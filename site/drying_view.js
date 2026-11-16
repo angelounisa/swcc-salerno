@@ -19,7 +19,9 @@ const GEO = [ // Urciuoli et al., Table 1 and section 2
   {L:'A1', d:'topsoil biogeochimicamente attivo', thick:'5–30 cm', Gs:2.67, n:0.65, gd:9.30, Ks:1.03e-6, phi:38.5},
   {L:'A2', d:'cenere limo-sabbiosa bruna con pomici (79 d.C.)', thick:'65–100 cm', Gs:2.69, n:0.59, gd:10.80, Ks:9.27e-6, phi:38.5},
   {L:'C1', d:'cenere limo-sabbiosa giallastra (pre 79 d.C.), discontinua', thick:'15 cm (medio)', Gs:2.74, n:0.64, gd:9.05, Ks:4.82e-6, phi:36.7}];
-const iCal = S2.sites.NV.calib ? S2.sites.NV.calib.iCal : null;
+const CD = s => S2.sites[s].calib.drying, CH = s => CD(s).candidates[CD(s).chosen];
+const WIN = CD('NV').config.windows, EV = S2.events;
+const ksTxt = k => `${k<0.1?k.toPrecision(2):fx(k,k<10?2:1)} cm/h (${(k/CMH).toExponential(1)} m/s)`;
 
 function fill(){
   // --- drying comparison table
@@ -46,41 +48,62 @@ function fill(){
     ['Bordo superiore', m=>`flusso atmosferico τ·P − E<sub>p</sub>; se la superficie arriva a h = 0 passa a carico imposto (eccesso = ruscellamento); se scende sotto h = ${(m.hCrit_cm).toLocaleString('it-IT')} cm (≈ ${it(-m.hCrit_cm/10.197)} kPa) passa a carico imposto ed E si riduce`],
     ['Bordo inferiore', m=>`drenaggio libero (gradiente idraulico unitario, q = K(h)) al contatto con la dolomia fratturata`],
     ['Condizione iniziale', m=>`suzione misurata il ${dIt(S2.sites.NV.t_init)} alle tre profondità, interpolata linearmente e costante sopra il sensore superficiale e sotto quello profondo`],
-    ['Intercettazione', m=>m.throughfall<1?`τ = ${m.throughfall}: arriva al suolo il ${Math.round(m.throughfall*100)}% della pioggia (throughfall misurato sotto chioma, 15/01–14/02/2026)`:'τ = 1: nessuna chioma arborea; intercettazione della vegetazione erbacea trascurata'],
-    ['Evapotraspirazione potenziale', m=>`Oudin (2005) da temperatura media giornaliera del suolo a 15 cm della parcella × fattore ${fx(m.eFactor,2)}; quota traspirata ${fx(m.tFrac,2)}, il resto è evaporazione dal suolo`],
+    ['Intercettazione', m=>m.throughfall<1?`τ = ${m.throughfall}: arriva al suolo il ${Math.round(m.throughfall*100)}% della pioggia; minimo dell'errore sul periodo completo (piatto fra 0,4 e 0,7), in accordo con il throughfall misurato sotto chioma (49%, 15/01–14/02/2026)`:'τ = 1: nessuna chioma arborea; intercettazione della vegetazione erbacea trascurata'],
+    ['Evapotraspirazione potenziale', m=>`Oudin (2005) dalla temperatura media giornaliera <b>del suolo</b> a 15 cm della parcella (non dell'aria) × fattore ${fx(m.eFactor,2)}; quota assorbita dalle radici ${fx(m.tFrac,2)}, il resto è evaporazione dalla superficie. Fattore e quota calibrati sul drying 2025`],
     ['Assorbimento radicale', m=>`Feddes: h₁ = ${m.feddes_cm[0]}, h₂ = ${m.feddes_cm[1]}, h₃ = ${m.feddes_cm[2]}, h₄ = ${m.feddes_cm[3].toLocaleString('it-IT')} cm; densità radicale relativa ${rootTxt(m)} (0 sotto)`],
-    ['Conducibilità', m=>`Mualem (l = 0,5) con ingresso d'aria a h<sub>s</sub> = ${m.hs_cm} cm (Vogel et al., 2001); K<sub>s</sub> di laboratorio per strato`],
+    ['Conducibilità', m=>`Mualem (l = 0,5) con ingresso d'aria a h<sub>s</sub> = ${m.hs_cm} cm (Vogel et al., 2001); K<sub>s</sub> di A1 e A2 calibrate sul drying, K<sub>s</sub> di C1 di laboratorio`],
     ['Schema numerico', m=>`Richards in forma mista, differenze finite implicite, Picard modificato (Celia et al., 1990); Δt adattivo fino a ${m.dtMax_h} h; tolleranza Δθ ${m.tolTheta}`]];
   h = '<thead><tr><th>Voce</th><th>Senza vegetazione</th><th>Vegetata</th></tr></thead><tbody>';
   rows.forEach(([k,f]) => { const a=f(M.NV), b=f(M.V); h += `<tr><td><b>${k}</b></td>`+(a===b?`<td colspan="2" style="white-space:normal">${a}</td>`:`<td style="white-space:normal">${a}</td><td style="white-space:normal">${b}</td>`)+'</tr>'; });
   $('bcTable').innerHTML = h+'</tbody>';
+  // --- calibration candidates
+  h = '<thead><tr><th>Parcella</th><th>Insieme</th><th>K<sub>s</sub> A1</th><th>K<sub>s</sub> A2</th><th>Fattore ETP</th><th>Quota radici</th><th>J drying 2025</th><th>J drying 2026</th><th>RMSE θ periodo completo</th><th></th></tr></thead><tbody>';
+  SITES.forEach(s => { const D=CD(s);
+    h += `<tr><td><span class="pill" style="color:var(${COL[s]})">${LABEL[s]}</span></td><td>laboratorio (K<sub>s</sub>), ETP iniziale</td><td class="num">${ksTxt(D.lab_Ks_cm_h.A1)}</td><td class="num">${ksTxt(D.lab_Ks_cm_h.A2)}</td><td class="num">1.00</td><td class="num">0.50</td><td class="num">${fx(D.labRun.calib.J,2)}</td><td class="num">${fx(D.labRun.valid.J,2)}</td><td class="num">–</td><td></td></tr>`;
+    D.candidates.forEach((c,i) => { const bd=(v,lo,hi)=> (v<=lo*1.02||v>=hi*0.98)?' <span class="flag">vincolo</span>':'';
+      h += `<tr><td><span class="pill" style="color:var(${COL[s]})">${LABEL[s]}</span></td><td>calibrato ${i+1}${c.converged?'':' (non a convergenza)'}</td><td class="num">${ksTxt(c.Ks_A1_cm_h)}${bd(c.Ks_A1_cm_h,0.001,100)}</td><td class="num">${ksTxt(c.Ks_A2_cm_h)}${bd(c.Ks_A2_cm_h,0.001,100)}</td><td class="num">${fx(c.eFactor,2)}${bd(c.eFactor,0.1,2)}</td><td class="num">${fx(c.tFrac,2)}${c.tFrac>=0.98?' <span class="flag">vincolo</span>':''}</td><td class="num">${fx(c.J_calib,2)}</td><td class="num">${fx(c.J_valid,2)}</td><td class="num">${fx(c.full_rmse,3)}</td><td>${i===D.chosen?'<b>usato</b>':''}</td></tr>`; }); });
+  $('candTable').innerHTML = h+'</tbody>';
   // --- performance
-  h = '<thead><tr><th>Parcella</th><th>Profondità</th><th>RMSE calibrazione (2025)</th><th>RMSE validazione (2026)</th><th>Bias calibrazione</th><th>Bias validazione</th></tr></thead><tbody>';
-  SITES.forEach(s => { const R=S2.sites[s]; Object.keys(R.theta).forEach(k => {
-    const m=(i0,i1)=>{ let e=0,b=0,n=0; for(let i=i0;i<i1;i++){ const o=R.obs[k][i]; if(o==null) continue; const d=R.theta[k][i]-o; e+=d*d; b+=d; n++; } return [Math.sqrt(e/n), b/n]; };
-    const c=m(0,iCal), v=m(iCal,nH);
-    h += `<tr><td><span class="pill" style="color:var(${COL[s]})">${LABEL[s]}</span></td><td>${k} cm</td><td class="num">${fx(c[0],3)}</td><td class="num">${fx(v[0],3)}</td><td class="num">${(c[1]>=0?'+':'')+fx(c[1],3)}</td><td class="num">${(v[1]>=0?'+':'')+fx(v[1],3)}</td></tr>`; }); });
+  h = '<thead><tr><th>Parcella</th><th>Profondità</th><th>RMSE θ drying 2025</th><th>RMSE log₁₀s drying 2025</th><th>RMSE θ drying 2026</th><th>RMSE log₁₀s drying 2026</th><th>RMSE θ periodo completo</th><th>Bias θ periodo completo</th></tr></thead><tbody>';
+  SITES.forEach(s => { const R=S2.sites[s], c=CH(s); Object.keys(R.theta).forEach(k => {
+    let e=0,b=0,n=0; for(let i=0;i<nH;i++){ const o=R.obs[k][i]; if(o==null) continue; const d=R.theta[k][i]-o; e+=d*d; b+=d; n++; }
+    const mc=c.dry_metrics.calib[k], mv=c.dry_metrics.valid[k];
+    h += `<tr><td><span class="pill" style="color:var(${COL[s]})">${LABEL[s]}</span></td><td>${k} cm</td><td class="num">${fx(mc.rmse_theta,3)}</td><td class="num">${fx(mc.rmse_log10s,2)}</td><td class="num">${fx(mv.rmse_theta,3)}</td><td class="num">${fx(mv.rmse_log10s,2)}</td><td class="num">${fx(Math.sqrt(e/n),3)}</td><td class="num">${(b/n>=0?'+':'')+fx(b/n,3)}</td></tr>`; }); });
   $('perfTable').innerHTML = h+'</tbody>';
+  // --- infiltration: sensors (event scale) and model
+  const sm=EV.summary, dry=sm['dry_season(May-Sep)'], wetS=sm['wet_season(Oct-Apr)'];
+  h = '<thead><tr><th>Dai sensori, per evento (colonna 0–75 cm)</th><th>Eventi</th><th>Pioggia [mm]</th><th>Accumulo senza veg. [mm]</th><th>Accumulo vegetata [mm]</th><th>Senza veg. / pioggia</th><th>Vegetata / pioggia</th><th>Vegetata / senza veg.</th></tr></thead><tbody>';
+  const rowE=(l,n,P,a,b)=>`<tr><td>${l}</td><td class="num">${n}</td><td class="num">${it(P)}</td><td class="num">${it(a)}</td><td class="num">${it(b)}</td><td class="num">${fx(a/P,2)}</td><td class="num">${fx(b/P,2)}</td><td class="num">${fx(b/a,2)}</td></tr>`;
+  h += rowE('Tutti gli eventi con dati in entrambe le parcelle',sm.n_both,sm.sum_P,sm.sum_dS_NV,sm.sum_dS_V)+rowE('Stagione secca (maggio–settembre)',dry.n,dry.P,dry.dS_NV,dry.dS_V)+rowE('Stagione umida (ottobre–aprile)',wetS.n,wetS.P,wetS.dS_NV,wetS.dS_V);
+  $('infTable').innerHTML = h+'</tbody>';
+  const W0 = s => S2.sites[s].massBalance, inf = s => W0(s).rain_mm - W0(s).interception_mm - W0(s).runoff_mm;
+  h = `<thead><tr><th>Dal modello, ${dIt(S2.t0)} → ${dIt(T[nH-1])}</th><th>Senza vegetazione</th><th>Vegetata</th><th>Vegetata / senza veg.</th></tr></thead><tbody>`;
+  h += `<tr><td>Pioggia in campo aperto [mm]</td><td class="num">${it(W0('NV').rain_mm)}</td><td class="num">${it(W0('V').rain_mm)}</td><td></td></tr>`;
+  h += `<tr><td>Infiltrazione nel suolo [mm]</td><td class="num">${it(inf('NV'))}</td><td class="num">${it(inf('V'))}</td><td class="num">${fx(inf('V')/inf('NV'),2)}</td></tr>`;
+  h += `<tr><td>Infiltrazione / pioggia</td><td class="num">${fx(inf('NV')/W0('NV').rain_mm,2)}</td><td class="num">${fx(inf('V')/W0('V').rain_mm,2)}</td><td></td></tr>`;
+  const tsc = CH('V').tauScan; h += `<tr><td>RMSE θ della parcella vegetata al variare di τ</td><td colspan="3" class="num" style="white-space:normal;text-align:left">${tsc.map(t=>`τ ${t[0]}: ${fx(t[1],3)}`).join(' · ')}</td></tr>`;
+  $('infModel').innerHTML = h+'</tbody>';
   // --- water balance
   const W = s => S2.sites[s].massBalance;
-  const wb = [['Pioggia (pluviometro in campo aperto)','rain_mm'],['Intercettata dalla chioma','interception_mm'],['Ruscellamento','runoff_mm'],['Evaporazione dal suolo','evaporation_mm'],['Traspirazione','transpiration_mm'],['Drenaggio alla base (130 cm)','drainage_mm'],['Variazione d\'invaso','dS_mm']];
+  const wb = [['Pioggia (pluviometro in campo aperto)','rain_mm'],['Intercettata dalla chioma','interception_mm'],['Ruscellamento','runoff_mm'],['Evapotraspirazione reale (suolo + radici)','et_mm'],['di cui evaporazione dalla superficie','evaporation_mm'],['di cui assorbimento radicale','transpiration_mm'],['Drenaggio alla base (130 cm)','drainage_mm'],['Variazione d\'invaso','dS_mm']];
   h = `<thead><tr><th>Bilancio ${dIt(S2.t0)} → ${dIt(T[nH-1])} [mm]</th><th>Senza vegetazione</th><th>Vegetata</th></tr></thead><tbody>`;
-  wb.forEach(([l,k]) => h += `<tr><td>${l}</td><td class="num">${it(W('NV')[k])}</td><td class="num">${it(W('V')[k])}</td></tr>`);
+  const wv=(s,k)=> k==='et_mm' ? W(s).evaporation_mm+W(s).transpiration_mm : W(s)[k];
+  wb.forEach(([l,k]) => h += `<tr><td>${l}</td><td class="num">${it(wv('NV',k))}</td><td class="num">${it(wv('V',k))}</td></tr>`);
   h += `<tr><td>Errore di chiusura del bilancio</td><td class="num">${fx(W('NV').error_mm,3)}</td><td class="num">${fx(W('V').error_mm,3)}</td></tr>`;
-  h += `<tr><td>Parametri calibrati: fattore ETP · quota traspirata</td><td class="num">${fx(S2.sites.NV.model.eFactor,2)} · ${fx(S2.sites.NV.model.tFrac,2)}</td><td class="num">${fx(S2.sites.V.model.eFactor,2)} · ${fx(S2.sites.V.model.tFrac,2)}</td></tr>`;
   $('wbTable').innerHTML = h+'</tbody>';
   // --- notes
+  const cN=CH('NV'), cV=CH('V'), mbN=CD('NV').series.calib.massBalance, mbV=CD('V').series.calib.massBalance;
   const notes = [
-    `<b>Curve di drying di campo, non di laboratorio.</b> Il modello usa le curve ricavate dai sensori. Il loro θ<sub>s</sub> (0,09–0,29) è molto più basso della porosità misurata in laboratorio (0,59–0,65) e del θ<sub>s</sub> delle prove Ku-pF (80–95% della porosità): i sensori TEROS 10 in campo non vedono mai valori vicini alla saturazione. Conviene verificarne la calibrazione prima di usare queste curve per analisi di stabilità.`,
-    `<b>Differenze fra le parcelle nei rami di drying.</b> La differenza più grande è a 60 cm: la parcella vegetata trattiene molto meno acqua a ogni suzione (θ<sub>s</sub> 0,19 contro 0,29; a 100 kPa 0,08 contro 0,19). A 15 cm le curve coincidono fra 10 e 100 kPa, ma vicino alla saturazione la parcella vegetata resta molto più asciutta (θ<sub>s</sub> 0,09 contro 0,14) e ha un ingresso d'aria più alto (1/α ≈ 23 kPa contro 0,8 kPa). A 30/35 cm le curve sono simili fino a circa 100 kPa; oltre, la parcella vegetata trattiene un po' più acqua (0,079 contro 0,062 a 1000 kPa).`,
-    `<b>Profili.</b> θ è discontinuo ai passaggi fra zone (20 cm, 45 o 47,5 cm) perché ogni zona ha la sua curva di ritenzione; la suzione invece è continua. Nella parcella senza vegetazione l'essiccamento estivo è più forte in superficie: a 15 cm la suzione arriva a circa 1470 kPa, il limite di appassimento di Feddes (h₄), mentre a 60 cm non supera circa 600 kPa (agosto 2025). Nella vegetata l'assorbimento radicale profondo porta 35–60 cm a 1300–1460 kPa già all'inizio di agosto 2025, e la suzione resta più alta fino alla base del profilo.`,
-    `<b>Limiti visibili nelle serie.</b> Il modello non secca abbastanza i 60 cm della parcella senza vegetazione d'estate (0,15 simulato contro 0,11 misurato) e, nella parcella vegetata, bagna troppo poco i 60 cm nelle piogge autunnali: con τ costante passa al suolo la stessa frazione anche negli eventi intensi, quando la chioma si satura.`,
-    `<b>Zone e strati.</b> Il passaggio A1/A2 è posto a 20 cm (spessore di A1 5–30 cm); C1 è assegnato a 115–130 cm con la curva di ritenzione del sensore a 60 cm, perché non è strumentato. Il modello è verticale: la pendenza di 25–30° del versante non è rappresentata.`,
-    `<b>Radici.</b> Le distribuzioni seguono la descrizione del lavoro (massimo a 20 cm nella parcella disboscata con erbacee a radici superficiali, profilo "a cuore" con massimo a 40 cm sotto il leccio), ma i valori numerici sono indicativi: la figura 4 non riporta i dati. Con i pesi secchi delle radici a 20, 40 e 60 cm si possono sostituire.`,
-    `<b>Intercettazione costante.</b> τ = 0,49 è il rapporto throughfall/pioggia misurato in un solo mese invernale e molto piovoso; nella realtà dipende da intensità e durata degli eventi. L'acqua intercettata non viene sottratta dall'evapotraspirazione potenziale.`,
-    `<b>Ruscellamento nella parcella senza vegetazione.</b> Con K<sub>s</sub> di laboratorio dello strato A1 (1,03·10⁻⁶ m/s ≈ 0,37 cm/h) il modello produce ${it(W('NV').runoff_mm)} mm di ruscellamento, mentre il lavoro lo considera trascurabile. È un segnale che in campo l'infiltrazione superficiale è più rapida (vie preferenziali, macropori) di quella del provino.`,
-    `<b>Evapotraspirazione dalla temperatura del suolo.</b> La temperatura dell'aria è misurata in sito dal 17/03/2025 ma non era nei file forniti: usarla al posto di quella del suolo renderebbe più affidabili i fattori calibrati.`,
-    `<b>Istanti dei profili.</b> Scelti nelle due stagioni secche: dal 26/04/2025 (dopo l'ultima pioggia primaverile) al 28/08/2025 (prima delle piogge di fine agosto) e dal 01/04/2026 al 30/07/2026 (fine della serie di pioggia); a mezzogiorno.`];
+    `<b>Differenze fra le parcelle nei rami di drying.</b> La differenza più grande è a 60 cm: la parcella vegetata trattiene molto meno acqua a ogni suzione (θ<sub>s</sub> 0,19 contro 0,29; a 100 kPa 0,08 contro 0,19). A 15 cm le curve coincidono fra 10 e 100 kPa, ma vicino alla saturazione la vegetata resta più asciutta (θ<sub>s</sub> 0,09 contro 0,14) e ha un ingresso d'aria più alto (1/α ≈ 23 kPa contro 0,8 kPa). A 30/35 cm le curve sono simili fino a circa 100 kPa.`,
+    `<b>Cosa calibra il drying e cosa no.</b> La K<sub>s</sub> dello strato A2 risulta in tutti gli insiemi 4–30 volte più alta di quella di laboratorio (15–100 cm/h contro 3,3 cm/h). La K<sub>s</sub> di A1, il fattore di ETP e la quota radicale invece si compensano fra loro: insiemi molto diversi riproducono il drying 2025 quasi ugualmente bene (colonna J). Per questo ogni insieme è stato provato sul periodo completo ed è usato quello con l'errore più basso.`,
+    `<b>Parametri sul vincolo.</b> Nella parcella senza vegetazione il fattore di ETP usato è al limite superiore (2,0); nella vegetata la K<sub>s</sub> di A2 è al limite superiore (100 cm/h). Sono valori efficaci del modello, non stime fisiche: indicano rispettivamente che il drying superficiale osservato richiede più evaporazione di quanta ne dà la formula, e che in campo l'acqua si muove nello strato A2 molto più in fretta che nel provino.`,
+    `<b>Acqua persa nel drying 2025 (26/04–28/08).</b> Nei 130 cm del modello l'invaso cala di ${it(-mbN.dS_mm)} mm nella parcella senza vegetazione e di ${it(-mbV.dS_mm)} mm nella vegetata, che parte già più asciutta. L'evapotraspirazione reale simulata è ${it(mbN.evaporation_mm+mbN.transpiration_mm)} mm contro ${it(mbV.evaporation_mm+mbV.transpiration_mm)} mm.`,
+    `<b>Infiltrazione: due stime diverse.</b> I sensori vedono accumularsi nei primi 75 cm il ${Math.round(sm.frac_NV*100)}% della pioggia degli eventi nella parcella senza vegetazione e il ${Math.round(sm.frac_V*100)}% nella vegetata (rapporto ${fx(sm.ratio_V_over_NV_sum,2)}). È un limite inferiore: non conta l'acqua che supera i 75 cm o che resta sopra il sensore a 15 cm, e i piccoli eventi estivi nella vegetata non arrivano ai sensori. Nel modello l'errore sulla serie completa è minimo per τ = ${S2.sites.V.model.throughfall}, ma il minimo è piatto: fra 0,4 e 0,7 l'errore è lo stesso. Il throughfall misurato sotto chioma (49%) cade in questo intervallo; l'infiltrazione nella parcella vegetata è quindi fra il 40% e il 70% di quella della parcella senza vegetazione.`,
+    `<b>Soglia di pioggia.</b> Nella parcella vegetata gli eventi sotto circa 25–30 mm non producono accumulo misurabile; nella parcella senza vegetazione bastano 10–15 mm. È coerente con le soglie riportate nel lavoro (10, 25 e 40 mm a 15, 30–35 e 60 cm).`,
+    `<b>Temperatura del suolo.</b> L'evapotraspirazione potenziale è stimata dalla temperatura del suolo a 15 cm, non dell'aria: il fattore calibrato assorbe questa differenza e non va letto come coefficiente colturale. La stima dell'infiltrazione dai sensori non usa la temperatura.`,
+    `<b>Curve di drying di campo.</b> Il modello usa le curve ricavate dai sensori. Il loro θ<sub>s</sub> (0,09–0,29) è molto più basso della porosità di laboratorio (0,59–0,65): conviene verificare la calibrazione dei TEROS 10 prima di usarle per analisi di stabilità.`,
+    `<b>Zone, radici e geometria.</b> Passaggio A1/A2 a 20 cm; C1 fra 115 e 130 cm con la curva di ritenzione del sensore a 60 cm; distribuzioni radicali indicative (massimo a 20 cm senza vegetazione, a 40 cm sotto il leccio); modello verticale, pendenza non rappresentata.`,
+    `<b>Profili.</b> θ è discontinuo ai passaggi fra zone perché ogni zona ha la sua curva di ritenzione; la suzione è continua. Istanti: dal 26/04 al 28/08/2025 e dal 01/04 al 30/07/2026, a mezzogiorno.`];
   $('dryNotes').innerHTML = notes.map(x=>'<li>'+x+'</li>').join('');
   $('colsvg').innerHTML = columnSVG();
 }
@@ -144,6 +167,25 @@ function plots(){
     const L=base('suzione s [kPa]','θ [m³/m³]'); L.xaxis.type='log'; L.xaxis.dtick=1; L.xaxis.range=[-1.1,Math.log10(4000)];
     Plotly.react('dc-'+j,tr,L,cfgP);
   });
+  // infiltration scatter (events)
+  { const tr=[]; SITES.forEach(s => { const e=EV.events.filter(v=>v['dS_'+s]!=null);
+      tr.push({type:'scatter',mode:'markers',x:e.map(v=>v.P_mm),y:e.map(v=>v['dS_'+s]),text:e.map(v=>dIt(v.start)),name:LABEL[s],marker:{size:9,color:css(COL[s]),opacity:.8,line:{width:1,color:css('--panel')}},hovertemplate:'%{text}<br>pioggia %{x:.0f} mm<br>accumulo %{y:.0f} mm<extra>'+LABEL[s]+'</extra>'}); });
+    tr.push({type:'scatter',mode:'lines',x:[0,210],y:[0,210],name:'accumulo = pioggia',line:{color:mu,width:1,dash:'dot'},hoverinfo:'skip'});
+    const L=base('pioggia cumulata dell\'evento [mm]','acqua accumulata in 0–75 cm [mm]'); L.yaxis.range=[-5,100]; L.xaxis.range=[0,215];
+    Plotly.react('infPlot',tr,L,cfgP); }
+  // drying windows: theta and suction, simulated vs measured
+  SITES.forEach(s => { const R=S2.sites[s], D=CD(s), ks=Object.keys(R.theta), shade=['#c9a227','#8a5a9e','#2b7a8c'], tr=[];
+    ks.forEach((k,j) => { const xs=[], ot=[], os=[], st=[], ss=[];
+      Object.values(D.series).forEach(w => { for(let i=w.i0+1;i<=w.i1;i+=3){ const q=i-w.i0-1; xs.push(T[i]); ot.push(R.obs[k][i]); os.push(R.obs_s[k][i]); st.push(w.theta[k][q]); ss.push(w.s_kPa[k][q]); } xs.push(null); ot.push(null); os.push(null); st.push(null); ss.push(null); });
+      tr.push({type:'scatter',mode:'lines',x:xs,y:ot,name:k+' cm misurato',legendgroup:k+'o',line:{color:shade[j],width:1},opacity:.5,yaxis:'y',connectgaps:false,hovertemplate:'%{x}<br>θ = %{y:.3f}<extra>'+k+' cm misurato</extra>'});
+      tr.push({type:'scatter',mode:'lines',x:xs,y:st,name:k+' cm simulato',legendgroup:k+'s',line:{color:shade[j],width:2},yaxis:'y',connectgaps:false,hovertemplate:'%{x}<br>θ = %{y:.3f}<extra>'+k+' cm simulato</extra>'});
+      tr.push({type:'scatter',mode:'lines',x:xs,y:os,legendgroup:k+'o',showlegend:false,line:{color:shade[j],width:1},opacity:.5,yaxis:'y2',connectgaps:false,hovertemplate:'%{x}<br>s = %{y:.0f} kPa<extra>'+k+' cm misurato</extra>'});
+      tr.push({type:'scatter',mode:'lines',x:xs,y:ss,legendgroup:k+'s',showlegend:false,line:{color:shade[j],width:2},yaxis:'y2',connectgaps:false,hovertemplate:'%{x}<br>s = %{y:.0f} kPa<extra>'+k+' cm simulato</extra>'}); });
+    const L=base('',''); L.margin={l:60,r:12,t:44,b:34}; L.hovermode='x unified'; L.legend.font.size=10;
+    L.xaxis={type:'date',gridcolor:gr,linecolor:ln,tickfont:{color:mu},anchor:'y2',rangebreaks:[{bounds:[T[D.series.calib.i1],T[D.series.valid.i0]]}]};
+    L.yaxis={title:{text:'θ [m³/m³]',font:{color:mu,size:11}},domain:[0.54,1],gridcolor:gr,linecolor:ln,zeroline:false,tickfont:{color:mu}};
+    L.yaxis2={title:{text:'suzione [kPa]',font:{color:mu,size:11}},domain:[0,0.46],type:'log',dtick:1,gridcolor:gr,linecolor:ln,tickfont:{color:mu}};
+    Plotly.react('dw-'+s,tr,L,cfgP); });
   // 4. profiles
   SITES.forEach(s => {
     const R=S2.sites[s], M=R.model, cols=instColors(M), z=R.z_cm;
@@ -167,12 +209,12 @@ function plots(){
     tr.push({type:'scatter',mode:'lines',x:T,y:R.obs[pr[k]],name:`${s} misurato`,legendgroup:s+'o',showlegend:j===0,line:{color:c,width:1},opacity:.45,yaxis:ya,hovertemplate:`%{x}<br>θ = %{y:.3f}<extra>${s} ${pr[k]} cm misurato</extra>`});
     tr.push({type:'scatter',mode:'lines',x:T,y:R.theta[pr[k]],name:`${s} simulato`,legendgroup:s+'s',showlegend:j===0,line:{color:c,width:1.8},yaxis:ya,hovertemplate:`%{x}<br>θ = %{y:.3f}<extra>${s} ${pr[k]} cm simulato</extra>`}); }));
   const M=S2.sites.NV.model, cols=instColors(M);
-  const shapes=[{type:'rect',xref:'x',yref:'paper',x0:T[iCal],x1:T[nH-1],y0:0,y1:1,fillcolor:css('--band'),line:{width:0},layer:'below'}]
+  const shapes=Object.values(CD('NV').series).map(w=>({type:'rect',xref:'x',yref:'paper',x0:T[w.i0],x1:T[w.i1],y0:0,y1:1,fillcolor:css('--band'),line:{width:0},layer:'below'}))
     .concat(M.profileHours.map((hr,k)=>({type:'line',xref:'x',yref:'paper',x0:T[hr],x1:T[hr],y0:0,y1:0.75,line:{color:cols[k],width:1.5,dash:'dot'}})));
   const L={paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{family:css('--f-body'),size:12,color:fg},margin:{l:64,r:16,t:30,b:36},hovermode:'x unified',bargap:0,
     legend:{orientation:'h',x:0,y:1.04,yanchor:'bottom',font:{size:11,color:mu}}, shapes,
     xaxis:{type:'date',gridcolor:gr,linecolor:ln,tickfont:{color:mu},anchor:'y4'}, yaxis:{title:{text:'pioggia [mm/g]',font:{size:11,color:mu}},domain:[0.79,1],gridcolor:gr,tickfont:{color:mu}},
-    annotations:[{xref:'x',yref:'paper',x:T[Math.round(iCal/2)],y:1.0,text:'calibrazione',showarrow:false,font:{size:11,color:mu},yanchor:'bottom'},{xref:'x',yref:'paper',x:T[Math.round((iCal+nH)/2)],y:1.0,text:'validazione',showarrow:false,font:{size:11,color:mu},yanchor:'bottom'}]};
+    annotations:[['calib','drying 2025 · calibrazione'],['valid','drying 2026 · validazione']].map(([k,t])=>{const w=CD('NV').series[k];return {xref:'x',yref:'paper',x:T[Math.round((w.i0+w.i1)/2)],y:1.0,text:t,showarrow:false,font:{size:11,color:mu},yanchor:'bottom'};})};
   PAIRS.forEach((pr,j)=>{ L['yaxis'+(j+2)]={title:{text:`θ ${pr[0]}/${pr[1]} cm`,font:{size:11,color:mu}},domain:doms[j],gridcolor:gr,linecolor:ln,zeroline:false,tickfont:{color:mu}}; });
   Plotly.react('tsPlot',tr,L,cfgP);
 }

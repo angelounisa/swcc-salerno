@@ -4,7 +4,8 @@ import json, pathlib, shutil
 body = pathlib.Path('site/body.html').read_text()
 data = json.dumps({'NV': json.load(open('results_NV.json')), 'V': json.load(open('results_V.json'))}, separators=(',', ':'), allow_nan=False)
 view = pathlib.Path('site/drying_view.js').read_text()
-sim2 = json.dumps(json.load(open('sim/sim2_results.json')), separators=(',', ':'), allow_nan=False)
+S2 = json.load(open('sim/sim2_results.json')); S2['events'] = json.load(open('sim/infiltration_events.json'))
+sim2 = json.dumps(S2, separators=(',', ':'), allow_nan=False)
 assert body.count('/*DATA*/null') == 1 and body.count('/*SIM2*/null') == 1
 page = body.replace('/*DATA*/null', data).replace('/*SIM2*/null', sim2) + '\n' + view
 pathlib.Path('site/artifact.html').write_text(page)
@@ -16,8 +17,8 @@ full = ('<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
 (repo / 'docs' / 'index.html').write_text(full)
 shutil.copy('analysis.py', repo / 'analysis.py')
 (repo / 'sim').mkdir(exist_ok=True); (repo / 'site').mkdir(exist_ok=True)
-for fn in ['solver.js', 'prep_forcing.py', 'calibrate2.js', 'final2.js', 'run2.js', 'model_NV.json', 'model_V.json',
-           'calib2_NV.json', 'calib2_V.json', 'forcing_NV.json', 'forcing_V.json']:
+for fn in ['solver.js', 'prep_forcing.py', 'calib_drying.js', 'final3.js', 'infil_events.py', 'model_NV.json', 'model_V.json',
+           'calibdry_NV.json', 'calibdry_V.json', 'infiltration_events.json', 'forcing_NV.json', 'forcing_V.json']:
     shutil.copy('sim/' + fn, repo / 'sim' / fn)
 for fn in ['body.html', 'drying_view.js']:
     shutil.copy('site/' + fn, repo / 'site' / fn)

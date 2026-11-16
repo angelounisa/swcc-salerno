@@ -26,18 +26,19 @@ python build.py
 2. Differenza centrata su 24 h: *drying* se θ cala ≥ 0,001 m³/m³ e log₁₀s cresce ≥ 0,01; *wetting* se avviene il contrario; altrimenti *indeterminato* (escluso dal fit).
 3. Fit van Genuchten–Mualem (m = 1 − 1/n) sulle mediane per classi di 0,1 decadi di log₁₀s, con vincoli θs ∈ [0,05; 0,55], θr ∈ [0; θmin], α ∈ [1e-4; 10] kPa⁻¹, n ∈ [1,05; 8].
 
-## Drying e modello: vegetata vs senza vegetazione
+## Drying, calibrazione e infiltrazione: vegetata vs senza vegetazione
 
-Scheda *Drying e modello* della dashboard: confronto dei rami di drying delle due parcelle e simulazione con lo stesso modello alle differenze finite (`sim/solver.js`).
+Terza scheda della dashboard.
 
-- Dominio: colonna 1D di 130 cm (copertura piroclastica su dolomia fratturata), Δz = 1 cm. Strati da Urciuoli et al.: A1 0–20 cm, A2 20–115 cm, C1 115–130 cm, con Ks di laboratorio (1,03·10⁻⁶, 9,27·10⁻⁶, 4,82·10⁻⁶ m/s). Curve di ritenzione: drying di campo di ciascuna parcella (C1 con la curva a 60 cm).
-- Bordo superiore: pioggia × τ (τ = 1 senza vegetazione, 0,49 vegetata) meno evaporazione, con passaggio a carico imposto in caso di ristagno o di superficie troppo secca. Bordo inferiore: drenaggio libero.
-- Evapotraspirazione potenziale: Oudin (2005) dalla temperatura del suolo a 15 cm × fattore calibrato; quota traspirata calibrata, assorbita dalle radici con Feddes (distribuzione radicale per parcella).
-- Calibrati solo il fattore di ETP e la quota traspirata (2025); validazione 2026.
+- **Rami di drying a confronto** (curve van Genuchten di campo delle due parcelle).
+- **Modello**: Richards 1D alle differenze finite (`sim/solver.js`), colonna di 130 cm, strati A1 0–20, A2 20–115, C1 115–130 cm (Urciuoli et al.), drenaggio libero al fondo, flusso atmosferico in superficie (pioggia × τ meno evaporazione), assorbimento radicale di Feddes. ETP da Oudin (2005) con la temperatura del **suolo** a 15 cm.
+- **Calibrazione inversa sul drying** (`sim/calib_drying.js`): Ks di A1 e A2, fattore di ETP e quota radicale, da θ e suzione misurati nel drying 2025 (26/04–28/08), validazione sul drying 2026 (01/04–30/07). Tre punti di partenza; gli insiemi trovati sono poi provati sul periodo completo (`sim/final3.js`), dove per la parcella vegetata si sceglie anche τ.
+- **Infiltrazione**: stima per evento dai sensori (`sim/infil_events.py`, accumulo nella colonna 0–75 cm, limite inferiore) e stima dal modello.
 
 ```bash
 python sim/prep_forcing.py Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_NV_temperature_2025-2026.xlsx sim/forcing_NV.json 15,30,60
 python sim/prep_forcing.py Pioggia_unificata.xlsx Salerno_METER_V_2025-2026.xlsx  Salerno_METER_V_temperature_2025-2026.xlsx  sim/forcing_V.json  15,35,60
-cd sim && node calibrate2.js NV 2026-01-01 calib2_NV.json && node calibrate2.js V 2026-01-01 calib2_V.json
-node final2.js sim2_results.json && cd .. && python build.py
+python sim/infil_events.py Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx sim/infiltration_events.json
+cd sim && node calib_drying.js NV calibdry_NV.json && node calib_drying.js V calibdry_V.json
+node final3.js sim2_results.json && cd .. && python build.py
 ```

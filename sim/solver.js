@@ -129,7 +129,7 @@
     const storage = () => { let s = 0; for (let i = 0; i < nn; i++) s += th[i] * (i === 0 || i === N ? dz / 2 : dz); return s; };
     const S0 = storage();
 
-    const out = {}; cfg.outDepths_cm.forEach(z => out[z] = new Float64Array(nH));
+    const out = {}, outH = {}; cfg.outDepths_cm.forEach(z => { out[z] = new Float64Array(nH); outH[z] = new Float64Array(nH); });
     const qTopH = new Float64Array(nH), runoffH = new Float64Array(nH), drainH = new Float64Array(nH);
     const transpH = new Float64Array(nH), evapH = new Float64Array(nH);
     let cumInf = 0, cumDrain = 0, cumRunoff = 0, cumT = 0, cumE = 0, steps = 0, iters = 0;
@@ -247,7 +247,7 @@
       }
       cumInf += hrInf; cumDrain += hrDrain; cumRunoff += hrRun; cumT += hrT; cumE += hrE;
       qTopH[hr] = hrInf * 10; runoffH[hr] = hrRun * 10; drainH[hr] = hrDrain * 10; transpH[hr] = hrT * 10; evapH[hr] = hrE * 10;
-      for (let j = 0; j < outIdx.length; j++) out[cfg.outDepths_cm[j]][hr] = th[outIdx[j]];
+      for (let j = 0; j < outIdx.length; j++) { out[cfg.outDepths_cm[j]][hr] = th[outIdx[j]]; outH[cfg.outDepths_cm[j]][hr] = h[outIdx[j]]; }
       if (profSet.has(hr)) profiles[hr] = { h_cm: Array.from(h), theta: Array.from(th) };
     }
     const S1 = storage();
@@ -255,7 +255,7 @@
     const err = (S1 - S0) - (cumInf - cumDrain - cumT);
     let Ptot = 0; for (let i = 0; i < nH; i++) Ptot += forcing.P_mm[i];
     return {
-      theta: out, profiles, z_cm: Array.from({ length: nn }, (_, i) => i * dz),
+      theta: out, head_cm: outH, profiles, z_cm: Array.from({ length: nn }, (_, i) => i * dz),
       netSurface_mm: qTopH, runoff_mm: runoffH, drainage_mm: drainH, transp_mm: transpH, evap_mm: evapH,
       massBalance: { rain_mm: Ptot, interception_mm: (1 - cfg.throughfall) * Ptot, dS_mm: (S1 - S0) * 10, netSurface_mm: cumInf * 10,
         drainage_mm: cumDrain * 10, runoff_mm: cumRunoff * 10, transpiration_mm: cumT * 10, evaporation_mm: cumE * 10,

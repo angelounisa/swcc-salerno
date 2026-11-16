@@ -89,7 +89,7 @@ footer{font-size:.8rem;color:var(--muted)}
     <nav class="tabs" role="tablist" aria-label="Parcella">
       <button role="tab" id="tab-nv" data-site="nv">Senza vegetazione · 15/30/60 cm</button>
       <button role="tab" id="tab-v" data-site="v">Vegetata · 15/35/60 cm</button>
-      <button role="tab" id="tab-sim" data-site="sim">Drying e modello: vegetata vs senza vegetazione</button>
+      <button role="tab" id="tab-sim" data-site="sim">Drying, calibrazione e infiltrazione: vegetata vs senza veg.</button>
     </nav>
   </header>
 
@@ -127,7 +127,7 @@ footer{font-size:.8rem;color:var(--muted)}
   </div>
 
   <div id="simview" class="stack" hidden>
-    <p class="muted" style="max-width:95ch">Confronto fra le due parcelle limitato ai rami di essiccamento, e simulazione con lo stesso modello alle differenze finite su entrambe. Geometria e proprietà geotecniche vengono da Urciuoli et al. (JEnGe, in preparazione); le curve di ritenzione sono quelle di drying ricavate qui dai dati di campo.</p>
+    <p class="muted" style="max-width:95ch">Confronto fra le due parcelle sui rami di essiccamento. Lo stesso modello alle differenze finite è usato su entrambe per calibrare i parametri idraulici a partire dalle misure in sito di θ e suzione durante il drying, e per stimare quanta pioggia si infiltra. Geometria, stratigrafia e valori di laboratorio vengono da Urciuoli et al. (JEnGe, in preparazione); le curve di ritenzione sono quelle di drying ricavate qui dai dati di campo.</p>
 
     <div class="dhead"><h2>1 · Rami di drying a confronto</h2><span class="muted">curve van Genuchten interpolate (linee) e mediane per classi di suzione (punti)</span></div>
     <div class="grid3">
@@ -147,11 +147,25 @@ footer{font-size:.8rem;color:var(--muted)}
     </div>
     <div class="tablebox"><table id="bcTable"></table></div>
 
-    <div class="dhead"><h2>3 · Prestazioni e bilancio idrico</h2><span class="muted">calibrati solo il fattore di evapotraspirazione e la quota traspirata; K<sub>s</sub> da laboratorio</span></div>
+    <div class="dhead"><h2>3 · Calibrazione sui periodi di drying</h2><span class="muted">K<sub>s</sub> di A1 e A2, fattore di ETP e quota radicale; calibrazione sul drying 2025, validazione sul drying 2026. J = errore medio normalizzato su θ (0,02) e log₁₀ suzione (0,3)</span></div>
+    <div class="tablebox"><table id="candTable"></table></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · θ e suzione nei due drying</h3><div class="plot prof" id="dw-NV"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · θ e suzione nei due drying</h3><div class="plot prof" id="dw-V"></div></div>
+    </div>
     <div class="tablebox"><table id="perfTable"></table></div>
+
+    <div class="dhead"><h2>4 · Quanta pioggia si infiltra</h2><span class="muted">stima dai sensori evento per evento (non usa la temperatura) e stima dal modello</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Acqua accumulata nel profilo per evento di pioggia</h3><div class="plot" id="infPlot" style="height:420px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0">
+        <div class="tablebox"><table id="infTable"></table></div>
+        <div class="tablebox"><table id="infModel"></table></div>
+      </div>
+    </div>
     <div class="tablebox"><table id="wbTable"></table></div>
 
-    <div class="dhead"><h2>4 · Profili calcolati</h2><span class="muted">θ(z) e suzione(z) negli istanti delle due stagioni secche; i punti sono le misure dei sensori nello stesso istante</span></div>
+    <div class="dhead"><h2>5 · Profili calcolati</h2><span class="muted">θ(z) e suzione(z) negli istanti delle due stagioni secche; i punti sono le misure dei sensori nello stesso istante</span></div>
     <div class="grid2">
       <div class="card"><h3><span class="pill drying" style="color:var(--nv)">Senza vegetazione</span> · θ</h3><div class="plot prof" id="pf-NV-th"></div></div>
       <div class="card"><h3><span class="pill drying" style="color:var(--veg)">Vegetata</span> · θ</h3><div class="plot prof" id="pf-V-th"></div></div>
@@ -159,7 +173,7 @@ footer{font-size:.8rem;color:var(--muted)}
       <div class="card"><h3><span class="pill drying" style="color:var(--veg)">Vegetata</span> · suzione</h3><div class="plot prof" id="pf-V-s"></div></div>
     </div>
 
-    <div class="dhead"><h2>5 · Serie temporali simulate e osservate</h2></div>
+    <div class="dhead"><h2>6 · Serie temporali simulate e osservate</h2><span class="muted">periodo completo con i parametri calibrati sul drying; fasce = finestre di drying</span></div>
     <div class="card"><div class="plot sim" id="tsPlot"></div></div>
 
     <section class="notes">
