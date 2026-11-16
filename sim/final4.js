@@ -18,9 +18,10 @@ const rowV = L.V.cd.grid_J[iRow], jV = rowV.indexOf(Math.min(...rowV));
 const par = { NV: { eFactor: nvBest.eFactor, log10_kmult: lk }, V: { eFactor: L.V.cd.config.eFactor[jV], log10_kmult: lk, J_grid: rowV[jV], free_fit_best: L.V.cd.best } };
 const build = (s, kmac) => { const M = JSON.parse(JSON.stringify(L[s].M)); M.eFactor = par[s].eFactor;
   M.zones.forEach(z => { z.Ks_cm_h *= Math.pow(10, par[s].log10_kmult); if (z.name === 'A1' && kmac != null) z.Kmac_cm_h = kmac; }); return M; };
-const seOf = (s, k, th) => (th - L[s].fits[k].theta_r) / (L[s].fits[k].theta_s - L[s].fits[k].theta_r);
+const seObs = (s, k, th) => { const p = L[s].fits.sensors[k]; return (th - p.theta_r) / (p.theta_s - p.theta_r); };        // measured theta -> Se with the sensor range
+const seSim = (s, k, th) => { const p = L[s].fits[L[s].fits.sensors[k].layer]; return (th - p.theta_r) / (p.theta_s - p.theta_r); };   // simulated theta -> Se with the layer curve
 const rmseSe = (s, o, i0, i1) => { const F = L[s].F, r = {}; let t = 0; for (const k of Object.keys(F.obs)) { let e = 0, b = 0, n = 0;
-  for (let i = i0; i < i1; i++) { const v = F.obs[k][i]; if (v != null) { const d = seOf(s, k, o.theta[+k][i]) - seOf(s, k, v); e += d * d; b += d; n++; } }
+  for (let i = i0; i < i1; i++) { const v = F.obs[k][i]; if (v != null) { const d = seSim(s, k, o.theta[+k][i]) - seObs(s, k, v); e += d * d; b += d; n++; } }
   r[k] = { rmse: Math.sqrt(e / n), bias: b / n }; t += r[k].rmse; } r.mean = t / Object.keys(F.obs).length; return r; };
 // --- full-period scan of the topsoil macropore conductivity
 const scan = { NV: [], V: [] };
@@ -45,23 +46,24 @@ for (const s of ['NV', 'V']) {
     const Mw = build(s, kmacBest); Mw.profileHours = [];
     const ow = S.run(S.buildConfig(Mw, fits, s0), { P_mm: F.P_mm.slice(i0 + 1, i1 + 1), PE_mm: F.PE_mm.slice(i0 + 1, i1 + 1) });
     series[name] = { i0, i1, massBalance: ow.massBalance, Se: {}, s_kPa: {} }; dry[name] = {};
-    for (const k of keys) { series[name].Se[k] = r4(Array.from(ow.theta[+k], v => seOf(s, k, v)));
+    for (const k of keys) { series[name].Se[k] = r4(Array.from(ow.theta[+k], v => seSim(s, k, v)));
       series[name].s_kPa[k] = Array.from(ow.head_cm[+k], h => Math.round(Math.max(-h / S.CM_PER_KPA, cd.config.S_FLOOR_KPA) * 100) / 100);
       let e = 0, n = 0, es = 0, ns = 0; for (let j = 0; j < i1 - i0; j++) { const ot = F.obs[k][i0 + 1 + j], os = F.obs_s[k][i0 + 1 + j];
-        if (ot != null) { e += (seOf(s, k, ow.theta[+k][j]) - seOf(s, k, ot)) ** 2; n++; }
+        if (ot != null) { e += (seSim(s, k, ow.theta[+k][j]) - seObs(s, k, ot)) ** 2; n++; }
         if (os != null) { es += (Math.log10(series[name].s_kPa[k][j]) - Math.log10(Math.max(os, cd.config.S_FLOOR_KPA))) ** 2; ns++; } }
       dry[name][k] = { rmse_Se: Math.sqrt(e / n), rmse_log10s: Math.sqrt(es / ns) }; }
   }
   const prof = {}; for (const [hr, p] of Object.entries(o.profiles)) {
-    const zoneKey = z => { const zn = M.zones.find(q => z >= q.zTop_cm && z < q.zBot_cm) || M.zones[M.zones.length - 1]; return zn.ret; };
-    prof[hr] = { Se: r4(p.theta.map((v, i) => seOf(s, zoneKey(o.z_cm[i]), v))), s_kPa: p.h_cm.map(h => h < 0 ? Math.round(-h / S.CM_PER_KPA * 100) / 100 : 0),
-      obs: Object.fromEntries(keys.map(k => [k, { Se: F.obs[k][+hr] == null ? null : Math.round(seOf(s, k, F.obs[k][+hr]) * 1e4) / 1e4, s: F.obs_s[k][+hr] }])) }; }
+    const layOf = z => { const zn = M.zones.find(q => z >= q.zTop_cm && z < q.zBot_cm) || M.zones[M.zones.length - 1]; return fits[zn.ret]; };
+    prof[hr] = { Se: r4(p.theta.map((v, i) => { const q = layOf(o.z_cm[i]); return (v - q.theta_r) / (q.theta_s - q.theta_r); })), s_kPa: p.h_cm.map(h => h < 0 ? Math.round(-h / S.CM_PER_KPA * 100) / 100 : 0),
+      obs: Object.fromEntries(keys.map(k => [k, { Se: F.obs[k][+hr] == null ? null : Math.round(seObs(s, k, F.obs[k][+hr]) * 1e4) / 1e4, s: F.obs_s[k][+hr] }])) }; }
   const full = rmseSe(s, o, 0, F.n_hours);
   out.sites[s] = { model: M, fits, s0_kPa: F.s0_kPa, t_init: F.t_init, forcing: { totals: F.totals, air_temperature: F.air_temperature, interception_capacity_mm: F.config.interception_capacity_mm },
-    calib: { config: cd.config, grid_J: cd.grid_J, free_best: cd.best, chosen: par[s], prior: cd.prior, own_curves_at_best: cd.own_curves_at_best, dry, series, full },
-    Se: Object.fromEntries(keys.map(k => [k, r4(Array.from(o.theta[+k], v => seOf(s, k, v)))])),
-    obsSe: Object.fromEntries(keys.map(k => [k, F.obs[k].map(v => v == null ? null : Math.round(seOf(s, k, v) * 1e4) / 1e4)])), obs_s: F.obs_s,
-    z_cm: o.z_cm, profiles: prof, massBalance: o.massBalance };
+    calib: { config: cd.config, grid_J: cd.grid_J, free_best: cd.best, chosen: par[s], prior: cd.prior, dry, series, full },
+    Se: Object.fromEntries(keys.map(k => [k, r4(Array.from(o.theta[+k], v => seSim(s, k, v)))])),
+    obsSe: Object.fromEntries(keys.map(k => [k, F.obs[k].map(v => v == null ? null : Math.round(seObs(s, k, v) * 1e4) / 1e4)])), obs_s: F.obs_s,
+    z_cm: o.z_cm, profiles: prof, massBalance: o.massBalance,
+    lateral_monthly: (() => { const m = {}; for (let i = 0; i < F.n_hours; i++) { const k = new Date(t0 + i * 3.6e6).toISOString().slice(0, 7); m[k] = (m[k] || 0) + o.lateral_cm2_per_cm[i] / 1e4; } return m; })() };
   if (!out.t0) { out.t0 = F.t0; out.n_hours = F.n_hours; out.rain_missing = F.rain_missing;
     out.P_daily = (() => { const d = {}; for (let i = 0; i < F.n_hours; i++) { const k = new Date(t0 + i * 3.6e6).toISOString().slice(0, 10); d[k] = (d[k] || 0) + F.P_gross_mm[i]; } return d; })(); }
   console.log(s, 'chosen', JSON.stringify(par[s]), 'dry', JSON.stringify(Object.fromEntries(Object.entries(dry).map(([w, m]) => [w, Object.fromEntries(Object.entries(m).map(([k, v]) => [k, [+v.rmse_Se.toFixed(3), +v.rmse_log10s.toFixed(2)]]))]))), 'full', full.mean.toFixed(3), JSON.stringify(Object.fromEntries(Object.entries(o.massBalance).map(([k, v]) => [k, +v.toFixed(1)]))));

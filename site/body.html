@@ -189,6 +189,14 @@ footer{font-size:.8rem;color:var(--muted)}
     <div class="dhead"><h2>7 · Serie temporali simulate e osservate</h2><span class="muted">periodo completo in S<sub>e</sub>; fasce = finestre di drying</span></div>
     <div class="card"><div class="plot sim" id="tsPlot"></div></div>
 
+    <div class="dhead"><h2>8 · Verifica del solutore</h2><span class="muted">stesso problema risolto con un secondo codice indipendente (forma in carico, griglia di 0,25 cm, integrazione BDF a passo adattivo): linee = riferimento, cerchi = solutore del modello</span></div>
+    <div class="grid3">
+      <div class="card"><h3>Assorbimento radicale</h3><div class="plot" id="ver-T1"></div></div>
+      <div class="card"><h3>Infiltrazione e ridistribuzione</h3><div class="plot" id="ver-T2"></div></div>
+      <div class="card"><h3>Evaporazione dalla superficie</h3><div class="plot" id="ver-T3"></div></div>
+    </div>
+    <div class="tablebox"><table id="verTable"></table></div>
+
     <section class="notes">
       <h2>Note e ipotesi</h2>
       <ul id="dryNotes"></ul>

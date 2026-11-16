@@ -1,4 +1,5 @@
-// Drying-season calibration with the main-curve Se retention (fits_main.json), matrix K from night drainage
+// Drying-season calibration with the main-curve Se retention (fits_main.json: one curve per layer, same in both plots;
+// sensor theta_r/theta_s only to convert measured theta into Se), matrix K from night drainage
 // (model_SITE.json) and vegetation parameters from the ALERT 2025 slides. Only two factors are free:
 //   eFactor = multiplier of the potential evapotranspiration, kmult = multiplier of the matrix Ks (all layers).
 // Full grid (no optimiser) -> the J surface shows how well each factor is identified.
@@ -18,9 +19,9 @@ function runWindow(eF, lk, w, fits) {
   const i0 = idx(w[0]), i1 = idx(w[1]); const s0 = {}; for (const k of keys) { s0[k] = F.obs_s[k][i0]; if (!(s0[k] > 0)) throw new Error('no initial suction ' + k); }
   const f = { P_mm: F.P_mm.slice(i0 + 1, i1 + 1), PE_mm: F.PE_mm.slice(i0 + 1, i1 + 1) };
   const o = S.run(S.buildConfig(M, fits, s0), f); const m = {}; let J = 0;
-  for (const k of keys) { const p = fits[k], rng = p.theta_s - p.theta_r; let e = 0, n = 0, es = 0, ns = 0;
+  for (const k of keys) { const so = fits.sensors[k], L = fits[so.layer]; let e = 0, n = 0, es = 0, ns = 0;   // Se: model with the layer curve, data with the sensor range
     for (let j = 0; j < f.P_mm.length; j++) { const ot = F.obs[k][i0 + 1 + j], os = F.obs_s[k][i0 + 1 + j];
-      if (ot != null) { e += ((o.theta[+k][j] - ot) / rng) ** 2; n++; }
+      if (ot != null) { e += ((o.theta[+k][j] - L.theta_r) / (L.theta_s - L.theta_r) - (ot - so.theta_r) / (so.theta_s - so.theta_r)) ** 2; n++; }
       if (os != null) { const ss = Math.max(-o.head_cm[+k][j] / S.CM_PER_KPA, CFG.S_FLOOR_KPA); es += (Math.log10(ss) - Math.log10(Math.max(os, CFG.S_FLOOR_KPA))) ** 2; ns++; } }
     if (!n || !ns) throw new Error('no observations ' + k);
     m[k] = { rmse_Se: Math.sqrt(e / n), rmse_log10s: Math.sqrt(es / ns) }; J += m[k].rmse_Se / CFG.SIG_SE + m[k].rmse_log10s / CFG.SIG_LS; }
@@ -34,7 +35,6 @@ const onEdge = best.eFactor === CFG.eFactor[0] || best.eFactor === CFG.eFactor[C
 const pack = (w, fits, eF, lk) => { const r = runWindow(eF, lk, w, fits); return { J: r.J, metrics: r.metrics, massBalance: r.mb }; };
 const out = { site, config: CFG, grid_J: grid, best: Object.assign(best, { kmult: Math.pow(10, best.log10_kmult), on_grid_edge: onEdge }),
   calib: pack(CFG.windows.calib, FITS[site], best.eFactor, best.log10_kmult), valid: pack(CFG.windows.valid, FITS[site], best.eFactor, best.log10_kmult),
-  prior: { calib: pack(CFG.windows.calib, FITS[site], 1.0, 0), valid: pack(CFG.windows.valid, FITS[site], 1.0, 0) },      // no calibration at all
-  own_curves_at_best: { calib: pack(CFG.windows.calib, FITS[site + '_own'], best.eFactor, best.log10_kmult), valid: pack(CFG.windows.valid, FITS[site + '_own'], best.eFactor, best.log10_kmult) } };
+  prior: { calib: pack(CFG.windows.calib, FITS[site], 1.0, 0), valid: pack(CFG.windows.valid, FITS[site], 1.0, 0) } };      // no calibration at all
 fs.writeFileSync(fOut, JSON.stringify(out));
-console.log(site, 'best', JSON.stringify(out.best), 'Jc', out.calib.J.toFixed(3), 'Jv', out.valid.J.toFixed(3), 'prior Jc', out.prior.calib.J.toFixed(3), 'Jv', out.prior.valid.J.toFixed(3), 'own Jc', out.own_curves_at_best.calib.J.toFixed(3));
+console.log(site, 'best', JSON.stringify(out.best), 'Jc', out.calib.J.toFixed(3), 'Jv', out.valid.J.toFixed(3), 'prior Jc', out.prior.calib.J.toFixed(3), 'Jv', out.prior.valid.J.toFixed(3));

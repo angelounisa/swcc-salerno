@@ -1,30 +1,30 @@
 {
  "NV": {
-  "eFactor_cal": 1.85,
-  "ET_cal_mm": 212.75308785942167,
-  "ET_factor1_mm": 193.40076968919055,
-  "excess_mm": 19.352318170231115,
-  "dS_model_cal_mm": -178.61087349905463,
-  "dS_model_factor1_mm": -164.61529413620028,
+  "eFactor_cal": 1.7,
+  "ET_cal_mm": 201.5470190651938,
+  "ET_factor1_mm": 186.32492313236287,
+  "excess_mm": 15.222095932830939,
+  "dS_model_cal_mm": -169.42197515224484,
+  "dS_model_factor1_mm": -158.8213060536734,
   "dS_observed_0_75cm_mm": -111.82499999999997,
-  "drainage_cal_mm": 21.74276135369373,
-  "lateral_m3_per_m": 0.007899124091019137,
+  "drainage_cal_mm": 23.756893503825943,
+  "lateral_m3_per_m": 0.01009128681740016,
   "rain_mm": 55.88100000000001,
   "PE_window_mm": 608.5351000000015,
-  "length_for_excess_m": 0.4081745670743487
+  "length_for_excess_m": 0.6629367507555464
  },
  "V": {
   "eFactor_cal": 0.5,
-  "ET_cal_mm": 102.49244728090805,
-  "ET_factor1_mm": 111.0327535500082,
-  "excess_mm": -8.540306269100142,
-  "dS_model_cal_mm": -112.86236936182917,
-  "dS_model_factor1_mm": -118.62157934798695,
+  "ET_cal_mm": 119.5316720797952,
+  "ET_factor1_mm": 131.20120383649476,
+  "excess_mm": -11.669531756699556,
+  "dS_model_cal_mm": -133.97561873050418,
+  "dS_model_factor1_mm": -142.32774421110435,
   "dS_observed_0_75cm_mm": -64.7025,
-  "drainage_cal_mm": 10.37046339692635,
-  "lateral_m3_per_m": 0.0037208397778270936,
+  "drainage_cal_mm": 14.443830350664193,
+  "lateral_m3_per_m": 0.00584463441608156,
   "rain_mm": 0,
   "PE_window_mm": 608.5351000000015,
-  "length_for_excess_m": -0.4356798995944139
+  "length_for_excess_m": -0.5008456669845487
  }
 }

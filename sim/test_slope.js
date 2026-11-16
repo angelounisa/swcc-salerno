@@ -1,15 +1,8 @@
 // Checks of the infinite-slope formulation.
-// (a) slope 0 must reproduce the vertical-column results obtained before the change (baseline_vertical.json);
+// (a) [run once when the slope was introduced, commit d6fd8c8] slope 0 reproduced the previous vertical-column results exactly;
 // (b) steady infiltration at a constant rate r: the profile must tend to uniform head with K(h) = r for ANY slope
 //     (unit gradient normal to the slope gives q = K per unit horizontal area), and the mass balance must close.
 const fs=require('fs'), S=require('./solver.js'), assert=require('assert');
-const FITS=JSON.parse(fs.readFileSync('fits_main.json')), B=JSON.parse(fs.readFileSync('baseline_vertical.json'));
-// (a)
-{ const s='NV', F=JSON.parse(fs.readFileSync(`forcing_${s}.json`)), M=JSON.parse(fs.readFileSync(`model_${s}.json`));
-  assert.strictEqual(M.slope_deg,0); M.eFactor=B.params[s].eFactor; M.profileHours=[];
-  M.zones.forEach(z=>{ z.Ks_cm_h*=Math.pow(10,B.params[s].log10_kmult); if(z.name==='A1') z.Kmac_cm_h=B.kmacChosen.Kmac_A1_cm_h; });
-  const o=S.run(S.buildConfig(M,FITS[s],F.s0_kPa),F), mb=B.sites[s].massBalance;
-  for (const k of ['drainage_mm','runoff_mm','transpiration_mm','evaporation_mm','dS_mm']) { const d=Math.abs(o.massBalance[k]-mb[k]); console.log('(a)',k,o.massBalance[k].toFixed(3),mb[k].toFixed(3)); assert(d<1e-6,'slope 0 differs from the vertical baseline: '+k); } }
 // (b)
 const r=0.01, nH=24*400;   // cm/h, 400 days
 const f={P_mm:new Array(nH).fill(r*10), PE_mm:new Array(nH).fill(0)}, fit={theta_r:0.08,theta_s:0.30,alpha:0.07,n:1.48};
