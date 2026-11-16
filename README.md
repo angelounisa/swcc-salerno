@@ -20,6 +20,16 @@ python build.py
 ```
 
 
+## Calibrazione di θ
+
+Tutte le analisi usano il contenuto d'acqua calibrato per terreno (`calibrate_theta.py` → `theta_calibration.json`).
+Dal file calibrato della parcella senza vegetazione (`dati_NV_cal.xlsx`, fino al 20/02/2026) sono ricavate due funzioni dell'uscita del sensore in mV: A1 (15 cm) e A2 (30, 35, 60 cm). In quel file θ è in ritardo di 1 h rispetto alla suzione: il ritardo è rimosso. Le funzioni sono applicate a tutta la serie di entrambe le parcelle (per la vegetata è un'ipotesi: stessi terreni e sensori; a 60 cm il 37% delle misure è sotto il campo della calibrazione).
+
+```bash
+python calibrate_theta.py Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx dati_NV_cal.xlsx NV_cal.csv V_cal.csv theta_calibration.json
+# i file *_cal (stesse colonne dei file originali) sono poi l'ingresso di analysis.py, swcc_main.py, kfield.py e degli script in sim/
+```
+
 ## Metodo in breve
 
 1. Medie orarie dei dati a 5 min.

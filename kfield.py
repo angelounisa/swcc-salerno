@@ -19,7 +19,7 @@ CONFIG = {
     "edge_avg_h": 3,                            # theta averaged over 3 h around the two ends of the night
     "dry_hours_before": 12,                     # no rain in the 12 h before the night and during it
     "i_min": 0.3,                               # minimum downward hydraulic gradient
-    "dtheta_mean_min": 0.001,                   # mean theta drop above the plane [m3/m3] (sensor resolution)
+    "dtheta_mean_min": 0.0006,                  # mean theta drop above the plane [m3/m3]: one sensor step in calibrated units
     "s_max_kPa": 300.0,                         # both bracketing suctions below this (wet range, gradient reliable)
     "hs_cm": -2.0,
     "planes": {"NV": [{"name": "22.5 cm", "z": 22.5, "above": [[15, 22.5]], "bracket": [15, 30]},

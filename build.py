@@ -8,6 +8,7 @@ S2 = json.load(open('sim/sim2_results.json')); S2['events'] = json.load(open('si
 SWm = json.load(open('swcc_main.json'))
 for v in SWm['sensors'].values(): v.pop('cloud')          # not shown in the dashboard
 S2['swcc'] = {'sensors': SWm['sensors'], 'shared': SWm['shared'], 'config': SWm['config']}; S2['kfield'] = json.load(open('kfield.json'))
+S2['thetaCal'] = json.load(open('cal/theta_calibration.json'))
 sim2 = json.dumps(S2, separators=(',', ':'), allow_nan=False)
 assert body.count('/*DATA*/null') == 1 and body.count('/*SIM2*/null') == 1
 page = body.replace('/*DATA*/null', data).replace('/*SIM2*/null', sim2) + '\n' + view
@@ -25,6 +26,7 @@ for fn in ['solver.js', 'prep_forcing2.py', 'calib_dry2.js', 'final4.js', 'run3.
     shutil.copy('sim/' + fn, repo / 'sim' / fn)
 for fn in ['swcc_main.py', 'kfield.py', 'swcc_main.json', 'kfield.json']:
     shutil.copy(fn, repo / fn)
+shutil.copy('calibrate_theta.py', repo / 'calibrate_theta.py'); shutil.copy('cal/theta_calibration.json', repo / 'theta_calibration.json')
 (repo / 'data').mkdir(exist_ok=True); shutil.copy('rain/air_T_RH_2025_from_slides.csv', repo / 'data' / 'air_T_RH_2025_from_slides.csv')
 for fn in ['body.html', 'drying_view.js']:
     shutil.copy('site/' + fn, repo / 'site' / fn)

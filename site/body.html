@@ -202,19 +202,21 @@ footer{font-size:.8rem;color:var(--muted)}
 (function(){
 const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;
 const COMMON_NOTES = [
- '<b>θ<sub>r</sub> poco vincolato.</b> In molti fit θ<sub>r</sub> finisce sul limite inferiore: i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo.',
- '<b>Curve di scanning.</b> La nuvola di punti non è una curva unica: ogni ciclo parte da uno stato diverso. Il fit dà una curva media per ramo, non la curva principale di essiccamento o imbibizione.'];
+ '<b>θ calibrato.</b> Il contenuto d\'acqua è quello dei TEROS 10 con la calibrazione specifica per i due terreni (A1 per i sensori a 15 cm, A2 per quelli a 30, 35 e 60 cm), ricavata dal file calibrato della parcella senza vegetazione e applicata a tutta la serie di entrambe le parcelle.',
+ '<b>θ<sub>r</sub> poco vincolato.</b> In molti fit θ<sub>r</sub> finisce su un limite: i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo.',
+ '<b>Curve di scanning.</b> La nuvola di punti non è una curva unica: ogni ciclo parte da uno stato diverso. Il fit di questa scheda dà una curva media per ramo; la curva principale di drying è nella terza scheda.'];
 const SITE_NOTES = {
  nv: [
- '<b>Rami di wetting meno affidabili.</b> Gli eventi di imbibizione durano poche ore e hanno 3–8 volte meno punti dei rami di essiccamento. A 15 e 60 cm α va al limite superiore o ha errore molto grande: la curva descrive la forma dei dati ma i parametri non sono identificabili.',
+ '<b>Rami di wetting meno affidabili.</b> Gli eventi di imbibizione durano poche ore e hanno molti meno punti dei rami di essiccamento. In più sensori α va al limite superiore o ha errore molto grande: la curva descrive la forma dei dati ma i parametri non sono identificabili.',
  '<b>Ritardo del sensore di suzione.</b> Nel primo evento dopo l\'estate (set. 2025) θ sale subito mentre s resta per ore a 10²–10³ kPa: sono punti fuori equilibrio, visibili a 30 e 60 cm come wetting con θ alto e s alta. Sono inclusi nel fit; escluderli cambierebbe soprattutto la coda secca delle curve di wetting.',
- '<b>Isteresi negativa ad alta suzione.</b> A 30 e 60 cm la differenza a 100 kPa è negativa solo perché la coda secca delle curve di wetting è trascinata dai punti fuori equilibrio; nel campo 1–10 kPa l\'isteresi ha il segno atteso ma è piccola (≤0,01 m³/m³).',
+ '<b>Isteresi ad alta suzione.</b> A 30 e 60 cm la differenza fra le curve ad alta suzione è condizionata dai punti fuori equilibrio che trascinano la coda secca delle curve di wetting: va letta solo nel campo delle basse suzioni.',
  '<b>Plateau secco a 15 cm.</b> D\'estate s si stabilizza fra 2000 e 3300 kPa mentre θ oscilla col ciclo giornaliero (effetto termico sulla misura di θ).'],
  v: [
  '<b>Lacuna a 15 cm.</b> θ a 15 cm manca dal 31/01/2026 al 04/03/2026; quelle ore sono escluse e la serie temporale mostra il vuoto.',
- '<b>Wetting a 35 e 60 cm limitato alle basse suzioni.</b> Il 95% delle ore di wetting a 35 cm è sotto 29 kPa (a 60 cm sotto circa 220 kPa, con pochi punti). Oltre questi valori la curva di wetting è un\'estrapolazione. A 60 cm i pochi punti di wetting sopra 30 kPa trascinano la curva verso il basso: la differenza di −0,08 m³/m³ a 100 kPa non è affidabile (R² sui punti del wetting 0,38).',
- '<b>Spostamento fra le due stagioni secche.</b> A 35 cm (e meno a 60 cm) l\'essiccamento del 2026 segue un percorso più secco di quello del 2025, con circa 0,03–0,04 m³/m³ di differenza a 100 kPa. La curva di drying interpolata media le due stagioni; vale la pena verificare se dipende dalle radici, dalla struttura del suolo o dal sensore.',
- '<b>θ<sub>s</sub> basso a 15 cm.</b> Il θ<sub>s</sub> interpolato a 15 cm (circa 0,09 m³/m³) è molto inferiore a quello degli strati profondi: lo strato superficiale vegetato non si avvicina mai alla saturazione nei dati.']
+ '<b>Wetting a 35 e 60 cm limitato alle basse suzioni.</b> Quasi tutte le ore di wetting a 35 cm sono sotto circa 30 kPa, e a 60 cm i punti sopra questo valore sono pochi. Oltre, la curva di wetting è un\'estrapolazione e la differenza con il drying non è affidabile.',
+ '<b>Spostamento fra le due stagioni secche.</b> A 35 cm (e meno a 60 cm) l\'essiccamento del 2026 segue un percorso più secco di quello del 2025. La curva di drying interpolata media le due stagioni; vale la pena verificare se dipende dalle radici, dalla struttura del suolo o dal sensore.',
+ '<b>θ<sub>s</sub> basso a 15 cm.</b> Il θ<sub>s</sub> interpolato a 15 cm è molto inferiore a quello degli strati profondi: lo strato superficiale vegetato non si avvicina mai alla saturazione nei dati.',
+ '<b>Calibrazione estrapolata a 60 cm.</b> Nella parcella vegetata il sensore a 60 cm scende sotto il campo coperto dalla calibrazione per circa un terzo delle misure: lì θ è un\'estrapolazione della funzione di calibrazione.']
 };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const fmt = (x,k)=> (x==null||!isFinite(x))?'–':Number(x).toFixed(k);
@@ -226,7 +228,7 @@ document.getElementById('cfg-win').textContent = C.diff_window_h;
 document.getElementById('cfg-dth').textContent = C.dtheta_min;
 document.getElementById('cfg-dls').textContent = C.dlogs_min;
 document.getElementById('meta').innerHTML =
-  `<span>periodo ${D.period[0].slice(0,10)} → ${D.period[1].slice(0,10)}</span><span>profondità ${depths.join(', ')} cm</span><span>passo originale 5 min · analisi su medie orarie</span>`;
+  `<span>periodo ${D.period[0].slice(0,10)} → ${D.period[1].slice(0,10)}</span><span>profondità ${depths.join(', ')} cm</span><span>passo originale 5 min · analisi su medie orarie</span><span>θ calibrato per terreno</span>`;
 document.getElementById('foot').textContent =
   `Elaborazione: Python numpy ${D.versions.numpy}, pandas ${D.versions.pandas}, scipy ${D.versions.scipy} (curve_fit, trust-region con vincoli). Vincoli: θs ∈ [${C.theta_s_min}, ${C.theta_s_max}], θr ∈ [0, θmin del ramo], α ∈ [${C.alpha_bounds}] 1/kPa, n ∈ [${C.n_bounds}]. Punti nei grafici: un campione ogni ${C.plot_every_h} h.`;
 

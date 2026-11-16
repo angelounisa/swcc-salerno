@@ -15,11 +15,11 @@ def config_from_argv(argv):
         "site": argv[4],
         "resample": "1h",                  # hourly means of 5-min data
         "diff_window_h": 24,               # centred difference window to compute trends (slow drying at depth needs >=24 h)
-        "dtheta_min": 0.001,               # |dtheta| over window [m3/m3] to call a trend (= sensor resolution)
+        "dtheta_min": 0.0006,              # |dtheta| over window [m3/m3] to call a trend: one sensor step (0.001 raw) is >= 0.00066 after the soil-specific calibration
         "dlogs_min": 0.01,                 # |dlog10 s| over window to call a trend
         "bin_width_log10": 0.1,            # log10(s) bin width for the fit
         "bin_min_count": 3,
-        "theta_s_max": 0.55,               # upper bound for theta_s [m3/m3]
+        "theta_s_max": 0.65,               # upper bound for theta_s [m3/m3] (largest laboratory porosity)
         "theta_s_min": 0.05,               # lower bound for theta_s (not tied to observed max: isolated spikes would force it)
         "alpha_bounds": [1e-4, 10.0],      # [1/kPa]
         "n_bounds": [1.05, 8.0],

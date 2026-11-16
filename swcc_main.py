@@ -24,7 +24,7 @@ CONFIG = {
     "bin_width_log10": 0.1,
     "bin_min_count": 10,         # hourly drying points per bin
     "env_quantile": 0.95,        # upper envelope (not the maximum: robust to isolated spikes)
-    "theta_s_bounds": [0.05, 0.55],
+    "theta_s_bounds": [0.05, 0.65],   # upper bound = largest laboratory porosity
     "alpha_bounds": [1e-4, 10.0],
     "n_bounds": [1.05, 8.0],
     "n_boot": 300, "seed": 20261116,

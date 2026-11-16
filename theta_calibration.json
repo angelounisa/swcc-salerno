@@ -1,0 +1,164 @@
+{
+ "config": {
+  "lag_rows": 12,
+  "deg": {
+   "A1": 3,
+   "A2": 2
+  },
+  "layer_of": {
+   "15": "A1",
+   "30": "A2",
+   "35": "A2",
+   "60": "A2"
+  },
+  "meter_mineral_theta_of_mV": [
+   4.824e-10,
+   -2.278e-06,
+   0.003898,
+   -2.154
+  ],
+  "max_rmse": 0.002,
+  "edge_skip_rows": 40
+ },
+ "n_rows_calibrated_file": 111003,
+ "calibrated_file_last_time": "2026-02-20 23:55:00",
+ "lag_check": {
+  "15": {
+   "rmse_with_lag": 0.000817488249740377,
+   "rmse_without_lag": 0.0028981916692855016
+  },
+  "30": {
+   "rmse_with_lag": 0.0007572519757371401,
+   "rmse_without_lag": 0.005256457831146806
+  },
+  "60": {
+   "rmse_with_lag": 0.0006536336437466615,
+   "rmse_without_lag": 0.0021036771929921687
+  }
+ },
+ "functions": {
+  "A1": {
+   "poly_in_mV_highest_first": [
+    1.98437637903403e-09,
+    -8.365429013546292e-06,
+    0.011995061598499997,
+    -5.626564589566645
+   ],
+   "rmse": 0.000817488249740377,
+   "p99_abs_res": 0.001663493488617379,
+   "mV_range": [
+    1100.7937608135915,
+    1699.3697278308805
+   ],
+   "theta_cal_range": [
+    0.087101591,
+    0.340939275
+   ],
+   "n_pairs": 110923
+  },
+  "A2": {
+   "poly_in_mV_highest_first": [
+    7.261484115111412e-08,
+    0.0003630430737480585,
+    -0.4303006297179875
+   ],
+   "rmse": 0.0007253772705860051,
+   "p99_abs_res": 0.0011253747205707265,
+   "mV_range": [
+    1152.2496963051467,
+    1989.0870179359963
+   ],
+   "theta_cal_range": [
+    0.084131118,
+    0.583286576
+   ],
+   "n_pairs": 221846
+  }
+ },
+ "applied": {
+  "NV_15": {
+   "layer": "A1",
+   "raw_range": [
+    0.02,
+    0.259
+   ],
+   "cal_range": [
+    0.0876684458599728,
+    0.33771491739814863
+   ],
+   "rows_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "max_extrapolation_mV": 0.0
+  },
+  "NV_30": {
+   "layer": "A2",
+   "raw_range": [
+    0.046,
+    0.383
+   ],
+   "cal_range": [
+    0.07981921853607415,
+    0.579121869926231
+   ],
+   "rows_extrapolated": 5035,
+   "frac_extrapolated": 0.02878359992225284,
+   "max_extrapolation_mV": 8.693962158740987
+  },
+  "NV_60": {
+   "layer": "A2",
+   "raw_range": [
+    0.091,
+    0.347
+   ],
+   "cal_range": [
+    0.12516676176946168,
+    0.5345431577624911
+   ],
+   "rows_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "max_extrapolation_mV": 0.0
+  },
+  "V_15": {
+   "layer": "A1",
+   "raw_range": [
+    0.016,
+    0.21
+   ],
+   "cal_range": [
+    0.08265585788573038,
+    0.2557921525069533
+   ],
+   "rows_extrapolated": 13286,
+   "frac_extrapolated": 0.08015589555480476,
+   "max_extrapolation_mV": 6.242990641220786
+  },
+  "V_35": {
+   "layer": "A2",
+   "raw_range": [
+    0.052,
+    0.218
+   ],
+   "cal_range": [
+    0.08535772402255021,
+    0.31931994155894267
+   ],
+   "rows_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "max_extrapolation_mV": 0.0
+  },
+  "V_60": {
+   "layer": "A2",
+   "raw_range": [
+    0.025,
+    0.188
+   ],
+   "cal_range": [
+    0.06147362228744102,
+    0.26401919134521773
+   ],
+   "rows_extrapolated": 64889,
+   "frac_extrapolated": 0.37095114505562354,
+   "max_extrapolation_mV": 43.53234321051218
+  }
+ }
+}
