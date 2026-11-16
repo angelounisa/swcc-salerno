@@ -7,6 +7,9 @@
  * S = (1+(a|h|)^n)^-m, S_s = S(h_s); for h >= h_s theta = theta(h_s) (+ elastic storage Ss (h - h_s)), K = Ks.
  * Without it, Mualem K with n < ~1.3 drops by an order of magnitude within 1 cm of saturation
  * and the solver stalls during rain.
+ * Dual conductivity: K(h) = Ks_matrix * Kr(h) + Kmac * exp(min(h,0)/hmac). The first term is the soil matrix
+ * (Ks_matrix from field drainage data); the second is a macropore term that vanishes within a few hmac of
+ * saturation, so that K(0) = Ks_matrix + Kmac equals the saturated conductivity measured in the laboratory.
  * Top: atmospheric BC (flux tau*P - Ep) switching to h = 0 (ponding, excess = runoff) or
  *      h = hCrit (surface too dry to sustain potential evaporation).
  *      tau = throughfall fraction (canopy interception = (1 - tau) P, removed before reaching the soil).
@@ -82,7 +85,8 @@
       const L = cfg.layers.find(l => z >= l.zTop_cm && z < l.zBot_cm) || (z >= cfg.L_cm - 1e-9 ? cfg.layers[cfg.layers.length - 1] : null);
       if (!L) throw new Error('no layer covers z = ' + z);
       if (!(L.n > 1 && L.ts > L.tr && L.Ks_cm_h > 0 && L.alpha_per_kPa > 0)) throw new Error('bad layer params');
-      const q = { tr: L.tr, ts: L.ts, a: L.alpha_per_kPa / CM_PER_KPA, n: L.n, m: 1 - 1 / L.n, Ks: L.Ks_cm_h };
+      if (!(L.Kmac_cm_h >= 0 && L.hmac_cm > 0)) throw new Error('bad macropore params');
+      const q = { tr: L.tr, ts: L.ts, a: L.alpha_per_kPa / CM_PER_KPA, n: L.n, m: 1 - 1 / L.n, Ks: L.Ks_cm_h, Kmac: L.Kmac_cm_h, hmac: L.hmac_cm };
       if (!(cfg.hs_cm < 0)) throw new Error('hs_cm must be negative');
       const ans = Math.pow(q.a * -cfg.hs_cm, q.n);
       q.Ss_ = Math.pow(1 + ans, -q.m);                 // S at h_s
@@ -121,9 +125,10 @@
     const hs = cfg.hs_cm;
     const wc = (hh, p) => hh >= hs ? p.ths + Ss * (hh - hs) : vgTheta(hh, p);
     const kOf = (hh, p) => {
-      if (hh >= hs) return p.Ks;
+      const mac = p.Kmac > 0 ? p.Kmac * Math.exp(Math.min(hh, 0) / p.hmac) : 0;
+      if (hh >= hs) return p.Ks + mac;
       const an = Math.pow(p.a * -hh, p.n), se = Math.pow(1 + an, -p.m), f = 1 - Math.pow(an / (1 + an), p.m);
-      return p.Ks * Math.sqrt(se / p.Ss_) * (f / p.Fs) * (f / p.Fs);
+      return p.Ks * Math.sqrt(se / p.Ss_) * (f / p.Fs) * (f / p.Fs) + mac;
     };
     for (let i = 0; i < nn; i++) th[i] = wc(h[i], P[i]);
     const storage = () => { let s = 0; for (let i = 0; i < nn; i++) s += th[i] * (i === 0 || i === N ? dz / 2 : dz); return s; };
@@ -143,14 +148,15 @@
       for (let it = 1; it <= cfg.maxIter; it++) {
         for (let i = 0; i < nn; i++) {
           const p = P[i], hh = hk[i];
-          if (hh >= hs) { thk[i] = p.ths + Ss * (hh - hs); C[i] = Ss; K[i] = p.Ks; continue; }  // above air entry: elastic storage only
+          const mac = p.Kmac > 0 ? p.Kmac * Math.exp(Math.min(hh, 0) / p.hmac) : 0;
+          if (hh >= hs) { thk[i] = p.ths + Ss * (hh - hs); C[i] = Ss; K[i] = p.Ks + mac; continue; }  // above air entry: elastic storage only
           // one pass: theta, C = dtheta/dh, K (Mualem); uses Se^(1/m) = 1/(1+(a|h|)^n)
           const ah = p.a * -hh, an = Math.pow(ah, p.n), se = Math.pow(1 + an, -p.m);
           const t = p.tr + (p.ts - p.tr) * se;
           thk[i] = t;
           C[i] = (p.ts - p.tr) * p.m * p.n * p.a * (an / ah) * se / (1 + an);
           const f = 1 - Math.pow(an / (1 + an), p.m);
-          K[i] = p.Ks * Math.sqrt(se / p.Ss_) * (f / p.Fs) * (f / p.Fs);
+          K[i] = p.Ks * Math.sqrt(se / p.Ss_) * (f / p.Fs) * (f / p.Fs) + mac;
         }
         for (let i = 0; i < N; i++) Kh[i] = 0.5 * (K[i] + K[i + 1]);
         for (let i = 0; i < nn; i++) Sk[i] = TpNow > 0 && bz[i] > 0 ? feddes(hk[i]) * bz[i] * TpNow : 0;  // lagged (Picard)
@@ -266,7 +272,7 @@
 
   /**
    * buildConfig(model, fits, s0_kPa)
-   * model.zones: [{ name, zTop_cm, zBot_cm, ret: '15' (key of fits), Ks_cm_h }] covering [0, L_cm]
+   * model.zones: [{ name, zTop_cm, zBot_cm, ret: '15' (key of fits), Ks_cm_h (matrix), Kmac_cm_h, hmac_cm }] covering [0, L_cm]
    * fits: {'15': {theta_r, theta_s, alpha, n}, ...}  (drying fits, alpha in 1/kPa)
    * s0_kPa: observed suction at t0 per sensor depth; initial head interpolated linearly in z,
    *         constant above the shallowest and below the deepest sensor
@@ -276,7 +282,7 @@
     if (!(Z.length > 0 && Z[0].zTop_cm === 0 && Z[Z.length - 1].zBot_cm === model.L_cm)) throw new Error('zones must cover [0, L]');
     for (let j = 1; j < Z.length; j++) if (Z[j].zTop_cm !== Z[j - 1].zBot_cm) throw new Error('zones must be contiguous');
     const layers = Z.map(zn => { const f = fits[zn.ret]; if (!f) throw new Error('no retention curve ' + zn.ret);
-      return { zTop_cm: zn.zTop_cm, zBot_cm: zn.zBot_cm, tr: f.theta_r, ts: f.theta_s, alpha_per_kPa: f.alpha, n: f.n, Ks_cm_h: zn.Ks_cm_h }; });
+      return { zTop_cm: zn.zTop_cm, zBot_cm: zn.zBot_cm, tr: f.theta_r, ts: f.theta_s, alpha_per_kPa: f.alpha, n: f.n, Ks_cm_h: zn.Ks_cm_h, Kmac_cm_h: zn.Kmac_cm_h, hmac_cm: zn.hmac_cm }; });
     const keys = Object.keys(s0_kPa).sort((x, y) => +x - +y), zs = keys.map(Number);
     const hs = keys.map(k => { const s = s0_kPa[k]; if (!(s > 0)) throw new Error('missing initial suction at ' + k); return -s * CM_PER_KPA; });
     const N = Math.round(model.L_cm / model.dz_cm), h0 = new Array(N + 1);

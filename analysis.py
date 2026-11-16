@@ -7,23 +7,24 @@ import json, sys
 import numpy as np, pandas as pd, scipy
 from scipy.optimize import curve_fit
 
-CONFIG = {
-    "input": sys.argv[1],
-    "output": sys.argv[2],
-    "depths_cm": [int(x) for x in sys.argv[3].split(",")],   # sensor depths, e.g. 15,30,60 (NV) or 15,35,60 (V)
-    "site": sys.argv[4],
-    "resample": "1h",                  # hourly means of 5-min data
-    "diff_window_h": 24,               # centred difference window to compute trends (slow drying at depth needs >=24 h)
-    "dtheta_min": 0.001,               # |dtheta| over window [m3/m3] to call a trend (= sensor resolution)
-    "dlogs_min": 0.01,                 # |dlog10 s| over window to call a trend
-    "bin_width_log10": 0.1,            # log10(s) bin width for the fit
-    "bin_min_count": 3,
-    "theta_s_max": 0.55,               # upper bound for theta_s [m3/m3]
-    "theta_s_min": 0.05,               # lower bound for theta_s (not tied to observed max: isolated spikes would force it)
-    "alpha_bounds": [1e-4, 10.0],      # [1/kPa]
-    "n_bounds": [1.05, 8.0],
-    "plot_every_h": 2,                 # thinning for the dashboard scatter
-}
+def config_from_argv(argv):
+    return {
+        "input": argv[1],
+        "output": argv[2],
+        "depths_cm": [int(x) for x in argv[3].split(",")],   # sensor depths, e.g. 15,30,60 (NV) or 15,35,60 (V)
+        "site": argv[4],
+        "resample": "1h",                  # hourly means of 5-min data
+        "diff_window_h": 24,               # centred difference window to compute trends (slow drying at depth needs >=24 h)
+        "dtheta_min": 0.001,               # |dtheta| over window [m3/m3] to call a trend (= sensor resolution)
+        "dlogs_min": 0.01,                 # |dlog10 s| over window to call a trend
+        "bin_width_log10": 0.1,            # log10(s) bin width for the fit
+        "bin_min_count": 3,
+        "theta_s_max": 0.55,               # upper bound for theta_s [m3/m3]
+        "theta_s_min": 0.05,               # lower bound for theta_s (not tied to observed max: isolated spikes would force it)
+        "alpha_bounds": [1e-4, 10.0],      # [1/kPa]
+        "n_bounds": [1.05, 8.0],
+        "plot_every_h": 2,                 # thinning for the dashboard scatter
+    }
 
 def vg(s_kpa, theta_r, theta_s, alpha, n):
     m = 1.0 - 1.0 / n
@@ -108,4 +109,4 @@ def main(cfg):
         json.dump(out, fh)
 
 if __name__ == "__main__":
-    main(CONFIG)
+    main(config_from_argv(sys.argv))

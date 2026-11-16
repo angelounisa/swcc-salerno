@@ -11,12 +11,6 @@
  "itGrow": 4,
  "itShrink": 8,
  "L_cm": 130,
- "feddes_cm": [
-  -10,
-  -25,
-  -400,
-  -15000
- ],
  "profileInstants": [
   "2025-04-26 12:00",
   "2025-06-01 12:00",
@@ -42,7 +36,21 @@
   13077
  ],
  "eFactor": 1.0,
- "tFrac": 0.5,
+ "throughfall": 1.0,
+ "feddes_cm": [
+  0,
+  -1,
+  -1019.72,
+  -15295.800000000001
+ ],
+ "sources": {
+  "Ksat_lab": "Urciuoli et al. Table 1",
+  "roots": "ALERT 2025 slide 12: total root biomass [g per 360.8 cm3 core] at 20, 40, 60 cm; root depth 1 m (slide 24)",
+  "LAI": "ALERT 2025 slide 24",
+  "k_extinction": "assumed 0.5 (Ritchie 1972: SCF = 1 - exp(-k LAI))",
+  "feddes": "ALERT 2025 slide 28",
+  "hmac_cm": "5 cm, upper limit compatible with wet-end night-drainage K points within sensor accuracy"
+ },
  "site": "V",
  "outDepths_cm": [
   15,
@@ -55,51 +63,61 @@
    "zTop_cm": 0,
    "zBot_cm": 20,
    "ret": "15",
-   "Ks_cm_h": 0.3708
+   "Ks_cm_h": 0.045055829384654925,
+   "Kmac_cm_h": 0.3257441706153451,
+   "hmac_cm": 5.0
   },
   {
    "name": "A2",
    "zTop_cm": 20,
    "zBot_cm": 47.5,
    "ret": "35",
-   "Ks_cm_h": 3.3371999999999997
+   "Ks_cm_h": 0.16750011673662318,
+   "Kmac_cm_h": 3.1696998832633767,
+   "hmac_cm": 5.0
   },
   {
    "name": "A2",
    "zTop_cm": 47.5,
    "zBot_cm": 115,
    "ret": "60",
-   "Ks_cm_h": 3.3371999999999997
+   "Ks_cm_h": 0.16750011673662318,
+   "Kmac_cm_h": 3.1696998832633767,
+   "hmac_cm": 5.0
   },
   {
    "name": "C1",
    "zTop_cm": 115,
    "zBot_cm": 130,
    "ret": "60",
-   "Ks_cm_h": 1.7351999999999999
+   "Ks_cm_h": 0.16750011673662318,
+   "Kmac_cm_h": 1.5676998832633766,
+   "hmac_cm": 5.0
   }
  ],
- "throughfall": 0.49,
+ "LAI": 3.0,
+ "k_ext": 0.5,
+ "tFrac": 0.7768698398515702,
  "roots": [
   [
    0,
-   0.3
+   0.0
   ],
   [
    20,
-   0.7
+   0.984
   ],
   [
    40,
-   1.0
+   3.562
   ],
   [
    60,
-   0.7
+   0.463
   ],
   [
    100,
-   0.2
+   0.0
   ],
   [
    130,

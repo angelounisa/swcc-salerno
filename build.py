@@ -5,6 +5,9 @@ body = pathlib.Path('site/body.html').read_text()
 data = json.dumps({'NV': json.load(open('results_NV.json')), 'V': json.load(open('results_V.json'))}, separators=(',', ':'), allow_nan=False)
 view = pathlib.Path('site/drying_view.js').read_text()
 S2 = json.load(open('sim/sim2_results.json')); S2['events'] = json.load(open('sim/infiltration_events.json'))
+SWm = json.load(open('swcc_main.json'))
+for v in SWm['sensors'].values(): v.pop('cloud')          # not shown in the dashboard
+S2['swcc'] = {'sensors': SWm['sensors'], 'shared': SWm['shared'], 'config': SWm['config']}; S2['kfield'] = json.load(open('kfield.json'))
 sim2 = json.dumps(S2, separators=(',', ':'), allow_nan=False)
 assert body.count('/*DATA*/null') == 1 and body.count('/*SIM2*/null') == 1
 page = body.replace('/*DATA*/null', data).replace('/*SIM2*/null', sim2) + '\n' + view
@@ -17,9 +20,12 @@ full = ('<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
 (repo / 'docs' / 'index.html').write_text(full)
 shutil.copy('analysis.py', repo / 'analysis.py')
 (repo / 'sim').mkdir(exist_ok=True); (repo / 'site').mkdir(exist_ok=True)
-for fn in ['solver.js', 'prep_forcing.py', 'calib_drying.js', 'final3.js', 'infil_events.py', 'model_NV.json', 'model_V.json',
-           'calibdry_NV.json', 'calibdry_V.json', 'infiltration_events.json', 'forcing_NV.json', 'forcing_V.json']:
+for fn in ['solver.js', 'prep_forcing2.py', 'calib_dry2.js', 'final4.js', 'run3.js', 'build_models.py', 'infil_events.py', 'model_NV.json', 'model_V.json', 'fits_main.json',
+           'calibdry2_NV.json', 'calibdry2_V.json', 'infiltration_events.json', 'forcing_NV.json', 'forcing_V.json']:
     shutil.copy('sim/' + fn, repo / 'sim' / fn)
+for fn in ['swcc_main.py', 'kfield.py', 'swcc_main.json', 'kfield.json']:
+    shutil.copy(fn, repo / fn)
+(repo / 'data').mkdir(exist_ok=True); shutil.copy('rain/air_T_RH_2025_from_slides.csv', repo / 'data' / 'air_T_RH_2025_from_slides.csv')
 for fn in ['body.html', 'drying_view.js']:
     shutil.copy('site/' + fn, repo / 'site' / fn)
 shutil.copy('build.py', repo / 'build.py')
