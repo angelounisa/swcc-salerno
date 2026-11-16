@@ -1,19 +1,24 @@
-# SWCC Salerno – parcella senza vegetazione
+# SWCC Salerno
 
-Dashboard delle curve di ritenzione idrica (θ vs suzione) misurate con sensori METER a 15, 30 e 60 cm, gen 2025 – set 2026.
+Dashboard delle curve di ritenzione idrica (θ vs suzione) misurate con sensori METER su due parcelle, gen 2025 – set 2026:
+
+- senza vegetazione (NV): 15, 30, 60 cm
+- vegetata (V): 15, 35, 60 cm (θ a 15 cm manca dal 31/01 al 04/03/2026)
 
 - `docs/index.html` – dashboard statica (Plotly). Per pubblicarla: *Settings → Pages → Deploy from branch → `main` / `/docs`*.
-- `docs/results.json` – parametri, classi e punti usati dalla dashboard.
+- `docs/results_NV.json`, `docs/results_V.json` – parametri, classi e punti usati dalla dashboard.
+- `site/body.html` + `build.py` – sorgente della pagina e script che incorpora i dati in `docs/index.html`.
 - `analysis.py` – classificazione drying/wetting e fit van Genuchten–Mualem. Tutti i parametri sono nel dizionario `CONFIG`.
 
 Rigenerare i risultati:
 
 ```bash
 pip install pandas openpyxl scipy numpy
-python analysis.py Salerno_METER_NV_2025-2026.xlsx docs/results.json
+python analysis.py Salerno_METER_NV_2025-2026.xlsx results_NV.json 15,30,60 "No vegetation"
+python analysis.py Salerno_METER_V_2025-2026.xlsx  results_V.json  15,35,60 "Vegetation"
+python build.py
 ```
 
-(`docs/index.html` contiene i dati incorporati: dopo una nuova analisi va ricostruito con `build.py`.)
 
 ## Metodo in breve
 

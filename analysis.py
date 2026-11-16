@@ -10,7 +10,8 @@ from scipy.optimize import curve_fit
 CONFIG = {
     "input": sys.argv[1],
     "output": sys.argv[2],
-    "depths_cm": [15, 30, 60],
+    "depths_cm": [int(x) for x in sys.argv[3].split(",")],   # sensor depths, e.g. 15,30,60 (NV) or 15,35,60 (V)
+    "site": sys.argv[4],
     "resample": "1h",                  # hourly means of 5-min data
     "diff_window_h": 24,               # centred difference window to compute trends (slow drying at depth needs >=24 h)
     "dtheta_min": 0.001,               # |dtheta| over window [m3/m3] to call a trend (= sensor resolution)
@@ -69,7 +70,7 @@ def fit_branch(s, th, cfg):
         "air_entry_kPa_1_over_alpha": float(1 / popt[2]),
         "fit_bins": stats(xs, ys), "all_points": stats(s, th),
         "bins": {"s": xs.round(3).tolist(), "theta": ys.round(4).tolist(), "count": agg.n.astype(int).tolist()},
-        "s_range": [float(s.min()), float(s.max())], "theta_range": [float(th.min()), float(th.max())],
+        "s_range": [float(s.min()), float(s.max())], "s_p05_p95": [float(np.percentile(s, 5)), float(np.percentile(s, 95))], "theta_range": [float(th.min()), float(th.max())],
     }
 
 def main(cfg):

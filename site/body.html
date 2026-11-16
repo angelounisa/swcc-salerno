@@ -1,4 +1,4 @@
-<title>SWCC Salerno No-Veg</title>
+<title>SWCC Salerno</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -54,13 +54,21 @@ section.depth{display:flex;flex-direction:column;gap:12px;border-top:2px solid v
 .plot.ts{height:230px}
 .notes{display:flex;flex-direction:column;gap:8px}
 .notes li{max-width:90ch}
+.tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);margin-top:6px}
+.tabs button{font:inherit;font-family:var(--f-display);font-size:1rem;font-weight:500;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:8px 16px 6px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--fg)}
+.tabs button:focus-visible{outline:2px solid var(--wet);outline-offset:2px}
 footer{font-size:.8rem;color:var(--muted)}
 </style>
 
 <div class="wrap">
   <header>
-    <h1>Curve di ritenzione idrica · Salerno, parcella senza vegetazione</h1>
-    <p class="muted">Contenuto d'acqua volumetrico θ contro suzione di matrice s, sensori METER a 15, 30 e 60 cm. Rami di essiccamento e imbibizione separati e interpolati con van Genuchten.</p>
+    <h1>Curve di ritenzione idrica · Salerno</h1>
+    <p class="muted">Contenuto d'acqua volumetrico θ contro suzione di matrice s, sensori METER su due parcelle (senza vegetazione e vegetata). Rami di essiccamento e imbibizione separati e interpolati con van Genuchten.</p>
+    <nav class="tabs" role="tablist" aria-label="Parcella">
+      <button role="tab" id="tab-nv" data-site="nv">Senza vegetazione · 15/30/60 cm</button>
+      <button role="tab" id="tab-v" data-site="v">Vegetata · 15/35/60 cm</button>
+    </nav>
     <div class="meta" id="meta"></div>
   </header>
 
@@ -76,7 +84,7 @@ footer{font-size:.8rem;color:var(--muted)}
   <div class="dhead"><h2>Parametri interpolati</h2><span class="muted">errori standard da matrice di covarianza (sottostimati: i dati sono autocorrelati)</span></div>
   <div class="tablebox"><table id="ptable"></table></div>
 
-  <div class="dhead"><h2>Isteresi: θ<sub>drying</sub> − θ<sub>wetting</sub> dalle curve interpolate</h2><span class="muted">m³/m³, solo entro il campo di suzione osservato in entrambi i rami</span></div>
+  <div class="dhead"><h2>Isteresi: θ<sub>drying</sub> − θ<sub>wetting</sub> dalle curve interpolate</h2><span class="muted">m³/m³, solo fra il 5° e il 95° percentile di suzione osservato in entrambi i rami (fuori da lì una delle curve è un'estrapolazione)</span></div>
   <div class="tablebox"><table id="htable"></table></div>
 
   <div class="controls">
@@ -88,14 +96,7 @@ footer{font-size:.8rem;color:var(--muted)}
 
   <section class="notes">
     <h2>Note sull'analisi</h2>
-    <ul id="notes">
-      <li><b>θ<sub>r</sub> poco vincolato.</b> In quasi tutti i fit θ<sub>r</sub> finisce sul limite inferiore (0): i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo.</li>
-      <li><b>Rami di wetting meno affidabili.</b> Gli eventi di imbibizione durano poche ore e hanno 3–8 volte meno punti dei rami di essiccamento. A 15 e 60 cm α va al limite superiore o ha errore molto grande: la curva descrive la forma dei dati ma i parametri non sono identificabili.</li>
-      <li><b>Ritardo del sensore di suzione.</b> Nel primo evento dopo l'estate (set. 2025) θ sale subito mentre s resta per ore a 10²–10³ kPa: sono punti fuori equilibrio, visibili a 30 e 60 cm come wetting con θ alto e s alta. Sono inclusi nel fit; escluderli cambierebbe soprattutto la coda secca delle curve di wetting.</li>
-      <li><b>Curve di scanning.</b> La nuvola di punti non è una curva unica: ogni ciclo parte da uno stato diverso. Il fit dà una curva media per ramo, non la curva principale di essiccamento o imbibizione.</li>
-      <li><b>Isteresi negativa ad alta suzione.</b> A 30 e 60 cm la differenza a 100–1000 kPa è negativa solo perché la coda secca delle curve di wetting è trascinata dai punti fuori equilibrio descritti sopra; nel campo 1–10 kPa l'isteresi ha il segno atteso ma è piccola (≤0,01 m³/m³).</li>
-      <li><b>Plateau secco a 15 cm.</b> D'estate s si stabilizza fra 2000 e 3300 kPa mentre θ oscilla col ciclo giornaliero (effetto termico sulla misura di θ).</li>
-    </ul>
+    <ul id="notes"></ul>
   </section>
 
   <footer id="foot"></footer>
@@ -105,13 +106,28 @@ footer{font-size:.8rem;color:var(--muted)}
 <script>const DATA = /*DATA*/null;</script>
 <script>
 (function(){
-const D = DATA, depths = Object.keys(D.depths);
+const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;
+const COMMON_NOTES = [
+ '<b>θ<sub>r</sub> poco vincolato.</b> In molti fit θ<sub>r</sub> finisce sul limite inferiore: i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo.',
+ '<b>Curve di scanning.</b> La nuvola di punti non è una curva unica: ogni ciclo parte da uno stato diverso. Il fit dà una curva media per ramo, non la curva principale di essiccamento o imbibizione.'];
+const SITE_NOTES = {
+ nv: [
+ '<b>Rami di wetting meno affidabili.</b> Gli eventi di imbibizione durano poche ore e hanno 3–8 volte meno punti dei rami di essiccamento. A 15 e 60 cm α va al limite superiore o ha errore molto grande: la curva descrive la forma dei dati ma i parametri non sono identificabili.',
+ '<b>Ritardo del sensore di suzione.</b> Nel primo evento dopo l\'estate (set. 2025) θ sale subito mentre s resta per ore a 10²–10³ kPa: sono punti fuori equilibrio, visibili a 30 e 60 cm come wetting con θ alto e s alta. Sono inclusi nel fit; escluderli cambierebbe soprattutto la coda secca delle curve di wetting.',
+ '<b>Isteresi negativa ad alta suzione.</b> A 30 e 60 cm la differenza a 100 kPa è negativa solo perché la coda secca delle curve di wetting è trascinata dai punti fuori equilibrio; nel campo 1–10 kPa l\'isteresi ha il segno atteso ma è piccola (≤0,01 m³/m³).',
+ '<b>Plateau secco a 15 cm.</b> D\'estate s si stabilizza fra 2000 e 3300 kPa mentre θ oscilla col ciclo giornaliero (effetto termico sulla misura di θ).'],
+ v: [
+ '<b>Lacuna a 15 cm.</b> θ a 15 cm manca dal 31/01/2026 al 04/03/2026; quelle ore sono escluse e la serie temporale mostra il vuoto.',
+ '<b>Wetting a 35 e 60 cm limitato alle basse suzioni.</b> Il 95% delle ore di wetting a 35 cm è sotto 29 kPa (a 60 cm sotto circa 220 kPa, con pochi punti). Oltre questi valori la curva di wetting è un\'estrapolazione. A 60 cm i pochi punti di wetting sopra 30 kPa trascinano la curva verso il basso: la differenza di −0,08 m³/m³ a 100 kPa non è affidabile (R² sui punti del wetting 0,38).',
+ '<b>Spostamento fra le due stagioni secche.</b> A 35 cm (e meno a 60 cm) l\'essiccamento del 2026 segue un percorso più secco di quello del 2025, con circa 0,03–0,04 m³/m³ di differenza a 100 kPa. La curva di drying interpolata media le due stagioni; vale la pena verificare se dipende dalle radici, dalla struttura del suolo o dal sensore.',
+ '<b>θ<sub>s</sub> basso a 15 cm.</b> Il θ<sub>s</sub> interpolato a 15 cm (circa 0,09 m³/m³) è molto inferiore a quello degli strati profondi: lo strato superficiale vegetato non si avvicina mai alla saturazione nei dati.']
+};
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const fmt = (x,k)=> (x==null||!isFinite(x))?'–':Number(x).toFixed(k);
 const vg = (s,p)=> p.theta_r + (p.theta_s-p.theta_r)/Math.pow(1+Math.pow(p.alpha*s,p.n),1-1/p.n);
 
-// ---- header / config text
-const C = D.config;
+function setup(){
+C = D.config;
 document.getElementById('cfg-win').textContent = C.diff_window_h;
 document.getElementById('cfg-dth').textContent = C.dtheta_min;
 document.getElementById('cfg-dls').textContent = C.dlogs_min;
@@ -135,21 +151,21 @@ const refS=[1,10,100,1000];
 let hh = `<thead><tr><th>Prof.</th><th></th>${refS.map(s=>`<th>s = ${s} kPa</th>`).join('')}</tr></thead><tbody>`;
 for (const d of depths){
   const fd=D.depths[d].fits.drying, fw=D.depths[d].fits.wetting;
-  const lo=Math.max(fd.s_range[0],fw.s_range[0]), hi=Math.min(fd.s_range[1],fw.s_range[1]);
+  const lo=Math.max(fd.s_p05_p95[0],fw.s_p05_p95[0]), hi=Math.min(fd.s_p05_p95[1],fw.s_p05_p95[1]);
   hh += `<tr><td>${d} cm</td><td></td>${refS.map(s=> (s<lo||s>hi)?'<td class="num muted">fuori campo</td>':`<td class="num">${fmt(vg(s,fd.params)-vg(s,fw.params),3)}</td>`).join('')}</tr>`;
 }
 document.getElementById('htable').innerHTML = hh+'</tbody>';
 
 // ---- time scale (shared across panels)
 const tnum = s => Date.parse(s.replace(' ','T')+':00Z')/864e5;
-const t0 = tnum(D.period[0].slice(0,16)), t1 = tnum(D.period[1].slice(0,16));
-const tickvals=[], ticktext=[];
+t0 = tnum(D.period[0].slice(0,16)); t1 = tnum(D.period[1].slice(0,16));
+tickvals=[]; ticktext=[];
 { let y=+D.period[0].slice(0,4), m=+D.period[0].slice(5,7);
   for(;;){ m+=1; if(m>12){m=1;y++;} const v=Date.UTC(y,m-1,1)/864e5; if(v>t1)break; if((m-1)%3===0){tickvals.push(v); ticktext.push(`${['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'][m-1]} ${String(y).slice(2)}`);} } }
-for (const d of depths){ const P=D.depths[d].points; P.tn = P.t.map(tnum); }
+for (const d of depths){ const P=D.depths[d].points; if(!P.tn) P.tn = P.t.map(tnum); }
 
 // ---- build DOM
-const host=document.getElementById('depths');
+const host=document.getElementById('depths'); host.innerHTML='';
 for (const d of depths){
   const c=D.depths[d].counts;
   const sec=document.createElement('section'); sec.className='depth';
@@ -163,6 +179,8 @@ for (const d of depths){
   host.appendChild(sec);
 }
 
+document.getElementById('notes').innerHTML = SITE_NOTES[SITE].concat(COMMON_NOTES).map(x=>'<li>'+x+'</li>').join('');
+}
 function baseLayout(xtitle,ytitle,extra){
   const fg=css('--fg'), mu=css('--muted'), gr=css('--grid'), ln=css('--line');
   return Object.assign({
@@ -236,6 +254,15 @@ document.getElementById('showU').addEventListener('change',render);
 document.getElementById('showFit').addEventListener('change',render);
 const mq=window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',render);
 new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-render();
+const KEY={nv:'NV',v:'V'};
+function show(id){
+  if(!KEY[id]) id='nv';
+  SITE=id; D=ALL[KEY[id]]; depths=Object.keys(D.depths);
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.site===id)));
+  setup(); render();
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{ if(location.hash!=='#'+b.dataset.site) location.hash=b.dataset.site; else show(b.dataset.site); }));
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+show(location.hash.slice(1));
 })();
 </script>
