@@ -9,6 +9,7 @@ SWm = json.load(open('swcc_main.json'))
 for v in SWm['sensors'].values(): v.pop('cloud')          # not shown in the dashboard
 S2['swcc'] = {'sensors': SWm['sensors'], 'shared': SWm['shared'], 'config': SWm['config']}; S2['kfield'] = json.load(open('kfield.json'))
 S2['thetaCal'] = json.load(open('cal/theta_calibration.json'))
+S2['baselineVertical'] = json.load(open('sim/baseline_vertical.json')); S2['excess'] = json.load(open('sim/excess.json'))
 sim2 = json.dumps(S2, separators=(',', ':'), allow_nan=False)
 assert body.count('/*DATA*/null') == 1 and body.count('/*SIM2*/null') == 1
 page = body.replace('/*DATA*/null', data).replace('/*SIM2*/null', sim2) + '\n' + view
@@ -21,7 +22,7 @@ full = ('<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
 (repo / 'docs' / 'index.html').write_text(full)
 shutil.copy('analysis.py', repo / 'analysis.py')
 (repo / 'sim').mkdir(exist_ok=True); (repo / 'site').mkdir(exist_ok=True)
-for fn in ['solver.js', 'prep_forcing2.py', 'calib_dry2.js', 'final4.js', 'run3.js', 'build_models.py', 'infil_events.py', 'model_NV.json', 'model_V.json', 'fits_main.json',
+for fn in ['solver.js', 'prep_forcing2.py', 'calib_dry2.js', 'final4.js', 'run3.js', 'build_models.py', 'test_slope.js', 'excess.js', 'excess.json', 'baseline_vertical.json', 'infil_events.py', 'model_NV.json', 'model_V.json', 'fits_main.json',
            'calibdry2_NV.json', 'calibdry2_V.json', 'infiltration_events.json', 'forcing_NV.json', 'forcing_V.json']:
     shutil.copy('sim/' + fn, repo / 'sim' / fn)
 for fn in ['swcc_main.py', 'kfield.py', 'swcc_main.json', 'kfield.json']:

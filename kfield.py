@@ -3,18 +3,20 @@
 
 For a control plane at depth z* between two sensors:
     q(z*) = - d/dt [ storage above z* ]            (zero flux at the surface: no rain, night)
-    K     = q / i ,   i = 1 - dh/dz                (z positive downward, h = -s * 10.1972 cm)
+    K     = q / i ,   i = 1 - (dh/dz) / cos(beta)^2    (infinite slope of angle beta; z = vertical depth, positive downward;
+                                                     q per unit horizontal area; h = -s * 10.1972 cm; beta = 0: vertical column)
 Storage above z* uses the theta sensors above the plane, each representing its own layer.
 K is attached to the geometric-mean suction of the two sensors bracketing the plane.
 Only nights with downward flow (i > I_MIN) and a storage loss above the sensor resolution are kept.
 Then Ks of layer A2 is the value that scales the Mualem-van Genuchten relative conductivity (shared A2 shape
 from swcc_main.json, with the same air-entry modification used by the solver) onto the K points.
-Usage: python kfield.py rain.xlsx meterNV.xlsx meterV.xlsx swcc_main.json out.json
+Usage: python kfield.py rain.xlsx meterNV.xlsx meterV.xlsx swcc_main.json out.json SLOPE_DEG
 """
 import json, sys
 import numpy as np, pandas as pd
 CM_PER_KPA = 10.1972
 CONFIG = {
+    "slope_deg": float(sys.argv[6]),
     "night_start_h": 20, "night_end_h": 6,      # local logger time
     "edge_avg_h": 3,                            # theta averaged over 3 h around the two ends of the night
     "dry_hours_before": 12,                     # no rain in the 12 h before the night and during it
@@ -55,7 +57,7 @@ for site, df in met.items():
             dt = (tb - ta) / pd.Timedelta("1h")
             q = -dS / dt                                                                              # cm/h, downward
             s_up, s_lo = N[f"s {pl['bracket'][0]}"].mean(), N[f"s {pl['bracket'][1]}"].mean()
-            i = 1 - (-s_lo * CM_PER_KPA - (-s_up * CM_PER_KPA)) / (pl["bracket"][1] - pl["bracket"][0])
+            i = 1 - (-s_lo * CM_PER_KPA - (-s_up * CM_PER_KPA)) / (pl["bracket"][1] - pl["bracket"][0]) / np.cos(np.deg2rad(c["slope_deg"])) ** 2
             if not (i > c["i_min"] and -dS >= c["dtheta_mean_min"] * pl["z"] and max(s_up, s_lo) <= c["s_max_kPa"]): continue
             rows.append({"date": str(d.date()), "q_cm_h": q, "i": i, "K_cm_h": q / i, "s_kPa": float(np.sqrt(s_up * s_lo)), "s_up": s_up, "s_lo": s_lo})
         R = pd.DataFrame(rows)

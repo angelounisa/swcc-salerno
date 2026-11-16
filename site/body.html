@@ -127,7 +127,7 @@ footer{font-size:.8rem;color:var(--muted)}
   </div>
 
   <div id="simview" class="stack" hidden>
-    <p class="muted" style="max-width:95ch">Confronto fra le due parcelle sui rami di essiccamento, in termini di saturazione efficace S<sub>e</sub> = (θ − θ<sub>r</sub>)/(θ<sub>s</sub> − θ<sub>r</sub>). I parametri idraulici sono fissati uno alla volta da misure in sito indipendenti (curva principale di drying, conducibilità dal drenaggio notturno, radici, intercettazione) e solo due fattori sono calibrati con il modello alle differenze finite. Dati di sito da Urciuoli et al. (JEnGe, in preparazione) e Comegna et al. (ALERT Workshop 2025).</p>
+    <p class="muted" style="max-width:95ch">Confronto fra le due parcelle sui rami di essiccamento, in termini di saturazione efficace S<sub>e</sub> = (θ − θ<sub>r</sub>)/(θ<sub>s</sub> − θ<sub>r</sub>). I parametri idraulici sono fissati uno alla volta da misure in sito indipendenti (curva principale di drying, conducibilità dal drenaggio notturno, radici, intercettazione) e solo due fattori sono calibrati con il modello alle differenze finite, in schema di pendio indefinito. Dati di sito da Urciuoli et al. (JEnGe, in preparazione) e Comegna et al. (ALERT Workshop 2025).</p>
 
     <div class="dhead"><h2>1 · Curve principali di drying in saturazione efficace</h2><span class="muted">punti = inviluppo superiore dei dati di essiccamento di ogni sensore; linea = curva van Genuchten comune allo strato</span></div>
     <div class="grid2">
@@ -145,7 +145,7 @@ footer{font-size:.8rem;color:var(--muted)}
       </div>
     </div>
 
-    <div class="dhead"><h2>3 · Modello numerico</h2><span class="muted">dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
+    <div class="dhead"><h2>3 · Modello numerico</h2><span class="muted">pendio indefinito: dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
     <div class="grid2">
       <div class="card"><h3>Dominio e condizioni al contorno</h3><div id="colsvg" style="overflow-x:auto"></div></div>
       <div class="stack" style="gap:14px;min-width:0">
@@ -166,6 +166,7 @@ footer{font-size:.8rem;color:var(--muted)}
       <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · S<sub>e</sub> e suzione nei due drying</h3><div class="plot prof" id="dw-V"></div></div>
     </div>
     <div class="tablebox"><table id="perfTable"></table></div>
+    <div class="tablebox"><table id="slopeTable"></table></div>
 
     <div class="dhead"><h2>5 · Quanta pioggia si infiltra</h2><span class="muted">stima dai sensori evento per evento (non usa la temperatura) e stima dal modello</span></div>
     <div class="grid2">

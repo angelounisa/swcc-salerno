@@ -7,6 +7,13 @@
  * S = (1+(a|h|)^n)^-m, S_s = S(h_s); for h >= h_s theta = theta(h_s) (+ elastic storage Ss (h - h_s)), K = Ks.
  * Without it, Mualem K with n < ~1.3 drops by an order of magnitude within 1 cm of saturation
  * and the solver stalls during rain.
+ * Infinite slope (cfg.slope_deg = beta): everything is uniform along the slope, so only the flow normal to the slope
+ * changes the water content:  d(theta)/dt = d/dn [ K (dh/dn - cos(beta)) ] - S.  The code keeps the VERTICAL depth
+ * z = n / cos(beta) as coordinate and fluxes per unit HORIZONTAL area (as rain is measured), which gives
+ *     d(theta)/dt = d/dz [ (K / c2) (dh/dz - c2) ] - S ,   c2 = cos(beta)^2 ,
+ * i.e. the vertical equation with K / c2 and gravity term c2 (beta = 0 is the vertical column). Free drainage at the
+ * base (dh/dn = 0) is q = K per unit horizontal area. The slope-parallel flux K sin(beta) does not change the storage
+ * of an infinite slope; its depth-integrated value (transmissivity flux, cm2/h per cm of slope width) is reported.
  * Dual conductivity: K(h) = Ks_matrix * Kr(h) + Kmac * exp(min(h,0)/hmac). The first term is the soil matrix
  * (Ks_matrix from field drainage data); the second is a macropore term that vanishes within a few hmac of
  * saturation, so that K(0) = Ks_matrix + Kmac equals the saturated conductivity measured in the laboratory.
@@ -71,9 +78,11 @@
   function run(cfg, forcing) {
     for (const k of ['L_cm', 'dz_cm', 'layers', 'hCrit_cm', 'Ss_per_cm', 'eFactor', 'dtMin_h', 'dtMax_h',
       'maxIter', 'tolTheta', 'tolHsat_cm', 'hs_cm', 'itGrow', 'itShrink', 'outDepths_cm', 'h0_cm',
-      'throughfall', 'tFrac', 'roots', 'feddes_cm', 'profileHours']) {
+      'throughfall', 'tFrac', 'roots', 'feddes_cm', 'profileHours', 'slope_deg']) {
       if (cfg[k] === undefined) throw new Error('missing cfg.' + k);
     }
+    if (!(cfg.slope_deg >= 0 && cfg.slope_deg < 60)) throw new Error('slope_deg must be in [0, 60)');
+    const beta = cfg.slope_deg * Math.PI / 180, c2 = Math.cos(beta) ** 2, G = c2;   // G = gravity term in vertical-depth coordinates
     const dz = cfg.dz_cm, N = Math.round(cfg.L_cm / dz);
     if (Math.abs(N * dz - cfg.L_cm) > 1e-9) throw new Error('L must be a multiple of dz');
     const nn = N + 1;
@@ -136,8 +145,8 @@
 
     const out = {}, outH = {}; cfg.outDepths_cm.forEach(z => { out[z] = new Float64Array(nH); outH[z] = new Float64Array(nH); });
     const qTopH = new Float64Array(nH), runoffH = new Float64Array(nH), drainH = new Float64Array(nH);
-    const transpH = new Float64Array(nH), evapH = new Float64Array(nH);
-    let cumInf = 0, cumDrain = 0, cumRunoff = 0, cumT = 0, cumE = 0, steps = 0, iters = 0;
+    const transpH = new Float64Array(nH), evapH = new Float64Array(nH), latH = new Float64Array(nH);   // latH: downslope flow [cm2 per cm width] in each hour
+    let cumInf = 0, cumDrain = 0, cumRunoff = 0, cumT = 0, cumE = 0, cumLat = 0, steps = 0, iters = 0;
     const profSet = new Set(cfg.profileHours), profiles = {};
     for (const ph of cfg.profileHours) if (!(Number.isInteger(ph) && ph >= 0 && ph < nH)) throw new Error('profile hour outside the run: ' + ph);
     let dt = Math.min(cfg.dtMax_h, 0.1), lastMode = 'flux';
@@ -158,27 +167,27 @@
           const f = 1 - Math.pow(an / (1 + an), p.m);
           K[i] = p.Ks * Math.sqrt(se / p.Ss_) * (f / p.Fs) * (f / p.Fs) + mac;
         }
-        for (let i = 0; i < N; i++) Kh[i] = 0.5 * (K[i] + K[i + 1]);
+        for (let i = 0; i < N; i++) Kh[i] = 0.5 * (K[i] + K[i + 1]) / c2;
         for (let i = 0; i < nn; i++) Sk[i] = TpNow > 0 && bz[i] > 0 ? feddes(hk[i]) * bz[i] * TpNow : 0;  // lagged (Picard)
         // interior
         for (let i = 1; i < N; i++) {
           const Km = Kh[i - 1], Kp = Kh[i];
           a[i] = -Km / (dz * dz); c[i] = -Kp / (dz * dz);
           b[i] = C[i] / dtS + (Km + Kp) / (dz * dz);
-          d[i] = C[i] * hk[i] / dtS - (thk[i] - thOld[i]) / dtS - (Kp - Km) / dz - Sk[i];
+          d[i] = C[i] * hk[i] / dtS - (thk[i] - thOld[i]) / dtS - G * (Kp - Km) / dz - Sk[i];
         }
         // top
         if (mode === 'flux') {
           const w = dz / 2;
           a[0] = 0; c[0] = -Kh[0] / dz;
           b[0] = w * C[0] / dtS + Kh[0] / dz;
-          d[0] = qTop - Kh[0] + w * (C[0] * hk[0] - (thk[0] - thOld[0])) / dtS - w * Sk[0];
+          d[0] = qTop - G * Kh[0] + w * (C[0] * hk[0] - (thk[0] - thOld[0])) / dtS - w * Sk[0];
         } else { a[0] = 0; b[0] = 1; c[0] = 0; d[0] = hTop; }
         // bottom: free drainage
         { const w = dz / 2, Km = Kh[N - 1];
           a[N] = -Km / dz; c[N] = 0;
           b[N] = w * C[N] / dtS + Km / dz;
-          d[N] = Km - K[N] + w * (C[N] * hk[N] - (thk[N] - thOld[N])) / dtS - w * Sk[N]; }
+          d[N] = G * Km - K[N] + w * (C[N] * hk[N] - (thk[N] - thOld[N])) / dtS - w * Sk[N]; }   // base flux = G * K_N / c2 = K_N
         tridiag(a, b, c, d, hNew, nn);
         // converged when the water content stops changing at every node (mass-based criterion:
         // the Celia scheme is mass-conservative only to the extent that theta(h^{k+1}) - theta(h^k) -> 0)
@@ -201,14 +210,14 @@
       const qE = (1 - cfg.tFrac) * pet;                                   // potential soil evaporation
       TpNow = cfg.tFrac * pet;                                            // potential transpiration
       const qPot = qP - qE;
-      let tIn = 0, hrInf = 0, hrRun = 0, hrDrain = 0, hrT = 0, hrE = 0;
+      let tIn = 0, hrInf = 0, hrRun = 0, hrDrain = 0, hrT = 0, hrE = 0, hrLat = 0;
       while (tIn < 1 - 1e-12) {
         const dtS = Math.min(dt, 1 - tIn);
         thOld.set(th);
         // atmospheric BC with switching (HYDRUS-like): keep the previous limiting mode while it still
         // limits the flux, otherwise use the potential flux and switch if the surface head leaves [hCrit, 0]
         const surfFlux = () => (dz / 2) * (wc(hk[0], P[0]) - thOld[0]) / dtS
-          - 0.5 * (kOf(hk[0], P[0]) + kOf(hk[1], P[1])) * ((hk[1] - hk[0]) / dz - 1);
+          - 0.5 * (kOf(hk[0], P[0]) + kOf(hk[1], P[1])) / c2 * ((hk[1] - hk[0]) / dz - G);
         let mode = null, hTop = 0, r = null;
         if (lastMode === 'dry' && qPot < 0) {
           r = step(dtS, 'head', 0, cfg.hCrit_cm);
@@ -232,7 +241,7 @@
         h.set(hk);
         for (let i = 0; i < nn; i++) th[i] = wc(h[i], P[i]);
         const K0 = kOf(h[0], P[0]), K1 = kOf(h[1], P[1]), KN = kOf(h[N], P[N]);
-        const q12 = -0.5 * (K0 + K1) * ((h[1] - h[0]) / dz - 1);   // downward flux at z = dz/2
+        const q12 = -0.5 * (K0 + K1) / c2 * ((h[1] - h[0]) / dz - G);   // flux at z = dz/2, per unit horizontal area
         let qTop;
         if (mode === 'flux') qTop = qPot;
         else qTop = (dz / 2) * (th[0] - thOld[0]) / dtS + q12;       // actual flux through surface
@@ -241,6 +250,7 @@
         hrInf += qTop * dtS;   // net surface flux: + infiltration, - evaporation
         if (mode === 'head' && hTop === 0) hrRun += Math.max(0, qPot - qTop) * dtS;  // ponding excess
         hrDrain += qBot * dtS;
+        if (beta > 0) { let tx = 0; for (let i = 0; i < nn; i++) tx += kOf(h[i], P[i]) * (i === 0 || i === N ? dz / 2 : dz); hrLat += tx * Math.sin(beta) * Math.cos(beta) * dtS; }  // int K sin(beta) dn, dn = dz cos(beta)
         let sT = 0; for (let i = 0; i < nn; i++) sT += Sk[i] * (i === 0 || i === N ? dz / 2 : dz);  // sink used in the accepted solve
         hrT += sT * dtS;
         hrE += (mode === 'head' && hTop !== 0 ? Math.max(0, qP - qTop) : qE) * dtS;
@@ -251,7 +261,7 @@
         else if (r.it > cfg.itShrink) dt = Math.max(cfg.dtMin_h, base * 0.7);
         else dt = base;
       }
-      cumInf += hrInf; cumDrain += hrDrain; cumRunoff += hrRun; cumT += hrT; cumE += hrE;
+      cumInf += hrInf; cumDrain += hrDrain; cumRunoff += hrRun; cumT += hrT; cumE += hrE; cumLat += hrLat; latH[hr] = hrLat;
       qTopH[hr] = hrInf * 10; runoffH[hr] = hrRun * 10; drainH[hr] = hrDrain * 10; transpH[hr] = hrT * 10; evapH[hr] = hrE * 10;
       for (let j = 0; j < outIdx.length; j++) { out[cfg.outDepths_cm[j]][hr] = th[outIdx[j]]; outH[cfg.outDepths_cm[j]][hr] = h[outIdx[j]]; }
       if (profSet.has(hr)) profiles[hr] = { h_cm: Array.from(h), theta: Array.from(th) };
@@ -262,9 +272,9 @@
     let Ptot = 0; for (let i = 0; i < nH; i++) Ptot += forcing.P_mm[i];
     return {
       theta: out, head_cm: outH, profiles, z_cm: Array.from({ length: nn }, (_, i) => i * dz),
-      netSurface_mm: qTopH, runoff_mm: runoffH, drainage_mm: drainH, transp_mm: transpH, evap_mm: evapH,
+      netSurface_mm: qTopH, runoff_mm: runoffH, drainage_mm: drainH, transp_mm: transpH, evap_mm: evapH, lateral_cm2_per_cm: latH,
       massBalance: { rain_mm: Ptot, interception_mm: (1 - cfg.throughfall) * Ptot, dS_mm: (S1 - S0) * 10, netSurface_mm: cumInf * 10,
-        drainage_mm: cumDrain * 10, runoff_mm: cumRunoff * 10, transpiration_mm: cumT * 10, evaporation_mm: cumE * 10,
+        drainage_mm: cumDrain * 10, runoff_mm: cumRunoff * 10, transpiration_mm: cumT * 10, evaporation_mm: cumE * 10, lateral_throughflow_m3_per_m: cumLat / 1e4,
         error_mm: err * 10, relError: Math.abs(err) / Math.max(1e-9, Math.abs(cumInf) + Math.abs(cumDrain) + cumT) },
       stats: { steps, iters, finalH: Array.from(h) }
     };

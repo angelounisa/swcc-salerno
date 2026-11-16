@@ -1,7 +1,8 @@
 """Model definition files for the two plots, from the independent estimates:
 retention = shared (alpha, n) per layer + sensor theta_r/theta_s (swcc_main.json); matrix Ks = night-drainage K (kfield.json);
 Ksat (macropore term), stratigraphy, LAI, root biomass, root depth, Feddes thresholds from Urciuoli et al. and ALERT 2025 slides.
-Usage (from sim/): python build_models.py ../swcc_main.json ../kfield.json
+Depths (layers, sensors, roots) are VERTICAL depths below the ground surface.
+Usage (from sim/): python build_models.py ../swcc_main.json ../kfield.json SLOPE_DEG
 """
 import json, sys, datetime as dt
 import numpy as np
@@ -22,7 +23,8 @@ LAI = {"NV": 1.0, "V": 3.0}; K_EXT = 0.5
 def zones(mid, mid_bot):
     Z = [("A1", 0, 20, "15"), ("A2", 20, mid_bot, mid), ("A2", mid_bot, 115, "60"), ("C1", 115, 130, "60")]
     return [{"name": n, "zTop_cm": a, "zBot_cm": b, "ret": r, "Ks_cm_h": km[n], "Kmac_cm_h": ksat[n] - km[n], "hmac_cm": HMAC_CM} for n, a, b, r in Z]
-base = dict(num, L_cm=130, profileInstants=inst, profileHours=ph, eFactor=1.0, throughfall=1.0,
+SLOPE_DEG = float(sys.argv[3])     # 32 deg: ALERT 2025 slide 5 (25-30 deg in Urciuoli et al., locally > 35); 0 = vertical column
+base = dict(num, slope_deg=SLOPE_DEG, L_cm=130, profileInstants=inst, profileHours=ph, eFactor=1.0, throughfall=1.0,
             feddes_cm=[0, -1, -100 * 10.1972, -1500 * 10.1972],
             sources={"Ksat_lab": "Urciuoli et al. Table 1", "roots": "ALERT 2025 slide 12: total root biomass [g per 360.8 cm3 core] at 20, 40, 60 cm; root depth 1 m (slide 24)",
                      "LAI": "ALERT 2025 slide 24", "k_extinction": "assumed 0.5 (Ritchie 1972: SCF = 1 - exp(-k LAI))", "feddes": "ALERT 2025 slide 28", "hmac_cm": "5 cm, upper limit compatible with wet-end night-drainage K points within sensor accuracy"})

@@ -42,7 +42,7 @@ Terza scheda della dashboard. I parametri idraulici sono fissati uno alla volta 
 
 1. **Curva principale di drying in Se** (`swcc_main.py` → `swcc_main.json`): per ogni sensore, inviluppo superiore dei punti di essiccamento (95° percentile di θ per classe di suzione, non crescente); fit van Genuchten; Se = (θ − θr)/(θs − θr), con θr non superiore al minimo θ osservato. Curva comune (α, n) per strato (A1: sensori a 15 cm; A2: 30, 35, 60 cm) con θr, θs propri di ogni sensore. Incertezza con bootstrap a blocchi sugli episodi di drying.
 2. **Conducibilità non satura** (`kfield.py` → `kfield.json`): metodo del profilo istantaneo nelle notti senza pioggia (flusso nullo in superficie), senza stime di evapotraspirazione. Dà la Ks di matrice che scala la curva di Mualem.
-3. **Modello** (`sim/solver.js`, `sim/build_models.py`): Richards 1D alle differenze finite, colonna di 130 cm, A1 0–20 / A2 20–115 / C1 115–130 cm, drenaggio libero. K(h) = Ks di matrice × Mualem + Kmac·exp(h/5 cm), con Ks + Kmac = Ksat di laboratorio. Radici dalla biomassa misurata a 20, 40, 60 cm; Feddes 100–1500 kPa; quota radicale 1 − exp(−0,5·LAI) con LAI 1 e 3 (Comegna et al., ALERT 2025).
+3. **Modello** (`sim/solver.js`, `sim/build_models.py`): Richards 1D alle differenze finite in schema di **pendio indefinito** (β = 32°: flusso normale al pendio, gravità × cos β; coordinate in profondità verticale e flussi per unità di area orizzontale; β = 0 dà la colonna verticale; verifiche in `sim/test_slope.js`), copertura di 130 cm, A1 0–20 / A2 20–115 / C1 115–130 cm, drenaggio libero. K(h) = Ks di matrice × Mualem + Kmac·exp(h/5 cm), con Ks + Kmac = Ksat di laboratorio. Radici dalla biomassa misurata a 20, 40, 60 cm; Feddes 100–1500 kPa; quota radicale 1 − exp(−0,5·LAI) con LAI 1 e 3 (Comegna et al., ALERT 2025).
 4. **Forzanti** (`sim/prep_forcing2.py`): pioggia unificata; ETP di Oudin dalla temperatura dell'aria in campo aperto (misurata 17/03–03/09/2025, `data/air_T_RH_2025_from_slides.csv`; altrove stimata dalla temperatura del suolo); per la parcella vegetata serbatoio di intercettazione di 16,75 mm.
 5. **Calibrazione sul drying** (`sim/calib_dry2.js`): griglia completa su fattore di ETP e moltiplicatore della K di matrice, drying 2025 (26/04–28/08); validazione drying 2026 (01/04–30/07). Obiettivo su Se e log10 suzione.
 6. **Periodo completo** (`sim/final4.js`): moltiplicatore di K della parcella senza vegetazione applicato anche alla vegetata; Kmac di A1 scelto come il più piccolo che dà ruscellamento ≤ 2% della pioggia.
@@ -50,11 +50,11 @@ Terza scheda della dashboard. I parametri idraulici sono fissati uno alla volta 
 
 ```bash
 python swcc_main.py Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx results_NV.json swcc_main.json
-python kfield.py Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx swcc_main.json kfield.json
+python kfield.py Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx swcc_main.json kfield.json 32
 python sim/prep_forcing2.py NV Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_NV_temperature_2025-2026.xlsx data/air_T_RH_2025_from_slides.csv sim/forcing_NV.json
 python sim/prep_forcing2.py V  Pioggia_unificata.xlsx Salerno_METER_V_2025-2026.xlsx  Salerno_METER_NV_temperature_2025-2026.xlsx data/air_T_RH_2025_from_slides.csv sim/forcing_V.json
 python sim/infil_events.py Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx sim/infiltration_events.json
-cd sim && python build_models.py ../swcc_main.json ../kfield.json
+cd sim && python build_models.py ../swcc_main.json ../kfield.json 32
 node calib_dry2.js NV calibdry2_NV.json && node calib_dry2.js V calibdry2_V.json
 node final4.js sim2_results.json && cd .. && python build.py
 ```
