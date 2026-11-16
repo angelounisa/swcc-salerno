@@ -1,0 +1,84 @@
+{
+ "calibEnd": "2026-01-01",
+ "iCal": 8025,
+ "best": {
+  "start": [
+   1,
+   0.5,
+   0,
+   0.5
+  ],
+  "x": [
+   1.998357186094181,
+   -0.20827639992756536,
+   -0.6554465107850286,
+   0.7842217758733565
+  ],
+  "Ks_cm_h": [
+   99.62244266580907,
+   0.6190469669222819,
+   0.22108205318579632
+  ],
+  "eFactor": 0.7842217758733565,
+  "calib": {
+   "15": 0.01711396933446686,
+   "30": 0.0187922758469738,
+   "60": 0.03332814521976077,
+   "mean": 0.023078130133733808
+  },
+  "valid": {
+   "15": 0.024706110759920998,
+   "30": 0.029001784478488803,
+   "60": 0.033563302590099556,
+   "mean": 0.029090399276169784
+  },
+  "massBalance": {
+   "dS_mm": -60.65378643574975,
+   "netSurface_mm": 846.971031742937,
+   "drainage_mm": 907.6916484204357,
+   "runoff_mm": 169.5316080534168,
+   "error_mm": 0.06683024174902741,
+   "relError": 3.8087230385959425e-05
+  },
+  "nEval": 73
+ },
+ "note": "Nelder-Mead, 3 starts. Start 1 converged (simplex spread < 1e-5). Starts 0 and 2 were stopped before convergence (slow runs with very low Ks in layer 2); their best values are reported in other_starts.",
+ "other_starts": [
+  {
+   "start_index": 0,
+   "stopped_after_evals": 60,
+   "best_calib_mean_rmse": 0.03087,
+   "x_log10Ks_eF": [
+    -0.001,
+    -1.742,
+    0.684,
+    1.148
+   ],
+   "Ks_cm_h": [
+    0.9977000638225533,
+    0.018113400926196024,
+    4.830588020397728
+   ],
+   "eFactor": 1.148,
+   "converged": false
+  },
+  {
+   "start_index": 2,
+   "stopped_after_evals": 81,
+   "best_calib_mean_rmse": 0.02691,
+   "x_log10Ks_eF": [
+    1.703,
+    -2.326,
+    0.394,
+    1.148
+   ],
+   "Ks_cm_h": [
+    50.46612975635284,
+    0.004720630412635905,
+    2.4774220576332855
+   ],
+   "eFactor": 1.148,
+   "converged": false
+  }
+ ]
+}
