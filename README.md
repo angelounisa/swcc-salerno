@@ -40,12 +40,14 @@ python calibrate_theta.py Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2
 
 Terza scheda della dashboard, costruita da `compare_plots.py` → `compare.json`. Nessuna simulazione.
 
-- Serie appaiate di Se e suzione per le coppie di sensori 15/15, 30/35, 60/60 cm.
+- Serie appaiate di θ calibrato (o di Se, con il selettore) e suzione per le coppie di sensori 15/15, 30/35, 60/60 cm.
 - Curve di durata della suzione e tempo passato sotto soglie di suzione, per stagione.
-- Risposta a ogni evento di pioggia (`sim/infil_events.py` per gli eventi): aumento di Se, suzione minima, ritardo, soglia di pioggia; acqua accumulata in 0–75 cm.
+- Risposta a ogni evento di pioggia (`sim/infil_events.py` per gli eventi): aumento di θ e di Se, suzione minima, ritardo, soglia di pioggia; acqua accumulata in 0–75 cm.
 - Invaso della colonna 0–75 cm e perdita nei periodi senza pioggia.
 - Segno del gradiente verticale fra i sensori.
 - Temperatura del suolo a 15 cm e dell'aria.
+- Meccanismi che emergono dai dati (`mechanisms.py` → `mechanisms.json`): accumulo per evento = b·(P − P0) con intervalli bootstrap, date dell'essiccamento stagionale e della riumidificazione autunnale per profondità, ripartizione giorno/notte della perdita d'acqua, ordine e ritardo del fronte umido, rapporto mensile fra le suzioni.
+- Stabilità con i valori misurati (`stability.py` → `stability.json`): pendio indefinito, FS = tanφ'/tanβ + (c' + χ·s·tanφ')/(W·senβ·cosβ) alla profondità di ogni sensore, con suzione e θ misurati; χ = Se misurata (in alternativa θ/n, oppure Se della curva principale alla suzione misurata), β = 32° (sensibilità 28° e 35°), φ' = 38,5°, c' = 0, nessun rinforzo radicale. Le ore con Se misurata < 0,05 non sono valutate.
 - Curve principali di drying in Se (`swcc_main.py`) e conducibilità dal drenaggio notturno (`kfield.py`).
 
 ```bash
@@ -53,9 +55,11 @@ python swcc_main.py NV_cal.xlsx V_cal.xlsx results_NV.json swcc_main.json
 python kfield.py Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx swcc_main.json kfield.json 32
 python sim/infil_events.py Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx sim/infiltration_events.json
 python compare_plots.py NV_cal.xlsx V_cal.xlsx Pioggia_unificata.xlsx Salerno_METER_NV_temperature_2025-2026.xlsx Salerno_METER_V_temperature_2025-2026.xlsx data/air_T_RH_2025_from_slides.csv swcc_main.json sim/infiltration_events.json compare.json
+python mechanisms.py NV_cal.xlsx V_cal.xlsx Pioggia_unificata.xlsx compare.json sim/infiltration_events.json Salerno_METER_NV_temperature_2025-2026.xlsx Salerno_METER_V_temperature_2025-2026.xlsx mechanisms.json
+python stability.py NV_cal.xlsx V_cal.xlsx swcc_main.json sim/infiltration_events.json stability.json
 python build.py
 ```
 
 ## Modello numerico (non usato nella dashboard)
 
-Il solutore di Richards 1D in schema di pendio indefinito (`sim/solver.js`), la sua calibrazione (`sim/`, `run_pipeline.sh`) e la verifica con un codice indipendente (`verify/`) restano nel repository per un eventuale confronto in termini di stabilità. La pagina con i risultati del modello (`site/drying_view.js`) non è più inclusa nella dashboard; l'ultima versione che la mostra è il commit `cf1965f`.
+Il solutore di Richards 1D in schema di pendio indefinito (`sim/solver.js`), la sua calibrazione (`sim/`, `run_pipeline.sh`) e la verifica con un codice indipendente (`verify/`) restano nel repository per un eventuale confronto di stabilità sotto i 60 cm, dove non ci sono sensori (la stabilità mostrata nella dashboard è calcolata dalle sole misure). La pagina con i risultati del modello (`site/drying_view.js`) non è più inclusa nella dashboard; l'ultima versione che la mostra è il commit `cf1965f`.

@@ -52,6 +52,7 @@ out["series"] = {"t": [t.strftime("%Y-%m-%d %H:%M") for t in thin]}
 for site, depths in (("NV", [15, 30, 60]), ("V", [15, 35, 60])):
     for d in depths:
         out["series"][f"Se_{site}_{d}"] = [r3(x) for x in Se(site, d).reindex(thin).values]
+        out["series"][f"th_{site}_{d}"] = [r3(x) for x in D[site][f"VWC {d}"].reindex(thin).values]
         out["series"][f"s_{site}_{d}"] = [r3(x, 1) for x in D[site][f"s {d}"].reindex(thin).values]
 S = {s: storage(s) for s in D}
 sd = pd.concat({s: S[s].resample("1D").mean() for s in S}, axis=1)
@@ -69,10 +70,11 @@ for a, b in c["pairs"]:
     mon = idx.month
     for name, sel in (("all", np.ones(len(idx), bool)), ("wet", np.isin(mon, c["wet_months"])), ("dry", np.isin(mon, c["dry_months"]))):
         m = ok.values & sel; st = {"n_hours": int(m.sum())}
-        for site, s_, se_ in (("NV", sa, Se("NV", a).reindex(idx)), ("V", sb, Se("V", b).reindex(idx))):
+        for site, s_, se_, th_ in (("NV", sa, Se("NV", a).reindex(idx), nv[f"VWC {a}"].reindex(idx)), ("V", sb, Se("V", b).reindex(idx), v[f"VWC {b}"].reindex(idx))):
             x = s_.values[m]
             st[site] = {"median_s": r3(np.median(x), 1), "p10_s": r3(np.percentile(x, 10), 1), "p90_s": r3(np.percentile(x, 90), 1), "min_s": r3(x.min(), 1),
-                        "frac_below": {str(t): r3((x < t).mean(), 4) for t in c["suction_thresholds_kPa"]}, "median_Se": r3(np.nanmedian(se_.values[m]), 3)}
+                        "frac_below": {str(t): r3((x < t).mean(), 4) for t in c["suction_thresholds_kPa"]}, "median_Se": r3(np.nanmedian(se_.values[m]), 3),
+                        "median_theta": r3(np.nanmedian(th_.values[m]), 3), "p10_theta": r3(np.nanpercentile(th_.values[m], 10), 3), "p90_theta": r3(np.nanpercentile(th_.values[m], 90), 3)}
         d = np.log10(sb.values[m]) - np.log10(sa.values[m])
         st["frac_V_drier"] = r3((d > 0).mean(), 3); st["median_log10_ratio_V_over_NV"] = r3(np.median(d), 3)
         P["stats"][name] = st
@@ -102,6 +104,7 @@ def thresholds(key):
     return {"n_events": len(r), "n_responded": len(Pr), "largest_P_without_response": (Pn[-1] if Pn else None), "smallest_P_with_response": (Pr[0] if Pr else None),
             "median_lag_h": r3(np.median([x[key]["lag_h"] for x in ev_rows if x[key] is not None and x[key]["responded"]]) if Pr else None, 1),
             "median_dSe_when_responded": r3(np.median([x[key]["dSe"] for x in ev_rows if x[key] is not None and x[key]["responded"]]) if Pr else None, 3),
+            "median_dtheta_when_responded": r3(np.median([x[key]["dtheta"] for x in ev_rows if x[key] is not None and x[key]["responded"]]) if Pr else None, 4),
             "n_s_min_below_10kPa": int(sum(1 for x in ev_rows if x[key] is not None and x[key]["s_min"] < 10))}
 out["event_summary"] = {k: thresholds(k) for k in ["NV_15", "NV_30", "NV_60", "V_15", "V_35", "V_60"]}
 # events seen by both sensors of a pair
@@ -110,7 +113,8 @@ for a, b in c["pairs"]:
     both = [x for x in ev_rows if x[f"NV_{a}"] is not None and x[f"V_{b}"] is not None]
     out["event_pairs"].append({"NV_depth": a, "V_depth": b, "n_both": len(both), "n_resp_NV": sum(x[f"NV_{a}"]["responded"] for x in both), "n_resp_V": sum(x[f"V_{b}"]["responded"] for x in both),
                                "n_V_smin_higher": sum(x[f"V_{b}"]["s_min"] > x[f"NV_{a}"]["s_min"] for x in both),
-                               "median_dSe_NV": r3(np.median([x[f"NV_{a}"]["dSe"] for x in both]), 3), "median_dSe_V": r3(np.median([x[f"V_{b}"]["dSe"] for x in both]), 3)})
+                               "median_dSe_NV": r3(np.median([x[f"NV_{a}"]["dSe"] for x in both]), 3), "median_dSe_V": r3(np.median([x[f"V_{b}"]["dSe"] for x in both]), 3),
+                               "median_dtheta_NV": r3(np.median([x[f"NV_{a}"]["dtheta"] for x in both]), 4), "median_dtheta_V": r3(np.median([x[f"V_{b}"]["dtheta"] for x in both]), 4)})
 
 # ---------- 4 rain-free spells: storage loss rate
 rr = rain.reindex(pd.date_range(rain.index.min(), rain.index.max(), freq="1h"))
