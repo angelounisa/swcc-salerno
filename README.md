@@ -36,25 +36,26 @@ python calibrate_theta.py Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2
 2. Differenza centrata su 24 h: *drying* se θ cala ≥ 0,001 m³/m³ e log₁₀s cresce ≥ 0,01; *wetting* se avviene il contrario; altrimenti *indeterminato* (escluso dal fit).
 3. Fit van Genuchten–Mualem (m = 1 − 1/n) sulle mediane per classi di 0,1 decadi di log₁₀s, con vincoli θs ∈ [0,05; 0,55], θr ∈ [0; θmin], α ∈ [1e-4; 10] kPa⁻¹, n ∈ [1,05; 8].
 
-## Drying in saturazione efficace, calibrazione e infiltrazione
+## Confronto vegetata – senza vegetazione (solo dati)
 
-Terza scheda della dashboard. I parametri idraulici sono fissati uno alla volta da misure in sito indipendenti; il modello calibra solo due fattori.
+Terza scheda della dashboard, costruita da `compare_plots.py` → `compare.json`. Nessuna simulazione.
 
-1. **Curva principale di drying in Se** (`swcc_main.py` → `swcc_main.json`): per ogni sensore, inviluppo superiore dei punti di essiccamento (95° percentile di θ per classe di suzione, non crescente); fit van Genuchten; Se = (θ − θr)/(θs − θr), con θr non superiore al minimo θ osservato. Curva comune (α, n) per strato (A1: sensori a 15 cm; A2: 30, 35, 60 cm) con θr, θs propri di ogni sensore. Incertezza con bootstrap a blocchi sugli episodi di drying.
-2. **Conducibilità non satura** (`kfield.py` → `kfield.json`): metodo del profilo istantaneo nelle notti senza pioggia (flusso nullo in superficie), senza stime di evapotraspirazione. Dà la Ks di matrice che scala la curva di Mualem.
-3. **Modello** (`sim/solver.js`, `sim/build_models.py`): Richards 1D alle differenze finite in schema di **pendio indefinito** (β = 32°: flusso normale al pendio, gravità × cos β; coordinate in profondità verticale e flussi per unità di area orizzontale; β = 0 dà la colonna verticale). **Due strati**, uno per unità stratigrafica riconosciuta nei sondaggi, con proprietà misurate diverse e strumentata: A1 0–20 cm e A2 20–150 cm (C1, sottile, discontinuo e non strumentato, è accorpato ad A2). Ogni strato ha una sola curva di ritenzione, uguale nelle due parcelle (α, n comuni; θr, θs = media dei sensori dello strato); θr, θs dei singoli sensori servono solo a convertire le misure in Se. K(h) = Ks di matrice × Mualem + Kmac·exp(h/5 cm), con Ks + Kmac = Ksat di laboratorio. Radici dalla biomassa misurata a 20, 40, 60 cm; Feddes 100–1500 kPa; quota radicale 1 − exp(−0,5·LAI) con LAI 1 e 3 (Comegna et al., ALERT 2025). Griglia Δz = 0,5 cm.
-   **Verifica** (`verify/`): tre casi di prova risolti anche con un codice indipendente (`verify/ref_solver.py`: forma in carico, griglia 0,25 cm, integrazione BDF); confronto in `verify/compare.log`. Soluzione analitica a regime in `sim/test_slope.js`.
-4. **Forzanti** (`sim/prep_forcing2.py`): pioggia unificata; ETP di Oudin dalla temperatura dell'aria in campo aperto (misurata 17/03–03/09/2025, `data/air_T_RH_2025_from_slides.csv`; altrove stimata dalla temperatura del suolo); per la parcella vegetata serbatoio di intercettazione di 16,75 mm.
-5. **Calibrazione sul drying** (`sim/calib_dry2.js`): griglia completa su fattore di ETP e moltiplicatore della K di matrice, drying 2025 (26/04–28/08); validazione drying 2026 (01/04–30/07). Obiettivo su Se e log10 suzione.
-6. **Periodo completo** (`sim/final4.js`): moltiplicatore di K della parcella senza vegetazione applicato anche alla vegetata; Kmac di A1 scelto come il più piccolo che dà ruscellamento ≤ 2% della pioggia.
-7. **Infiltrazione per evento dai sensori** (`sim/infil_events.py`).
+- Serie appaiate di Se e suzione per le coppie di sensori 15/15, 30/35, 60/60 cm.
+- Curve di durata della suzione e tempo passato sotto soglie di suzione, per stagione.
+- Risposta a ogni evento di pioggia (`sim/infil_events.py` per gli eventi): aumento di Se, suzione minima, ritardo, soglia di pioggia; acqua accumulata in 0–75 cm.
+- Invaso della colonna 0–75 cm e perdita nei periodi senza pioggia.
+- Segno del gradiente verticale fra i sensori.
+- Temperatura del suolo a 15 cm e dell'aria.
+- Curve principali di drying in Se (`swcc_main.py`) e conducibilità dal drenaggio notturno (`kfield.py`).
 
 ```bash
-python swcc_main.py Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx results_NV.json swcc_main.json
+python swcc_main.py NV_cal.xlsx V_cal.xlsx results_NV.json swcc_main.json
 python kfield.py Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx swcc_main.json kfield.json 32
-python sim/prep_forcing2.py NV Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_NV_temperature_2025-2026.xlsx data/air_T_RH_2025_from_slides.csv sim/forcing_NV.json
-python sim/prep_forcing2.py V  Pioggia_unificata.xlsx Salerno_METER_V_2025-2026.xlsx  Salerno_METER_NV_temperature_2025-2026.xlsx data/air_T_RH_2025_from_slides.csv sim/forcing_V.json
-python sim/infil_events.py Pioggia_unificata.xlsx Salerno_METER_NV_2025-2026.xlsx Salerno_METER_V_2025-2026.xlsx sim/infiltration_events.json
-./run_pipeline.sh Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx   # K di campo, modelli, calibrazione, periodo completo (β = 0 e 32°), verifiche
+python sim/infil_events.py Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx sim/infiltration_events.json
+python compare_plots.py NV_cal.xlsx V_cal.xlsx Pioggia_unificata.xlsx Salerno_METER_NV_temperature_2025-2026.xlsx Salerno_METER_V_temperature_2025-2026.xlsx data/air_T_RH_2025_from_slides.csv swcc_main.json sim/infiltration_events.json compare.json
 python build.py
 ```
+
+## Modello numerico (non usato nella dashboard)
+
+Il solutore di Richards 1D in schema di pendio indefinito (`sim/solver.js`), la sua calibrazione (`sim/`, `run_pipeline.sh`) e la verifica con un codice indipendente (`verify/`) restano nel repository per un eventuale confronto in termini di stabilità. La pagina con i risultati del modello (`site/drying_view.js`) non è più inclusa nella dashboard; l'ultima versione che la mostra è il commit `cf1965f`.
