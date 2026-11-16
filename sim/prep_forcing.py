@@ -4,7 +4,7 @@ PE: Oudin et al. (2005), PE[mm/d] = Ra/(lambda*rho) * (T+5)/100 for T > -5 C, el
     with Ra = extraterrestrial radiation (FAO-56 eq. 21), lambda = 2.45 MJ/kg.
     T = daily mean SOIL temperature at 15 cm (NV) used as proxy for air temperature (no air T available).
     Daily PE is distributed over daylight hours with a half-sine shape.
-Usage: python prep_forcing.py rain.xlsx meterNV.xlsx tempNV.xlsx out.json
+Usage: python prep_forcing.py rain.xlsx meter.xlsx temp.xlsx out.json depths(e.g. 15,30,60)
 """
 import json, sys
 import numpy as np, pandas as pd
@@ -14,7 +14,7 @@ CONFIG = {
     "latitude_deg": 40.7,               # Salerno / Cava de' Tirreni
     "lambda_MJ_per_kg": 2.45,
     "temp_column": "T 15",
-    "depths_cm": [15, 30, 60],
+    "depths_cm": [int(x) for x in sys.argv[5].split(",")],   # 15,30,60 (NV) or 15,35,60 (V)
     "missing_rain_as_zero": True,       # 136 missing hours (110 of them 16-21 Feb 2025)
 }
 

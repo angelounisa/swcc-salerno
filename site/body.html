@@ -5,17 +5,17 @@
 /* Layout: stacked depth bands, each = drying | wetting | comparison, then a classification strip. Parameter table up top. */
 :root{
   --bg:#f5f6f4; --panel:#ffffff; --fg:#1d2420; --muted:#5d6862; --line:#d9ddd8; --grid:#e8ebe7;
-  --dry:#a8581c; --wet:#2563a8; --sim:#6b3fa0; --obs:#4b5650; --band:rgba(37,99,168,.06); --undet:#9aa39d; --flag:#9a6a00; --flagbg:#fbf1d6;
+  --dry:#a8581c; --wet:#2563a8; --sim:#6b3fa0; --obs:#4b5650; --band:rgba(37,99,168,.06); --nv:#b0651f; --veg:#2f7d4f; --soilA1:#d9c9a8; --soilA2:#e8dcc0; --soilC1:#e9d58f; --rock:#b9b9b2; --undet:#9aa39d; --flag:#9a6a00; --flagbg:#fbf1d6;
   --f-display:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;
   --f-body:"IBM Plex Sans",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#121614; --panel:#1a1f1c; --fg:#e4e8e5; --muted:#9aa59f; --line:#2d3430; --grid:#252b27;
-  --dry:#e0904f; --wet:#6fa6e6; --sim:#c39bf0; --obs:#b5beb8; --band:rgba(111,166,230,.08); --undet:#6b746f; --flag:#e7b94a; --flagbg:#332a12; color-scheme:dark}}
+  --dry:#e0904f; --wet:#6fa6e6; --sim:#c39bf0; --obs:#b5beb8; --band:rgba(111,166,230,.08); --nv:#e3964f; --veg:#6cc28f; --soilA1:#5a4c33; --soilA2:#4a4030; --soilC1:#5c5124; --rock:#4a4a46; --undet:#6b746f; --flag:#e7b94a; --flagbg:#332a12; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#121614; --panel:#1a1f1c; --fg:#e4e8e5; --muted:#9aa59f; --line:#2d3430; --grid:#252b27;
-  --dry:#e0904f; --wet:#6fa6e6; --sim:#c39bf0; --obs:#b5beb8; --band:rgba(111,166,230,.08); --undet:#6b746f; --flag:#e7b94a; --flagbg:#332a12; color-scheme:dark}
+  --dry:#e0904f; --wet:#6fa6e6; --sim:#c39bf0; --obs:#b5beb8; --band:rgba(111,166,230,.08); --nv:#e3964f; --veg:#6cc28f; --soilA1:#5a4c33; --soilA2:#4a4030; --soilC1:#5c5124; --rock:#4a4a46; --undet:#6b746f; --flag:#e7b94a; --flagbg:#332a12; color-scheme:dark}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
 .wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
@@ -75,7 +75,11 @@ footer{font-size:.8rem;color:var(--muted)}
 .status.err{color:var(--flag)}
 .mb{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
 .mb b{color:var(--fg);font-weight:500}
-.plot.sim{height:860px}
+.plot.sim{height:900px}
+.plot.prof{height:520px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+#colsvg svg{display:block;max-width:100%;height:auto}
 </style>
 
 <div class="wrap">
@@ -85,7 +89,7 @@ footer{font-size:.8rem;color:var(--muted)}
     <nav class="tabs" role="tablist" aria-label="Parcella">
       <button role="tab" id="tab-nv" data-site="nv">Senza vegetazione · 15/30/60 cm</button>
       <button role="tab" id="tab-v" data-site="v">Vegetata · 15/35/60 cm</button>
-      <button role="tab" id="tab-sim" data-site="sim">Simulazione pioggia → θ (senza veg.)</button>
+      <button role="tab" id="tab-sim" data-site="sim">Drying e modello: vegetata vs senza vegetazione</button>
     </nav>
   </header>
 
@@ -123,51 +127,51 @@ footer{font-size:.8rem;color:var(--muted)}
   </div>
 
   <div id="simview" class="stack" hidden>
-    <div class="method">
-      <div><h3>Modello numerico</h3>
-        <p>Equazione di Richards 1D in forma mista, differenze finite implicite con iterazione di Picard modificata (Celia et al., 1990). Profilo di <span id="sm-L"></span> cm, Δz = <span id="sm-dz"></span> cm, passo temporale adattivo fino a 1 h. Tre strati (0–22,5, 22,5–45, 45–100 cm) con le curve di <b>drying</b> della parcella senza vegetazione e conducibilità di Mualem con ingresso d'aria a h<sub>s</sub> = <span id="sm-hs"></span> cm (Vogel et al., 2001). Drenaggio libero al fondo.</p></div>
-      <div><h3>Forzanti</h3>
-        <p>Pioggia oraria unificata. Evaporazione potenziale con la formula di Oudin (2005) dalla temperatura media giornaliera del suolo a 15 cm (manca la temperatura dell'aria), distribuita sulle ore di luce e moltiplicata per il fattore E. Se la superficie scende sotto h = <span id="sm-hc"></span> cm l'evaporazione si riduce; se si satura, l'eccesso di pioggia va in ruscellamento.</p></div>
-      <div><h3>Calibrazione</h3>
-        <p>K<sub>s</sub> dei tre strati e fattore E calibrati (Nelder–Mead da tre punti di partenza, uno solo arrivato a convergenza) minimizzando l'RMSE medio di θ a 15, 30 e 60 cm fino al <span id="sm-cal"></span>; il periodo successivo è usato solo per la validazione. Condizione iniziale dalla suzione misurata al <span id="sm-t0"></span>.</p></div>
+    <p class="muted" style="max-width:95ch">Confronto fra le due parcelle limitato ai rami di essiccamento, e simulazione con lo stesso modello alle differenze finite su entrambe. Geometria e proprietà geotecniche vengono da Urciuoli et al. (JEnGe, in preparazione); le curve di ritenzione sono quelle di drying ricavate qui dai dati di campo.</p>
+
+    <div class="dhead"><h2>1 · Rami di drying a confronto</h2><span class="muted">curve van Genuchten interpolate (linee) e mediane per classi di suzione (punti)</span></div>
+    <div class="grid3">
+      <div class="card"><h3>Superficiale · 15 / 15 cm</h3><div class="plot" id="dc-0"></div></div>
+      <div class="card"><h3>Intermedio · 30 / 35 cm</h3><div class="plot" id="dc-1"></div></div>
+      <div class="card"><h3>Profondo · 60 / 60 cm</h3><div class="plot" id="dc-2"></div></div>
+    </div>
+    <div class="tablebox"><table id="dcTable"></table></div>
+
+    <div class="dhead"><h2>2 · Modello numerico</h2><span class="muted">dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Dominio e condizioni al contorno</h3><div id="colsvg" style="overflow-x:auto"></div></div>
+      <div class="stack" style="gap:14px;min-width:0">
+        <div><h3 style="margin-bottom:6px">Caratteristiche geotecniche (Urciuoli et al., tab. 1)</h3><div class="tablebox"><table id="geoTable"></table></div></div>
+        <div><h3 style="margin-bottom:6px">Zone del modello</h3><div class="tablebox"><table id="zoneTable"></table></div></div>
+      </div>
+    </div>
+    <div class="tablebox"><table id="bcTable"></table></div>
+
+    <div class="dhead"><h2>3 · Prestazioni e bilancio idrico</h2><span class="muted">calibrati solo il fattore di evapotraspirazione e la quota traspirata; K<sub>s</sub> da laboratorio</span></div>
+    <div class="tablebox"><table id="perfTable"></table></div>
+    <div class="tablebox"><table id="wbTable"></table></div>
+
+    <div class="dhead"><h2>4 · Profili calcolati</h2><span class="muted">θ(z) e suzione(z) negli istanti delle due stagioni secche; i punti sono le misure dei sensori nello stesso istante</span></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill drying" style="color:var(--nv)">Senza vegetazione</span> · θ</h3><div class="plot prof" id="pf-NV-th"></div></div>
+      <div class="card"><h3><span class="pill drying" style="color:var(--veg)">Vegetata</span> · θ</h3><div class="plot prof" id="pf-V-th"></div></div>
+      <div class="card"><h3><span class="pill drying" style="color:var(--nv)">Senza vegetazione</span> · suzione</h3><div class="plot prof" id="pf-NV-s"></div></div>
+      <div class="card"><h3><span class="pill drying" style="color:var(--veg)">Vegetata</span> · suzione</h3><div class="plot prof" id="pf-V-s"></div></div>
     </div>
 
-    <div class="simctl">
-      <div class="ctl"><label for="ks1">K<sub>s</sub> strato 0–22,5 cm</label><input type="range" id="ks1" min="-3" max="2" step="0.01"><output id="ks1o"></output></div>
-      <div class="ctl"><label for="ks2">K<sub>s</sub> strato 22,5–45 cm</label><input type="range" id="ks2" min="-3" max="2" step="0.01"><output id="ks2o"></output></div>
-      <div class="ctl"><label for="ks3">K<sub>s</sub> strato 45–100 cm</label><input type="range" id="ks3" min="-3" max="2" step="0.01"><output id="ks3o"></output></div>
-      <div class="ctl"><label for="ef">Fattore evaporazione E</label><input type="range" id="ef" min="0" max="1.5" step="0.01"><output id="efo"></output></div>
-    </div>
-    <div class="simbar">
-      <button class="btn" id="simReset" type="button">Ripristina valori calibrati</button>
-      <span class="status" id="simStatus" role="status"></span>
-    </div>
-
-    <div class="dhead"><h2>Prestazioni</h2><span class="muted">θ simulato contro θ osservato, ogni ora</span></div>
-    <div class="tablebox"><table id="simTable"></table></div>
-    <div class="mb" id="simMB"></div>
-
-    <div class="card"><h3>Pioggia giornaliera e θ simulato / osservato</h3><div class="plot sim" id="simPlot"></div></div>
+    <div class="dhead"><h2>5 · Serie temporali simulate e osservate</h2></div>
+    <div class="card"><div class="plot sim" id="tsPlot"></div></div>
 
     <section class="notes">
-      <h2>Note sul modello</h2>
-      <ul>
-        <li><b>Evaporazione stimata dalla temperatura del suolo.</b> La formula di Oudin vuole la temperatura dell'aria; la temperatura del suolo nudo a 15 cm è più alta d'estate, quindi il fattore E assorbe anche questa differenza e quella fra evaporazione potenziale ed evaporazione da suolo nudo.</li>
-        <li><b>Nessuna isteresi.</b> Il modello usa solo le curve di drying. Le fasi di imbibizione, che nei dati seguono curve diverse, sono il primo candidato per gli scarti dopo le piogge.</li>
-        <li><b>θ massimo limitato.</b> Il contenuto d'acqua simulato non supera θ(h<sub>s</sub>), poco sotto θ<sub>s</sub> interpolato: i picchi osservati sopra θ<sub>s</sub> (per esempio 0,2–0,26 a 15 cm) non possono essere riprodotti.</li>
-        <li><b>Pioggia mancante.</b> Le ore senza dato di pioggia (in grigio nel grafico, soprattutto 16–21 febbraio 2025) sono poste a zero.</li>
-        <li><b>K<sub>s</sub> superficiale sul limite.</b> La calibrazione porta K<sub>s</sub> dello strato 0–22,5 cm a 100 cm/h, il limite superiore imposto (circa 3·10⁻⁴ m/s). Il modello ha bisogno che l'acqua entri molto in fretta: è probabile che questo valore compensi processi assenti nel modello (vie preferenziali, isteresi in imbibizione) più che descrivere la matrice del suolo. Anche così restano circa 170 mm di ruscellamento, perché lo strato 22,5–45 cm (0,6 cm/h) frena l'infiltrazione.</li>
-        <li><b>Calibrazione non unica.</b> Due dei tre punti di partenza sono stati interrotti prima della convergenza, con RMSE medio 0,027–0,031 (contro 0,023) e K<sub>s</sub> dello strato intermedio molto bassa (0,005–0,02 cm/h). I dettagli sono in <code>sim/calibration.json</code>.</li>
-        <li><b>Equivalenza dei parametri.</b> K<sub>s</sub> e fattore E sono in parte compensabili: valori diversi possono dare RMSE simili. I valori calibrati sono il migliore dei tre punti di partenza, non una stima univoca.</li>
-      </ul>
+      <h2>Note e ipotesi</h2>
+      <ul id="dryNotes"></ul>
     </section>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script>const DATA = /*DATA*/null;</script>
-<script>window.SIM = /*SIM*/null;</script>
-<script id="solver-src">/*SOLVER*/</script>
+<script>window.SIM2 = /*SIM2*/null;</script>
 <script>
 (function(){
 const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;

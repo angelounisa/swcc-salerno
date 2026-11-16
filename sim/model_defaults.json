@@ -1,1 +1,0 @@
-{"L_cm": 100, "dz_cm": 1, "layerBounds_cm": [0, 22.5, 45, 100], "layerDepthKeys": ["15", "30", "60"], "Ks_cm_h": [1.0, 0.5, 0.5], "eFactor": 1.0, "hCrit_cm": -100000, "Ss_per_cm": 1e-06, "dtMin_h": 1e-07, "dtMax_h": 1.0, "maxIter": 25, "itGrow": 4, "itShrink": 8, "outDepths_cm": [15, 30, 60], "tolTheta": 1e-05, "tolHsat_cm": 0.1, "hs_cm": -2}
