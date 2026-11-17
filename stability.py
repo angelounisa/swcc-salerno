@@ -19,12 +19,12 @@ Usage: python stability.py NV_cal.xlsx V_cal.xlsx swcc_main.json sim/infiltratio
 import json, sys
 import numpy as np, pandas as pd
 CONFIG = {
-    "beta_deg": 32.0, "beta_sensitivity_deg": [28.0, 32.0, 35.0], "chi_models": ["Se", "Sr", "SeVG"], "se_min_valid": 0.05,
+    "beta_deg": 28.0, "beta_sensitivity_deg": [25.0, 28.0, 32.0], "chi_models": ["Se", "Sr", "SeVG"], "se_min_valid": 0.05,
     "c_kPa": 0.0, "gamma_w": 9.81,
     "soil": {"A1": {"gamma_d": 9.30, "n": 0.65, "phi_deg": 38.5}, "A2": {"gamma_d": 10.80, "n": 0.59, "phi_deg": 38.5}},
     "A1_thickness_cm": 20.0,
     "pairs": [[15, 15], [30, 35], [60, 60]],
-    "fs_thresholds": [1.5, 2.0, 3.0], "suction_stress_thresholds_kPa": [0.5, 2.0, 5.0], "sensor_accuracy_kPa": 2.0, "wet_months": [10, 11, 12, 1, 2, 3, 4],
+    "fs_thresholds": [1.75, 2.0, 3.0], "suction_stress_thresholds_kPa": [0.5, 2.0, 5.0], "sensor_accuracy_kPa": 2.0, "wet_months": [10, 11, 12, 1, 2, 3, 4],
     "event_after_h": 24, "plot_every_h": 2,
 }
 c = CONFIG
@@ -104,7 +104,7 @@ for a, b in c["pairs"]:
     both = [x for x in out["events"] if x[f"NV_{a}"] is not None and x[f"V_{b}"] is not None]
     out["event_pairs"].append({"NV_depth": a, "V_depth": b, "n_both": len(both), "n_V_higher": sum(x[f"V_{b}"] > x[f"NV_{a}"] for x in both),
                                "median_NV": r3(np.median([x[f"NV_{a}"] for x in both]), 2), "median_V": r3(np.median([x[f"V_{b}"] for x in both]), 2),
-                               "n_below_1p5_NV": sum(x[f"NV_{a}"] < 1.5 for x in both), "n_below_1p5_V": sum(x[f"V_{b}"] < 1.5 for x in both)})
+                               "n_below_thr_NV": sum(x[f"NV_{a}"] < c["fs_thresholds"][0] for x in both), "n_below_thr_V": sum(x[f"V_{b}"] < c["fs_thresholds"][0] for x in both), "thr": c["fs_thresholds"][0]})
 for beta in c["beta_sensitivity_deg"]:
     for model in c["chi_models"]:
         row = {"beta_deg": beta, "chi": model, "fs_limit": r3(np.tan(np.deg2rad(c["soil"]["A2"]["phi_deg"])) / np.tan(np.deg2rad(beta)), 3), "pairs": []}
@@ -115,6 +115,6 @@ for beta in c["beta_sensitivity_deg"]:
 json.dump(out, open(sys.argv[5], "w"), separators=(",", ":"), allow_nan=False)
 print("FS limit (s=0):", out["fs_dry_limit"])
 for P in out["pairs"]:
-    w = P["stats"]["wet"]; print(f"{P['NV_depth']}/{P['V_depth']} wet: min NV {w['NV']['min']} V {w['V']['min']} | p5 {w['NV']['p5']} {w['V']['p5']} | median {w['NV']['median']} {w['V']['median']} | <1.5 {w['NV']['frac_below']['1.5']} {w['V']['frac_below']['1.5']} | <2 {w['NV']['frac_below']['2.0']} {w['V']['frac_below']['2.0']} | V higher {w['frac_V_higher']} | W {P['column_weight_kPa']}")
+    w = P["stats"]["wet"]; print(f"{P['NV_depth']}/{P['V_depth']} wet: min NV {w['NV']['min']} V {w['V']['min']} | p5 {w['NV']['p5']} {w['V']['p5']} | median {w['NV']['median']} {w['V']['median']} | <1.75 {w['NV']['frac_below']['1.75']} {w['V']['frac_below']['1.75']} | <2 {w['NV']['frac_below']['2.0']} {w['V']['frac_below']['2.0']} | V higher {w['frac_V_higher']} | W {P['column_weight_kPa']}")
 print("event pairs", out["event_pairs"])
-for r in out["sensitivity"]: print(r["beta_deg"], r["chi"], r["fs_limit"], [(p["NV"]["frac_below"]["1.5"], p["V"]["frac_below"]["1.5"], p["NV"]["p5"], p["V"]["p5"]) for p in r["pairs"]])
+for r in out["sensitivity"]: print(r["beta_deg"], r["chi"], r["fs_limit"], [(p["NV"]["frac_below"]["1.75"], p["V"]["frac_below"]["1.75"], p["NV"]["p5"], p["V"]["p5"]) for p in r["pairs"]])

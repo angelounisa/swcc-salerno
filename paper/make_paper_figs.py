@@ -116,6 +116,6 @@ for j, p in enumerate(PAIRS):
     a.plot([x[f"NV_{p[0]}"] for x in e], [x[f"V_{p[1]}"] for x in e], mk[j], color=cl[j], ms=3.5, alpha=.85, label=PL[j])
 lim = FS["fs_dry_limit"]["A2"]; a.plot([1, 300], [1, 300], ":", color="gray", lw=.8); a.axhline(lim, color="k", lw=.6, ls="--"); a.axvline(lim, color="k", lw=.6, ls="--")
 a.text(1.3, 230, f"tanφ'/tanβ = {lim:.2f}", fontsize=7)
-a.set_xscale("log"); a.set_yscale("log"); a.set_xlim(1.1, 300); a.set_ylim(1.1, 300); a.set_xlabel("Event-minimum FS, clear-cut"); a.set_ylabel("Event-minimum FS, forest"); a.legend(fontsize=7, loc="lower right")
+a.set_xscale("log"); a.set_yscale("log"); a.set_xlim(1.1, 300); a.set_ylim(1.1, 300); a.set_xlabel("Event-minimum FS, clear-cut"); a.set_ylabel("Event-minimum FS, forest"); a.legend(fontsize=7, loc="lower right", bbox_to_anchor=(1, .1))
 a.set_title("(b)", loc="left", fontweight="bold"); save(fig, "Fig7_stability")
 print("ok")
