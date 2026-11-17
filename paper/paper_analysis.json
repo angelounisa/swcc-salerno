@@ -1,0 +1,880 @@
+{
+ "config": {
+  "day_start_h": 6,
+  "layers_cm": {
+   "NV": {
+    "30": [
+     22.5,
+     45.0
+    ],
+    "60": [
+     45.0,
+     75.0
+    ]
+   },
+   "V": {
+    "35": [
+     25.0,
+     47.5
+    ],
+    "60": [
+     47.5,
+     75.0
+    ]
+   }
+  },
+  "suction_bins_kPa": [
+   5,
+   20,
+   50,
+   100,
+   300,
+   1000,
+   3000
+  ],
+  "n_boot": 1000,
+  "seed": 20261116,
+  "s_crit_kPa": 10.0,
+  "ridge_lambda": 0.5,
+  "s_rec_kPa": 20.0,
+  "pairs": [
+   [
+    15,
+    15
+   ],
+   [
+    30,
+    35
+   ],
+   [
+    60,
+    60
+   ]
+  ],
+  "rec_max_h": 480
+ },
+ "P1": {
+  "by_season": [
+   {
+    "site": "NV",
+    "depth": 30,
+    "season": "giu-set",
+    "n_days": 89,
+    "uptake_mm_d": 0.176,
+    "uptake_ci95": [
+     0.136,
+     0.214
+    ],
+    "total_loss_mm_d": 0.193,
+    "total_loss_ci95": [
+     0.132,
+     0.266
+    ]
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "season": "mar-mag",
+    "n_days": 40,
+    "uptake_mm_d": 0.542,
+    "uptake_ci95": [
+     0.384,
+     0.703
+    ],
+    "total_loss_mm_d": 0.926,
+    "total_loss_ci95": [
+     0.715,
+     1.167
+    ]
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "season": "ott-feb",
+    "n_days": 36,
+    "uptake_mm_d": 0.243,
+    "uptake_ci95": [
+     0.146,
+     0.335
+    ],
+    "total_loss_mm_d": 0.748,
+    "total_loss_ci95": [
+     0.642,
+     0.853
+    ]
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "season": "giu-set",
+    "n_days": 89,
+    "uptake_mm_d": 0.265,
+    "uptake_ci95": [
+     0.183,
+     0.342
+    ],
+    "total_loss_mm_d": 0.564,
+    "total_loss_ci95": [
+     0.482,
+     0.652
+    ]
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "season": "mar-mag",
+    "n_days": 40,
+    "uptake_mm_d": 0.566,
+    "uptake_ci95": [
+     0.391,
+     0.755
+    ],
+    "total_loss_mm_d": 0.577,
+    "total_loss_ci95": [
+     0.455,
+     0.691
+    ]
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "season": "ott-feb",
+    "n_days": 36,
+    "uptake_mm_d": 0.421,
+    "uptake_ci95": [
+     0.269,
+     0.572
+    ],
+    "total_loss_mm_d": 0.797,
+    "total_loss_ci95": [
+     0.689,
+     0.905
+    ]
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "season": "giu-set",
+    "n_days": 89,
+    "uptake_mm_d": 0.066,
+    "uptake_ci95": [
+     0.029,
+     0.103
+    ],
+    "total_loss_mm_d": 0.154,
+    "total_loss_ci95": [
+     0.118,
+     0.192
+    ]
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "season": "mar-mag",
+    "n_days": 40,
+    "uptake_mm_d": 0.208,
+    "uptake_ci95": [
+     0.1,
+     0.31
+    ],
+    "total_loss_mm_d": 0.411,
+    "total_loss_ci95": [
+     0.312,
+     0.504
+    ]
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "season": "ott-feb",
+    "n_days": 36,
+    "uptake_mm_d": 0.292,
+    "uptake_ci95": [
+     0.197,
+     0.39
+    ],
+    "total_loss_mm_d": 0.733,
+    "total_loss_ci95": [
+     0.623,
+     0.839
+    ]
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "season": "giu-set",
+    "n_days": 89,
+    "uptake_mm_d": -0.013,
+    "uptake_ci95": [
+     -0.046,
+     0.021
+    ],
+    "total_loss_mm_d": 0.117,
+    "total_loss_ci95": [
+     0.088,
+     0.143
+    ]
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "season": "mar-mag",
+    "n_days": 40,
+    "uptake_mm_d": 0.148,
+    "uptake_ci95": [
+     0.051,
+     0.25
+    ],
+    "total_loss_mm_d": 0.415,
+    "total_loss_ci95": [
+     0.334,
+     0.499
+    ]
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "season": "ott-feb",
+    "n_days": 36,
+    "uptake_mm_d": 0.113,
+    "uptake_ci95": [
+     0.028,
+     0.203
+    ],
+    "total_loss_mm_d": 0.565,
+    "total_loss_ci95": [
+     0.464,
+     0.661
+    ]
+   }
+  ],
+  "by_suction": [
+   {
+    "site": "NV",
+    "depth": 30,
+    "s_lo": 5,
+    "s_hi": 20,
+    "s_median": 16.1,
+    "n_days": 29,
+    "uptake_mm_d": 0.265,
+    "uptake_ci95": [
+     0.168,
+     0.359
+    ],
+    "total_loss_mm_d": 0.738
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "s_lo": 20,
+    "s_hi": 50,
+    "s_median": 26.4,
+    "n_days": 37,
+    "uptake_mm_d": 0.327,
+    "uptake_ci95": [
+     0.198,
+     0.473
+    ],
+    "total_loss_mm_d": 0.777
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "s_lo": 50,
+    "s_hi": 100,
+    "s_median": 66.6,
+    "n_days": 15,
+    "uptake_mm_d": 0.69,
+    "uptake_ci95": [
+     0.382,
+     0.97
+    ],
+    "total_loss_mm_d": 1.392
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "s_lo": 100,
+    "s_hi": 300,
+    "s_median": 181.3,
+    "n_days": 8,
+    "uptake_mm_d": 0.327,
+    "uptake_ci95": [
+     0.197,
+     0.481
+    ],
+    "total_loss_mm_d": 0.406
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "s_lo": 300,
+    "s_hi": 1000,
+    "s_median": 516.4,
+    "n_days": 26,
+    "uptake_mm_d": 0.128,
+    "uptake_ci95": [
+     0.07,
+     0.185
+    ],
+    "total_loss_mm_d": 0.153
+   },
+   {
+    "site": "NV",
+    "depth": 30,
+    "s_lo": 1000,
+    "s_hi": 3000,
+    "s_median": 1257.0,
+    "n_days": 50,
+    "uptake_mm_d": 0.2,
+    "uptake_ci95": [
+     0.146,
+     0.251
+    ],
+    "total_loss_mm_d": 0.058
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "s_lo": 5,
+    "s_hi": 20,
+    "s_median": 13.6,
+    "n_days": 37,
+    "uptake_mm_d": 0.252,
+    "uptake_ci95": [
+     0.127,
+     0.39
+    ],
+    "total_loss_mm_d": 0.768
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "s_lo": 20,
+    "s_hi": 50,
+    "s_median": 23.7,
+    "n_days": 23,
+    "uptake_mm_d": 0.492,
+    "uptake_ci95": [
+     0.328,
+     0.642
+    ],
+    "total_loss_mm_d": 0.504
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "s_lo": 50,
+    "s_hi": 100,
+    "s_median": 83.2,
+    "n_days": 12,
+    "uptake_mm_d": 1.123,
+    "uptake_ci95": [
+     0.807,
+     1.42
+    ],
+    "total_loss_mm_d": 0.726
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "s_lo": 100,
+    "s_hi": 300,
+    "s_median": 181.9,
+    "n_days": 28,
+    "uptake_mm_d": 0.567,
+    "uptake_ci95": [
+     0.41,
+     0.753
+    ],
+    "total_loss_mm_d": 0.904
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "s_lo": 300,
+    "s_hi": 1000,
+    "s_median": 743.0,
+    "n_days": 46,
+    "uptake_mm_d": 0.237,
+    "uptake_ci95": [
+     0.127,
+     0.332
+    ],
+    "total_loss_mm_d": 0.514
+   },
+   {
+    "site": "NV",
+    "depth": 60,
+    "s_lo": 1000,
+    "s_hi": 3000,
+    "s_median": 1177.9,
+    "n_days": 19,
+    "uptake_mm_d": 0.027,
+    "uptake_ci95": [
+     -0.117,
+     0.169
+    ],
+    "total_loss_mm_d": 0.23
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "s_lo": 5,
+    "s_hi": 20,
+    "s_median": 16.5,
+    "n_days": 30,
+    "uptake_mm_d": 0.341,
+    "uptake_ci95": [
+     0.245,
+     0.44
+    ],
+    "total_loss_mm_d": 0.88
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "s_lo": 20,
+    "s_hi": 50,
+    "s_median": 27.5,
+    "n_days": 30,
+    "uptake_mm_d": 0.314,
+    "uptake_ci95": [
+     0.189,
+     0.434
+    ],
+    "total_loss_mm_d": 0.469
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "s_lo": 100,
+    "s_hi": 300,
+    "s_median": 245.5,
+    "n_days": 15,
+    "uptake_mm_d": 0.007,
+    "uptake_ci95": [
+     -0.102,
+     0.116
+    ],
+    "total_loss_mm_d": 0.176
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "s_lo": 300,
+    "s_hi": 1000,
+    "s_median": 683.6,
+    "n_days": 24,
+    "uptake_mm_d": 0.005,
+    "uptake_ci95": [
+     -0.072,
+     0.086
+    ],
+    "total_loss_mm_d": 0.16
+   },
+   {
+    "site": "V",
+    "depth": 35,
+    "s_lo": 1000,
+    "s_hi": 3000,
+    "s_median": 1575.5,
+    "n_days": 66,
+    "uptake_mm_d": 0.074,
+    "uptake_ci95": [
+     0.034,
+     0.113
+    ],
+    "total_loss_mm_d": 0.145
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "s_lo": 5,
+    "s_hi": 20,
+    "s_median": 16.1,
+    "n_days": 32,
+    "uptake_mm_d": 0.134,
+    "uptake_ci95": [
+     0.052,
+     0.209
+    ],
+    "total_loss_mm_d": 0.736
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "s_lo": 20,
+    "s_hi": 50,
+    "s_median": 29.5,
+    "n_days": 22,
+    "uptake_mm_d": 0.214,
+    "uptake_ci95": [
+     0.059,
+     0.375
+    ],
+    "total_loss_mm_d": 0.368
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "s_lo": 100,
+    "s_hi": 300,
+    "s_median": 160.1,
+    "n_days": 22,
+    "uptake_mm_d": -0.023,
+    "uptake_ci95": [
+     -0.118,
+     0.072
+    ],
+    "total_loss_mm_d": 0.212
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "s_lo": 300,
+    "s_hi": 1000,
+    "s_median": 651.4,
+    "n_days": 37,
+    "uptake_mm_d": 0.011,
+    "uptake_ci95": [
+     -0.058,
+     0.084
+    ],
+    "total_loss_mm_d": 0.157
+   },
+   {
+    "site": "V",
+    "depth": 60,
+    "s_lo": 1000,
+    "s_hi": 3000,
+    "s_median": 1571.5,
+    "n_days": 48,
+    "uptake_mm_d": -0.001,
+    "uptake_ci95": [
+     -0.04,
+     0.039
+    ],
+    "total_loss_mm_d": 0.083
+   }
+  ],
+  "column": [
+   {
+    "site": "NV",
+    "season": "giu-set",
+    "n_days": 89,
+    "uptake_mm_d": 0.441,
+    "uptake_ci95": [
+     0.354,
+     0.53
+    ],
+    "total_loss_mm_d": 0.758,
+    "uptake_over_loss": 0.58,
+    "deep_share_of_uptake": 0.6
+   },
+   {
+    "site": "NV",
+    "season": "mar-mag",
+    "n_days": 40,
+    "uptake_mm_d": 1.108,
+    "uptake_ci95": [
+     0.814,
+     1.433
+    ],
+    "total_loss_mm_d": 1.503,
+    "uptake_over_loss": 0.74,
+    "deep_share_of_uptake": 0.51
+   },
+   {
+    "site": "NV",
+    "season": "ott-feb",
+    "n_days": 36,
+    "uptake_mm_d": 0.664,
+    "uptake_ci95": [
+     0.454,
+     0.873
+    ],
+    "total_loss_mm_d": 1.545,
+    "uptake_over_loss": 0.43,
+    "deep_share_of_uptake": 0.63
+   },
+   {
+    "site": "V",
+    "season": "giu-set",
+    "n_days": 89,
+    "uptake_mm_d": 0.054,
+    "uptake_ci95": [
+     0.003,
+     0.105
+    ],
+    "total_loss_mm_d": 0.27,
+    "uptake_over_loss": 0.2,
+    "deep_share_of_uptake": -0.24
+   },
+   {
+    "site": "V",
+    "season": "mar-mag",
+    "n_days": 40,
+    "uptake_mm_d": 0.356,
+    "uptake_ci95": [
+     0.171,
+     0.547
+    ],
+    "total_loss_mm_d": 0.825,
+    "uptake_over_loss": 0.43,
+    "deep_share_of_uptake": 0.42
+   },
+   {
+    "site": "V",
+    "season": "ott-feb",
+    "n_days": 36,
+    "uptake_mm_d": 0.405,
+    "uptake_ci95": [
+     0.258,
+     0.545
+    ],
+    "total_loss_mm_d": 1.298,
+    "uptake_over_loss": 0.31,
+    "deep_share_of_uptake": 0.28
+   }
+  ]
+ },
+ "P2": [
+  {
+   "NV_depth": 15,
+   "V_depth": 15,
+   "n": 69,
+   "n_events_lost_NV": 29,
+   "n_NV": 33,
+   "n_events_lost_V": 13,
+   "n_V": 36,
+   "median_s_before_NV": 25.6,
+   "median_s_before_V": 30.5,
+   "V_only": {
+    "coef": {
+     "const": 1.71,
+     "V": -2.15
+    },
+    "V_ci95": [
+     -3.06,
+     -1.39
+    ],
+    "odds_ratio_V": 0.117
+   },
+   "V_and_rain": {
+    "coef": {
+     "const": -4.74,
+     "lnP": 2.17,
+     "V": -2.71
+    },
+    "V_ci95": [
+     -3.62,
+     -1.95
+    ],
+    "odds_ratio_V": 0.066
+   },
+   "V_rain_antecedent": {
+    "coef": {
+     "const": -1.4,
+     "lnP": 2.15,
+     "lns0": -0.72,
+     "V": -3.11
+    },
+    "V_ci95": [
+     -3.89,
+     -2.35
+    ],
+    "odds_ratio_V": 0.044
+   },
+   "P50_mm": {
+    "NV_own_antecedent": 6.0,
+    "V_own_antecedent": 26.0,
+    "NV_common_antecedent": 6.0,
+    "V_common_antecedent": 25.0,
+    "common_s_before_kPa": 28.1
+   }
+  },
+  {
+   "NV_depth": 30,
+   "V_depth": 35,
+   "n": 75,
+   "n_events_lost_NV": 13,
+   "n_NV": 36,
+   "n_events_lost_V": 7,
+   "n_V": 39,
+   "median_s_before_NV": 26.4,
+   "median_s_before_V": 27.5,
+   "V_only": {
+    "coef": {
+     "const": -0.62,
+     "V": -0.83
+    },
+    "V_ci95": [
+     -1.63,
+     -0.15
+    ],
+    "odds_ratio_V": 0.437
+   },
+   "V_and_rain": {
+    "coef": {
+     "const": -9.43,
+     "lnP": 2.64,
+     "V": -1.57
+    },
+    "V_ci95": [
+     -2.55,
+     -0.62
+    ],
+    "odds_ratio_V": 0.208
+   },
+   "V_rain_antecedent": {
+    "coef": {
+     "const": -5.75,
+     "lnP": 2.96,
+     "lns0": -1.36,
+     "V": -1.8
+    },
+    "V_ci95": [
+     -2.71,
+     -0.65
+    ],
+    "odds_ratio_V": 0.165
+   },
+   "P50_mm": {
+    "NV_own_antecedent": 31.0,
+    "V_own_antecedent": 59.0,
+    "NV_common_antecedent": 32.0,
+    "V_common_antecedent": 58.0,
+    "common_s_before_kPa": 26.9
+   }
+  },
+  {
+   "NV_depth": 60,
+   "V_depth": 60,
+   "n": 75,
+   "n_events_lost_NV": 7,
+   "n_NV": 36,
+   "n_events_lost_V": 3,
+   "n_V": 39,
+   "median_s_before_NV": 25.3,
+   "median_s_before_V": 33.0,
+   "V_only": {
+    "coef": {
+     "const": -1.5,
+     "V": -0.84
+    },
+    "V_ci95": [
+     -1.96,
+     0.08
+    ],
+    "odds_ratio_V": 0.43
+   },
+   "V_and_rain": {
+    "coef": {
+     "const": -11.04,
+     "lnP": 2.67,
+     "V": -1.55
+    },
+    "V_ci95": [
+     -2.52,
+     -0.55
+    ],
+    "odds_ratio_V": 0.213
+   },
+   "V_rain_antecedent": {
+    "coef": {
+     "const": -9.1,
+     "lnP": 2.94,
+     "lns0": -0.81,
+     "V": -1.53
+    },
+    "V_ci95": [
+     -2.45,
+     -0.53
+    ],
+    "odds_ratio_V": 0.217
+   },
+   "P50_mm": {
+    "NV_own_antecedent": 54.0,
+    "V_own_antecedent": 98.0,
+    "NV_common_antecedent": 56.0,
+    "V_common_antecedent": 95.0,
+    "common_s_before_kPa": 29.5
+   }
+  }
+ ],
+ "P3": [
+  {
+   "site": "NV",
+   "depth": 15,
+   "n_events_below_crit": 38,
+   "n_recovered_before_next_event": 22,
+   "n_censored": 16,
+   "median_recovery_h": 78.0,
+   "iqr_h": [
+    36.0,
+    137.0
+   ]
+  },
+  {
+   "site": "NV",
+   "depth": 30,
+   "n_events_below_crit": 19,
+   "n_recovered_before_next_event": 6,
+   "n_censored": 13,
+   "median_recovery_h": 207.0,
+   "iqr_h": [
+    156.0,
+    254.0
+   ]
+  },
+  {
+   "site": "NV",
+   "depth": 60,
+   "n_events_below_crit": 13,
+   "n_recovered_before_next_event": 1,
+   "n_censored": 12,
+   "median_recovery_h": 80.0,
+   "iqr_h": [
+    80.0,
+    80.0
+   ]
+  },
+  {
+   "site": "V",
+   "depth": 15,
+   "n_events_below_crit": 15,
+   "n_recovered_before_next_event": 5,
+   "n_censored": 10,
+   "median_recovery_h": 155.0,
+   "iqr_h": [
+    146.0,
+    214.0
+   ]
+  },
+  {
+   "site": "V",
+   "depth": 35,
+   "n_events_below_crit": 10,
+   "n_recovered_before_next_event": 3,
+   "n_censored": 7,
+   "median_recovery_h": 272.0,
+   "iqr_h": [
+    188.0,
+    284.0
+   ]
+  },
+  {
+   "site": "V",
+   "depth": 60,
+   "n_events_below_crit": 6,
+   "n_recovered_before_next_event": 1,
+   "n_censored": 5,
+   "median_recovery_h": 368.0,
+   "iqr_h": [
+    368.0,
+    368.0
+   ]
+  }
+ ]
+}

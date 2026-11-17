@@ -1,0 +1,392 @@
+{
+ "config": {
+  "pairs": [
+   [
+    15,
+    15
+   ],
+   [
+    30,
+    35
+   ],
+   [
+    60,
+    60
+   ]
+  ],
+  "lambdas": [
+   0.1,
+   0.5,
+   2.0
+  ],
+  "s_crit_kPa": [
+   5.0,
+   10.0,
+   20.0
+  ],
+  "base": {
+   "lambda": 0.5,
+   "s_crit": 10.0
+  },
+  "n_boot": 2000,
+  "seed": 20261117
+ },
+ "base": [
+  {
+   "NV_depth": 15,
+   "V_depth": 15,
+   "n_obs": 69,
+   "n_events": 37,
+   "n_lost": {
+    "NV": 29,
+    "V": 13
+   },
+   "coef": {
+    "const": -1.4,
+    "lnP": 2.15,
+    "lns0": -0.72,
+    "V": -3.11
+   },
+   "odds_ratio_V": 0.044,
+   "odds_ratio_ci95": [
+    0.019,
+    0.105
+   ],
+   "k_equivalent_rain": 0.23,
+   "k_ci95": [
+    0.11,
+    0.39
+   ],
+   "n_boot_used": 2000,
+   "n_boot_skipped": 0
+  },
+  {
+   "NV_depth": 30,
+   "V_depth": 35,
+   "n_obs": 75,
+   "n_events": 39,
+   "n_lost": {
+    "NV": 13,
+    "V": 7
+   },
+   "coef": {
+    "const": -5.75,
+    "lnP": 2.96,
+    "lns0": -1.36,
+    "V": -1.8
+   },
+   "odds_ratio_V": 0.165,
+   "odds_ratio_ci95": [
+    0.067,
+    0.434
+   ],
+   "k_equivalent_rain": 0.54,
+   "k_ci95": [
+    0.37,
+    0.77
+   ],
+   "n_boot_used": 2000,
+   "n_boot_skipped": 0
+  },
+  {
+   "NV_depth": 60,
+   "V_depth": 60,
+   "n_obs": 75,
+   "n_events": 39,
+   "n_lost": {
+    "NV": 7,
+    "V": 3
+   },
+   "coef": {
+    "const": -9.1,
+    "lnP": 2.94,
+    "lns0": -0.81,
+    "V": -1.53
+   },
+   "odds_ratio_V": 0.217,
+   "odds_ratio_ci95": [
+    0.084,
+    0.64
+   ],
+   "k_equivalent_rain": 0.6,
+   "k_ci95": [
+    0.39,
+    0.86
+   ],
+   "n_boot_used": 2000,
+   "n_boot_skipped": 0
+  }
+ ],
+ "sensitivity": [
+  {
+   "NV_depth": 15,
+   "lambda": 0.1,
+   "s_crit": 5.0,
+   "n_obs": 70,
+   "n_lost_NV": 28,
+   "n_lost_V": 11,
+   "odds_ratio_V": 0.012,
+   "k": 0.28
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 0.1,
+   "s_crit": 10.0,
+   "n_obs": 69,
+   "n_lost_NV": 29,
+   "n_lost_V": 13,
+   "odds_ratio_V": 0.009,
+   "k": 0.23
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 0.1,
+   "s_crit": 20.0,
+   "n_obs": 53,
+   "n_lost_NV": 23,
+   "n_lost_V": 10,
+   "odds_ratio_V": 0.01,
+   "k": 0.2
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 0.5,
+   "s_crit": 5.0,
+   "n_obs": 70,
+   "n_lost_NV": 28,
+   "n_lost_V": 11,
+   "odds_ratio_V": 0.051,
+   "k": 0.28
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 0.5,
+   "s_crit": 10.0,
+   "n_obs": 69,
+   "n_lost_NV": 29,
+   "n_lost_V": 13,
+   "odds_ratio_V": 0.044,
+   "k": 0.23
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 0.5,
+   "s_crit": 20.0,
+   "n_obs": 53,
+   "n_lost_NV": 23,
+   "n_lost_V": 10,
+   "odds_ratio_V": 0.054,
+   "k": 0.22
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 2.0,
+   "s_crit": 5.0,
+   "n_obs": 70,
+   "n_lost_NV": 28,
+   "n_lost_V": 11,
+   "odds_ratio_V": 0.182,
+   "k": 0.3
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 2.0,
+   "s_crit": 10.0,
+   "n_obs": 69,
+   "n_lost_NV": 29,
+   "n_lost_V": 13,
+   "odds_ratio_V": 0.175,
+   "k": 0.26
+  },
+  {
+   "NV_depth": 15,
+   "lambda": 2.0,
+   "s_crit": 20.0,
+   "n_obs": 53,
+   "n_lost_NV": 23,
+   "n_lost_V": 10,
+   "odds_ratio_V": 0.201,
+   "k": 0.25
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 0.1,
+   "s_crit": 5.0,
+   "n_obs": 78,
+   "n_lost_NV": 10,
+   "n_lost_V": 4,
+   "odds_ratio_V": 0.006,
+   "k": 0.37
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 0.1,
+   "s_crit": 10.0,
+   "n_obs": 75,
+   "n_lost_NV": 13,
+   "n_lost_V": 7,
+   "odds_ratio_V": 0.033,
+   "k": 0.48
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 0.1,
+   "s_crit": 20.0,
+   "n_obs": 56,
+   "n_lost_NV": 11,
+   "n_lost_V": 6,
+   "odds_ratio_V": 0.143,
+   "k": 0.58
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 0.5,
+   "s_crit": 5.0,
+   "n_obs": 78,
+   "n_lost_NV": 10,
+   "n_lost_V": 4,
+   "odds_ratio_V": 0.092,
+   "k": 0.45
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 0.5,
+   "s_crit": 10.0,
+   "n_obs": 75,
+   "n_lost_NV": 13,
+   "n_lost_V": 7,
+   "odds_ratio_V": 0.165,
+   "k": 0.54
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 0.5,
+   "s_crit": 20.0,
+   "n_obs": 56,
+   "n_lost_NV": 11,
+   "n_lost_V": 6,
+   "odds_ratio_V": 0.284,
+   "k": 0.61
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 2.0,
+   "s_crit": 5.0,
+   "n_obs": 78,
+   "n_lost_NV": 10,
+   "n_lost_V": 4,
+   "odds_ratio_V": 0.349,
+   "k": 0.56
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 2.0,
+   "s_crit": 10.0,
+   "n_obs": 75,
+   "n_lost_NV": 13,
+   "n_lost_V": 7,
+   "odds_ratio_V": 0.432,
+   "k": 0.63
+  },
+  {
+   "NV_depth": 30,
+   "lambda": 2.0,
+   "s_crit": 20.0,
+   "n_obs": 56,
+   "n_lost_NV": 11,
+   "n_lost_V": 6,
+   "odds_ratio_V": 0.524,
+   "k": 0.66
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 0.1,
+   "s_crit": 5.0,
+   "n_obs": 81,
+   "n_lost_NV": 7,
+   "n_lost_V": 2,
+   "odds_ratio_V": 0.045,
+   "k": 0.51
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 0.1,
+   "s_crit": 10.0,
+   "n_obs": 75,
+   "n_lost_NV": 7,
+   "n_lost_V": 3,
+   "odds_ratio_V": 0.039,
+   "k": 0.52
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 0.1,
+   "s_crit": 20.0,
+   "n_obs": 57,
+   "n_lost_NV": 5,
+   "n_lost_V": 2,
+   "odds_ratio_V": 0.117,
+   "k": 0.59
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 0.5,
+   "s_crit": 5.0,
+   "n_obs": 81,
+   "n_lost_NV": 7,
+   "n_lost_V": 2,
+   "odds_ratio_V": 0.207,
+   "k": 0.56
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 0.5,
+   "s_crit": 10.0,
+   "n_obs": 75,
+   "n_lost_NV": 7,
+   "n_lost_V": 3,
+   "odds_ratio_V": 0.217,
+   "k": 0.6
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 0.5,
+   "s_crit": 20.0,
+   "n_obs": 57,
+   "n_lost_NV": 5,
+   "n_lost_V": 2,
+   "odds_ratio_V": 0.384,
+   "k": 0.69
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 2.0,
+   "s_crit": 5.0,
+   "n_obs": 81,
+   "n_lost_NV": 7,
+   "n_lost_V": 2,
+   "odds_ratio_V": 0.497,
+   "k": 0.65
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 2.0,
+   "s_crit": 10.0,
+   "n_obs": 75,
+   "n_lost_NV": 7,
+   "n_lost_V": 3,
+   "odds_ratio_V": 0.523,
+   "k": 0.69
+  },
+  {
+   "NV_depth": 60,
+   "lambda": 2.0,
+   "s_crit": 20.0,
+   "n_obs": 57,
+   "n_lost_NV": 5,
+   "n_lost_V": 2,
+   "odds_ratio_V": 0.671,
+   "k": 0.76
+  }
+ ]
+}
