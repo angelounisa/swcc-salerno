@@ -9,7 +9,7 @@ SWm = json.load(open('swcc_main.json'))
 for v in SWm['sensors'].values(): v.pop('cloud')          # not shown in the dashboard
 CMP = {'cmp': json.load(open('compare.json')), 'swcc': {'sensors': SWm['sensors'], 'shared': SWm['shared']}, 'kfield': json.load(open('kfield.json')),
        'thetaCal': json.load(open('cal/theta_calibration.json')), 'eventsSummary': json.load(open('sim/infiltration_events.json'))['summary'],
-       'mech': json.load(open('mechanisms.json')), 'stab': json.load(open('stability.json'))}
+       'mech': json.load(open('mechanisms.json')), 'stab': json.load(open('stability.json')), 'qc': json.load(open('qc.json'))}
 CMP['stab']['series'] = {k: v for k, v in CMP['stab']['series'].items() if not k.startswith('sig_')}     # suction-stress series not plotted
 assert body.count('/*DATA*/null') == 1 and body.count('/*CMP*/null') == 1
 page = body.replace('/*DATA*/null', data).replace('/*CMP*/null', json.dumps(CMP, separators=(',', ':'), allow_nan=False)) + '\n' + view
@@ -21,8 +21,8 @@ full = ('<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
         + page[:head_end] + '\n</head>\n<body>\n' + page[head_end:] + '\n</body>\n</html>\n')
 (repo / 'docs' / 'index.html').write_text(full)
 for d in ('sim', 'site', 'verify', 'data'): (repo / d).mkdir(exist_ok=True)
-for fn in ['analysis.py', 'calibrate_theta.py', 'swcc_main.py', 'kfield.py', 'compare_plots.py', 'stability.py', 'mechanisms.py', 'build.py', 'run_pipeline.sh',
-           'results_NV.json', 'results_V.json', 'swcc_main.json', 'kfield.json', 'compare.json', 'stability.json', 'mechanisms.json']:
+for fn in ['analysis.py', 'calibrate_theta.py', 'swcc_main.py', 'kfield.py', 'compare_plots.py', 'stability.py', 'mechanisms.py', 'qc.py', 'build.py', 'run_pipeline.sh',
+           'results_NV.json', 'results_V.json', 'swcc_main.json', 'kfield.json', 'compare.json', 'stability.json', 'mechanisms.json', 'qc.json']:
     shutil.copy(fn, repo / fn)
 shutil.copy('cal/theta_calibration.json', repo / 'theta_calibration.json')
 for fn in ['results_NV.json', 'results_V.json']: shutil.copy(fn, repo / 'docs' / fn)

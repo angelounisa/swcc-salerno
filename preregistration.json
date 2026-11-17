@@ -1,0 +1,15 @@
+{
+ "frozen_on": "2026-11-17",
+ "applies_to": "every extension of the series (third dry season onward): these thresholds are fixed before the new data are seen; any change gets a new version number and is reported with the results under both settings",
+ "branch_classification": {"resample": "1h", "diff_window_h": 24, "dtheta_min_m3m3": 0.0006, "dlog10s_min": 0.01, "bin_width_log10": 0.1, "bin_min_count": 3},
+ "vg_fit_bounds": {"theta_s": [0.05, 0.65], "theta_r": "[0, min observed theta of the branch]", "alpha_1_per_kPa": [0.0001, 10.0], "n": [1.05, 8.0]},
+ "main_drying_curve": {"s_min_kPa": 1.0, "bin_width_log10": 0.1, "bin_min_count": 10, "envelope_quantile": 0.95},
+ "quality_control": {"noneq_tol_theta_m3m3": 0.02, "noneq_tol_sensitivity": [0.01, 0.03], "extrapolated_theta_uncertainty_m3m3": 0.03, "not_identifiable_if_ci_ratio_alpha_or_n_above": 10},
+ "uncertainty": {"bootstrap_block": "calendar month", "n_boot": 300},
+ "events": {"min_rain_mm": 7.5, "separation_dry_h": 24, "response_dtheta_m3m3": 0.005, "after_event_h": 24},
+ "dry_spells": {"min_dry_h": 72, "skip_first_h": 48},
+ "suction_loss": {"critical_suction_kPa": 10.0, "ridge_lambda": 0.5, "sensitivity_lambda": [0.1, 0.5, 2.0], "sensitivity_critical_kPa": [5, 10, 20]},
+ "stability": {"beta_deg": 28.0, "sensitivity_beta_deg": [25.0, 32.0], "chi": "Se of the sensor (main drying curve)", "c_kPa": 0.0, "phi_deg": 38.5, "fs_indicator_threshold": 1.75, "suction_stress_threshold_kPa": 0.5, "se_min_valid": 0.05},
+ "seasons": {"wet_months": [10, 11, 12, 1, 2, 3, 4], "dry_months": [5, 6, 7, 8, 9]},
+ "recalibration": "TEROS 10: yearly check against gravimetric samples next to each sensor, in a wet and a dry month; TEROS 21: yearly check of the near-saturation reading"
+}

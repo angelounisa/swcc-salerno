@@ -60,6 +60,19 @@ python stability.py NV_cal.xlsx V_cal.xlsx swcc_main.json sim/infiltration_event
 python build.py
 ```
 
+## Controllo di qualità e versioni (dalla 1.1.0)
+
+- `analysis.py` ora richiede anche `swcc_main.json` e `theta_calibration.json`: segna ora per ora θ fuori dal campo della calibrazione (incertezza dichiarata ±0,03 m³/m³) e le ore fuori equilibrio (θ sopra la curva principale di drying di più di 0,02 m³/m³, ritardo del sensore di suzione), che sono escluse dal fit di wetting con sensibilità pubblicata. Gli intervalli dei parametri e dell'isteresi vengono da un bootstrap a blocchi mensili.
+- `qc.py` → `qc.json`: dove pesano i flag e quali fit non sono identificabili.
+- `preregistration.json`: soglie congelate prima di estendere la serie; `MANIFEST.json`: SHA-256 di dati, script e risultati; `CHANGELOG.md`: cosa cambia fra le versioni (tag git).
+
+```bash
+python analysis.py NV_cal.xlsx results_NV.json 15,30,60 "No vegetation" NV swcc_main.json theta_calibration.json
+python analysis.py V_cal.xlsx  results_V.json  15,35,60 "Vegetation"    V  swcc_main.json theta_calibration.json
+python qc.py NV_cal.xlsx V_cal.xlsx theta_calibration.json swcc_main.json results_NV.json results_V.json compare.json qc.json
+python manifest.py 1.1.0 MANIFEST.json
+```
+
 ## Modello numerico (non usato nella dashboard)
 
 Il solutore di Richards 1D in schema di pendio indefinito (`sim/solver.js`), la sua calibrazione (`sim/`, `run_pipeline.sh`) e la verifica con un codice indipendente (`verify/`) restano nel repository per un eventuale confronto di stabilità sotto i 60 cm, dove non ci sono sensori (la stabilità mostrata nella dashboard è calcolata dalle sole misure). La pagina con i risultati del modello (`site/drying_view.js`) non è più inclusa nella dashboard; l'ultima versione che la mostra è il commit `cf1965f`.

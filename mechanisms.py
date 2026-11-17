@@ -6,8 +6,10 @@
  M3 autumn rewetting: first day (after 15 August) from which the daily-median suction stays below REWET_KPA, and rain needed
  M4 day / night split of the water loss in rain-free periods (06-18 h vs 18-06 h), from theta and, independently, from suction
  M5 order and delay of the response to rain with depth
- M6 monthly median of the ratio of suction (vegetated / no vegetation) and of the difference of theta for each sensor pair
-Usage: python mechanisms.py NV_cal.xlsx V_cal.xlsx rain.xlsx compare.json sim/infiltration_events.json tempNV.xlsx tempV.xlsx out.json
+ M6 monthly medians for each sensor pair: suction of each plot, ratio of suction (vegetated / no vegetation), and the ABSOLUTE
+    differences of suction [kPa], of effective saturation and of theta. The ratio is unstable when the no-vegetation suction is
+    close to zero (wet winter months): the absolute differences are the robust indicators.
+Usage: python mechanisms.py NV_cal.xlsx V_cal.xlsx rain.xlsx compare.json sim/infiltration_events.json tempNV.xlsx tempV.xlsx out.json swcc_main.json
 """
 import json, sys
 import numpy as np, pandas as pd
@@ -18,7 +20,7 @@ CONFIG = {"p_max_fit_mm": 100.0, "p0_grid_mm": [0.0, 45.0, 0.5], "dry_thresholds
 c = CONFIG
 D = {"NV": pd.read_excel(sys.argv[1]).set_index("Time").resample("1h").mean(), "V": pd.read_excel(sys.argv[2]).set_index("Time").resample("1h").mean()}
 rain = pd.read_excel(sys.argv[3]).set_index("Data_fine_ora")["P_unificata_mm"]
-C = json.load(open(sys.argv[4])); EV = json.load(open(sys.argv[5]))["events"]
+SWm = json.load(open(sys.argv[9])); C = json.load(open(sys.argv[4])); EV = json.load(open(sys.argv[5]))["events"]
 TEMP = {"NV": pd.read_excel(sys.argv[6]).set_index("Time").resample("1h").mean(), "V": pd.read_excel(sys.argv[7]).set_index("Time").resample("1h").mean()}
 TCOL = {15: "T 15", 30: "T 30", 35: "T 30", 60: "T 60"}
 DEP = {"NV": [15, 30, 60], "V": [15, 35, 60]}
@@ -115,9 +117,16 @@ for a, b in c["pairs"]:
     sa, sb = D["NV"][f"s {a}"], D["V"][f"s {b}"]; ta, tb = D["NV"][f"VWC {a}"], D["V"][f"VWC {b}"]
     ok = sa.notna() & sb.notna() & ta.notna() & tb.notna()
     lr = np.log10(sb[ok] / sa[ok]); dt = (tb - ta)[ok]; per = lr.index.to_period("M"); n = lr.groupby(per).size(); keep = n[n >= c["min_hours_month"]].index
+    def se(site, d, th):
+        L = next(v for v in SWm["shared"].values() if f"{site}_{d}" in v["sensors"]); q = L["sensors"][f"{site}_{d}"]
+        return ((th - q["theta_r"]) / (q["theta_s"] - q["theta_r"])).clip(0, 1)
+    ds = (sb - sa)[ok]; dse = (se("V", b, tb) - se("NV", a, ta))[ok]
     out["M6"].append({"NV_depth": a, "V_depth": b, "months": [str(m) for m in keep], "n_hours": [int(n[m]) for m in keep],
                       "suction_ratio_V_over_NV": [r3(10 ** lr.groupby(per).median()[m], 3) for m in keep],
-                      "theta_diff_V_minus_NV": [r3(dt.groupby(per).median()[m], 4) for m in keep]})
+                      "theta_diff_V_minus_NV": [r3(dt.groupby(per).median()[m], 4) for m in keep],
+                      "suction_NV_kPa": [r3(sa[ok].groupby(per).median()[m], 1) for m in keep], "suction_V_kPa": [r3(sb[ok].groupby(per).median()[m], 1) for m in keep],
+                      "suction_diff_V_minus_NV_kPa": [r3(ds.groupby(per).median()[m], 1) for m in keep],
+                      "Se_diff_V_minus_NV": [r3(dse.groupby(per).median()[m], 3) for m in keep]})
 json.dump(out, open(sys.argv[8], "w"), separators=(",", ":"), allow_nan=False)
 print("M1", {s: out["M1"][s]["fit"] for s in D}, out["M1"]["slope_ratio_V_over_NV"])
 for r in out["M4"]: print("M4", r)

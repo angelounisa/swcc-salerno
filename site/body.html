@@ -81,6 +81,7 @@ footer{font-size:.8rem;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (max-width:900px){.grid2{grid-template-columns:1fr}}
 #colsvg svg{display:block;max-width:100%;height:auto}
+#kTable th,#kTable td{white-space:normal}
 </style>
 
 <div class="wrap">
@@ -103,14 +104,18 @@ footer{font-size:.8rem;color:var(--muted)}
     <div><h3>Modello</h3>
       <p>van Genuchten–Mualem: θ(s) = θ<sub>r</sub> + (θ<sub>s</sub>−θ<sub>r</sub>) / [1+(αs)<sup>n</sup>]<sup>1−1/n</sup>, s in kPa, α in 1/kPa. Minimi quadrati sulle mediane per classi di 0,1 decadi di log₁₀s (≥3 punti per classe), per non far pesare i lunghi plateau secchi.</p></div>
     <div><h3>Lettura dei grafici</h3>
-      <p>Il colore dei punti è la data (scala viridis condivisa da tutti i pannelli). Le croci sono le mediane usate per il fit, la linea è la curva interpolata. Il pannello di confronto sovrappone le due curve dello stesso strato.</p></div>
+      <p>Il colore dei punti è la data (scala viridis condivisa da tutti i pannelli); i cerchi vuoti sono ore con θ fuori dal campo della calibrazione, le croci grigie ore fuori equilibrio escluse dal wetting. Le croci nere sono le mediane usate per il fit, la linea è la curva interpolata. Nel pannello di confronto la fascia è il campo di suzione comune ai due rami; le curve sono punteggiate fuori dal campo osservato del proprio ramo.</p></div>
   </div>
 
-  <div class="dhead"><h2>Parametri interpolati</h2><span class="muted">errori standard da matrice di covarianza (sottostimati: i dati sono autocorrelati)</span></div>
+  <div class="dhead"><h2>Parametri interpolati</h2><span class="muted">tra parentesi l'intervallo al 95% da bootstrap a blocchi mensili (i dati orari consecutivi sono autocorrelati: gli errori dalla matrice di covarianza li sottostimano e non sono più usati)</span></div>
   <div class="tablebox"><table id="ptable"></table></div>
 
-  <div class="dhead"><h2>Isteresi: θ<sub>drying</sub> − θ<sub>wetting</sub> dalle curve interpolate</h2><span class="muted">m³/m³, solo fra il 5° e il 95° percentile di suzione osservato in entrambi i rami (fuori da lì una delle curve è un'estrapolazione)</span></div>
+  <div class="dhead"><h2>Isteresi: θ<sub>drying</sub> − θ<sub>wetting</sub> dalle curve interpolate</h2><span class="muted">m³/m³ con intervallo al 95% (bootstrap mensile, i due rami rifatti sugli stessi mesi), solo nel campo di suzione comune ai due rami (fra il 5° percentile più alto e il 95° più basso). Sono curve medie dei rami, non curve di stato.</span></div>
   <div class="tablebox"><table id="htable"></table></div>
+
+  <div class="dhead"><h2>Controllo di qualità e sensibilità</h2><span class="muted">flag calcolati ora per ora e propagati nei fit</span></div>
+  <div class="tablebox"><table id="qctable"></table></div>
+  <div class="tablebox"><table id="senstable"></table></div>
 
   <div class="controls">
     <label><input type="checkbox" id="showU"> mostra i punti indeterminati (grigio) nei pannelli</label>
@@ -180,7 +185,7 @@ footer{font-size:.8rem;color:var(--muted)}
 
     <div class="dhead"><h2>8 · Meccanismi che emergono dai dati</h2><span class="muted">relazioni cercate nelle misure; per ognuna sono indicati l'evidenza e i limiti</span></div>
     <div class="grid2">
-      <div class="card"><h3>Suzione vegetata / senza vegetazione, mediana mensile</h3><div class="plot" id="ratioPlot" style="height:400px"></div></div>
+      <div class="card"><h3>Differenza vegetata − senza vegetazione, mediana mensile</h3><div class="plot" id="ratioPlot" style="height:460px"></div></div>
       <div class="card"><h3>Quando ogni profondità supera 100 e 1000 kPa</h3><div class="plot" id="dryPlot" style="height:400px"></div></div>
     </div>
     <div class="grid2">
@@ -189,6 +194,7 @@ footer{font-size:.8rem;color:var(--muted)}
     </div>
     <div class="tablebox"><table id="thrTable"></table></div>
     <div class="tablebox"><table id="dayTable"></table></div>
+    <div class="tablebox"><table id="dsTable"></table></div>
     <section class="notes"><h3>Cosa emerge</h3><ol id="mechList" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ol></section>
 
     <div class="dhead"><h2>9 · Stabilità con i valori misurati</h2><span class="muted">pendio indefinito, superficie di scorrimento alla profondità di ogni sensore, suzione e θ misurati</span></div>
@@ -216,8 +222,12 @@ footer{font-size:.8rem;color:var(--muted)}
     <div class="dhead"><h2>11 · Conducibilità non satura dal drenaggio notturno</h2><span class="muted">perdita d'invaso nelle notti senza pioggia divisa per il gradiente misurato</span></div>
     <div class="grid2">
       <div class="card"><h3>K in funzione della suzione</h3><div class="plot" id="kPlot" style="height:420px"></div></div>
-      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="kTable"></table></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="kTable" style="white-space:normal"></table></div></div>
     </div>
+
+    <div class="dhead"><h2>12 · Controllo di qualità dei dati usati in questa scheda</h2><span class="muted">dove θ è fuori dal campo della calibrazione e quali risultati ne dipendono</span></div>
+    <div class="tablebox"><table id="qcCmpTable"></table></div>
+    <section class="notes"><ul id="qcCmpNotes" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ul></section>
 
     <section class="notes">
       <h2>Note</h2>
@@ -234,20 +244,24 @@ footer{font-size:.8rem;color:var(--muted)}
 const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;
 const COMMON_NOTES = [
  '<b>θ calibrato.</b> Il contenuto d\'acqua è quello dei TEROS 10 con la calibrazione specifica per i due terreni (A1 per i sensori a 15 cm, A2 per quelli a 30, 35 e 60 cm), ricavata dal file calibrato della parcella senza vegetazione e applicata a tutta la serie di entrambe le parcelle.',
- '<b>θ<sub>r</sub> poco vincolato.</b> In molti fit θ<sub>r</sub> finisce su un limite: i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo.',
- '<b>Curve di scanning.</b> La nuvola di punti non è una curva unica: ogni ciclo parte da uno stato diverso. Il fit di questa scheda dà una curva media per ramo; la curva principale di drying è nella terza scheda.'];
+ '<b>θ<sub>r</sub> poco vincolato.</b> In molti fit θ<sub>r</sub> finisce su un limite: i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo; l\'intervallo bootstrap dice quanto il dato li vincola.',
+ '<b>Nuvole di punti, non curve.</b> Ogni ciclo parte da uno stato diverso: il fit di ogni ramo è una curva media, non una curva di stato. La curva principale di drying è una ricostruzione a parte (terza scheda) ed è quella da usare come proprietà del terreno. L\'isteresi della tabella è la differenza fra curve medie.',
+ '<b>Fit non identificabili.</b> Un fit è segnato come non identificabile quando l\'intervallo al 95% di α o di n copre più di un fattore 10: la curva descrive la forma dei dati nel campo osservato, ma i suoi parametri non vanno usati.',
+ '<b>Punti fuori equilibrio.</b> Un\'ora è fuori equilibrio quando θ supera di più di 0,02 m³/m³ la curva principale di drying del sensore alla suzione misurata: all\'equilibrio nessuno stato sta sopra quella curva, quindi la suzione è in ritardo rispetto a θ (fronte rapido, sensore lento). Queste ore sono escluse dal fit di wetting (croci grigie nei pannelli); la tabella di sensibilità riporta il fit con tutti i punti e con tolleranze 0,01 e 0,03.',
+ '<b>θ fuori dal campo della calibrazione.</b> Le ore in cui θ calibrato esce dal campo coperto dal file calibrato del suo strato (sempre sul lato secco) sono cerchi vuoti nei pannelli e barre di ±0,03 m³/m³ nella serie temporale: è l\'incertezza dichiarata per quei valori, non stimabile dai dati.'];
 const SITE_NOTES = {
  nv: [
  '<b>Rami di wetting meno affidabili.</b> Gli eventi di imbibizione durano poche ore e hanno molti meno punti dei rami di essiccamento. In più sensori α va al limite superiore o ha errore molto grande: la curva descrive la forma dei dati ma i parametri non sono identificabili.',
- '<b>Ritardo del sensore di suzione.</b> Nel primo evento dopo l\'estate (set. 2025) θ sale subito mentre s resta per ore a 10²–10³ kPa: sono punti fuori equilibrio, visibili a 30 e 60 cm come wetting con θ alto e s alta. Sono inclusi nel fit; escluderli cambierebbe soprattutto la coda secca delle curve di wetting.',
- '<b>Isteresi ad alta suzione.</b> A 30 e 60 cm la differenza fra le curve ad alta suzione è condizionata dai punti fuori equilibrio che trascinano la coda secca delle curve di wetting: va letta solo nel campo delle basse suzioni.',
+ '<b>Ritardo del sensore di suzione.</b> Nel primo evento dopo l\'estate (set. 2025) θ sale subito mentre s resta per ore a 10²–10³ kPa: sono la maggior parte dei punti fuori equilibrio a 30 e 60 cm, ora esclusi dal fit di wetting. Con tutti i punti α del wetting a 15 e 60 cm finiva al vincolo o quasi (10 e 2,1 1/kPa); senza, scende a 0,51 e 0,12.',
+ '<b>Isteresi inversa a 30 cm.</b> Fra 30 e 100 kPa la curva media di wetting sta sopra quella di drying, con intervallo che esclude lo zero. Per curve di equilibrio è impossibile: è un artefatto (ritardo residuo o scanning), da non interpretare come proprietà del terreno.',
  '<b>Plateau secco a 15 cm.</b> D\'estate s si stabilizza fra 2000 e 3300 kPa mentre θ oscilla col ciclo giornaliero (effetto termico sulla misura di θ).'],
  v: [
  '<b>Lacuna a 15 cm.</b> θ a 15 cm manca dal 31/01/2026 al 04/03/2026; quelle ore sono escluse e la serie temporale mostra il vuoto.',
- '<b>Wetting a 35 e 60 cm limitato alle basse suzioni.</b> Quasi tutte le ore di wetting a 35 cm sono sotto circa 30 kPa, e a 60 cm i punti sopra questo valore sono pochi. Oltre, la curva di wetting è un\'estrapolazione e la differenza con il drying non è affidabile.',
+ '<b>Wetting a 35 e 60 cm limitato alle basse suzioni.</b> Il campo di suzione comune ai due rami è circa 7–28 kPa a 35 cm e 7–22 kPa a 60 cm: l\'isteresi è calcolata solo lì, e nei pannelli di confronto le curve fuori dal campo del proprio ramo sono punteggiate.',
  '<b>Spostamento fra le due stagioni secche.</b> A 35 cm (e meno a 60 cm) l\'essiccamento del 2026 segue un percorso più secco di quello del 2025. La curva di drying interpolata media le due stagioni; vale la pena verificare se dipende dalle radici, dalla struttura del suolo o dal sensore.',
  '<b>θ<sub>s</sub> basso a 15 cm.</b> Il θ<sub>s</sub> interpolato a 15 cm è molto inferiore a quello degli strati profondi: lo strato superficiale vegetato non si avvicina mai alla saturazione nei dati.',
- '<b>Calibrazione estrapolata a 60 cm.</b> Nella parcella vegetata il sensore a 60 cm scende sotto il campo coperto dalla calibrazione per circa un terzo delle misure: lì θ è un\'estrapolazione della funzione di calibrazione.']
+ '<b>Calibrazione estrapolata a 60 cm.</b> Nella parcella vegetata il sensore a 60 cm scende sotto il campo coperto dalla calibrazione nel 37% delle ore (65% in estate, 9% in inverno): lì θ ha un\'incertezza dichiarata di ±0,03 m³/m³ (±0,13 in S<sub>e</sub>). In quelle ore la suzione è affidabile, θ no: d\'estate S<sub>e</sub> e suzione indicano un ordine opposto fra le parcelle a 60 cm.',
+ '<b>Fit di wetting a 15 cm non identificabile.</b> I parametri del ramo di wetting a 15 cm hanno intervalli che coprono quasi tutto il campo ammesso: la curva va letta solo come descrizione dei dati.']
 };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const fmt = (x,k)=> (x==null||!isFinite(x))?'–':Number(x).toFixed(k);
@@ -265,23 +279,38 @@ document.getElementById('foot').textContent =
 
 // ---- parameter table
 const pt = document.getElementById('ptable');
-let h = `<thead><tr><th>Prof.</th><th>Ramo</th><th>θr</th><th>θs</th><th>α [1/kPa]</th><th>1/α [kPa]</th><th>n</th><th>R² classi</th><th>R² punti</th><th>RMSE punti</th><th>N ore</th></tr></thead><tbody>`;
+const unid = f => ['alpha','n'].filter(k=>f.ci95[k][0]>0 && f.ci95[k][1]/f.ci95[k][0]>10);
+let h = `<thead><tr><th>Prof.</th><th>Ramo</th><th>θr</th><th>θs</th><th>α [1/kPa]</th><th>1/α [kPa]</th><th>n</th><th>R² classi</th><th>RMSE punti</th><th>N ore</th><th>Ore fuori equilibrio escluse</th><th>Ore con θ estrapolato</th><th>Stato</th></tr></thead><tbody>`;
 for (const d of depths) for (const b of ['drying','wetting']) {
-  const f = D.depths[d].fits[b], p=f.params, e=f.stderr, ab=new Set(f.params_at_bound);
-  const cell=(k,dig)=>`<td class="num${ab.has(k)?' bound':''}">${fmt(p[k],dig)}<span class="muted"> ±${fmt(e[k],dig)}</span>${ab.has(k)?' <span class="flag">vincolo</span>':''}</td>`;
-  h += `<tr><td>${d} cm</td><td><span class="pill ${b}">${b}</span></td>${cell('theta_r',3)}${cell('theta_s',3)}${cell('alpha',3)}<td class="num">${fmt(f.air_entry_kPa_1_over_alpha,2)}</td>${cell('n',3)}<td class="num">${fmt(f.fit_bins.r2,3)}</td><td class="num">${fmt(f.all_points.r2,3)}</td><td class="num">${fmt(f.all_points.rmse,4)}</td><td class="num">${f.all_points.n}</td></tr>`;
+  const f = D.depths[d].fits[b], p=f.params, ci=f.ci95, ab=new Set(f.params_at_bound), un=unid(f);
+  const cell=(k,dig)=>`<td class="num${ab.has(k)?' bound':''}">${fmt(p[k],dig)}<span class="muted"> (${fmt(ci[k][0],dig)}, ${fmt(ci[k][1],dig)})</span>${ab.has(k)?' <span class="flag">vincolo</span>':''}</td>`;
+  h += `<tr${un.length?' style="opacity:.6"':''}><td>${d} cm</td><td><span class="pill ${b}">${b}</span></td>${cell('theta_r',3)}${cell('theta_s',3)}${cell('alpha',3)}<td class="num">${fmt(f.air_entry_kPa_1_over_alpha,1)}<span class="muted"> (${fmt(ci.air_entry_kPa[0],1)}, ${fmt(ci.air_entry_kPa[1],1)})</span></td>${cell('n',2)}<td class="num">${fmt(f.fit_bins.r2,3)}</td><td class="num">${fmt(f.all_points.rmse,4)}</td><td class="num">${f.all_points.n}</td><td class="num">${f.n_noneq_excluded||'–'}</td><td class="num">${(f.frac_extrapolated*100).toFixed(1)}%</td><td>${un.length?'<span class="flag">non identificabile ('+un.join(', ')+')</span>':'ok'}</td></tr>`;
 }
 pt.innerHTML = h+'</tbody>';
 
 // ---- hysteresis table
-const refS=[1,10,100,1000];
-let hh = `<thead><tr><th>Prof.</th><th></th>${refS.map(s=>`<th>s = ${s} kPa</th>`).join('')}</tr></thead><tbody>`;
+const refS=D.config.hysteresis_ref_s_kPa;
+let hh = `<thead><tr><th>Prof.</th><th>Campo comune [kPa]</th>${refS.map(s=>`<th>s = ${s} kPa</th>`).join('')}</tr></thead><tbody>`;
 for (const d of depths){
-  const fd=D.depths[d].fits.drying, fw=D.depths[d].fits.wetting;
-  const lo=Math.max(fd.s_p05_p95[0],fw.s_p05_p95[0]), hi=Math.min(fd.s_p05_p95[1],fw.s_p05_p95[1]);
-  hh += `<tr><td>${d} cm</td><td></td>${refS.map(s=> (s<lo||s>hi)?'<td class="num muted">fuori campo</td>':`<td class="num">${fmt(vg(s,fd.params)-vg(s,fw.params),3)}</td>`).join('')}</tr>`;
+  const H=D.depths[d].hysteresis;
+  hh += `<tr><td>${d} cm</td><td class="num">${fmt(H.s_common[0],1)}–${fmt(H.s_common[1],0)}</td>${refS.map(s=>{ const i=H.ref_s.indexOf(s); if(i<0) return '<td class="num muted">fuori campo</td>';
+    const v=H.dtheta[i], c=H.ci95[i], sig=c[0]>0||c[1]<0;
+    return `<td class="num"${sig?' style="font-weight:600"':''}>${fmt(v,3)} <span class="muted">(${fmt(c[0],3)}, ${fmt(c[1],3)})</span>${sig&&v<0?' <span class="flag">inversa</span>':''}</td>`; }).join('')}</tr>`;
 }
 document.getElementById('htable').innerHTML = hh+'</tbody>';
+
+// ---- QC and sensitivity
+let hq = `<thead><tr><th>Prof.</th><th>Ore valide</th><th>Campo della calibrazione dello strato [m³/m³]</th><th>Ore con θ estrapolato</th><th>Ore fuori equilibrio (drying · wetting · indeterminate)</th><th>Fuori equilibrio con tolleranza 0,01 · 0,02 · 0,03</th><th>Mesi con più ore fuori equilibrio</th></tr></thead><tbody>`;
+for (const d of depths){ const q=D.depths[d].qc, nb=q.noneq_by_branch, t=q.noneq_counts_by_tol, mm=Object.entries(q.noneq_months).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  hq += `<tr><td>${d} cm</td><td class="num">${q.hours_valid}</td><td class="num">${fmt(q.theta_cal_range[0],3)}–${fmt(q.theta_cal_range[1],3)}</td><td class="num">${q.hours_extrapolated} (${(q.hours_extrapolated/q.hours_valid*100).toFixed(1)}%)</td><td class="num">${nb.drying} · ${nb.wetting} · ${nb.undetermined}</td><td class="num">${t['0.01']} · ${t['0.02']} · ${t['0.03']}</td><td>${mm.map(([m,n])=>m.slice(5,7)+'/'+m.slice(2,4)+': '+n).join(', ')}</td></tr>`; }
+document.getElementById('qctable').innerHTML = hq+'</tbody>';
+const SL={wetting_all_points:'wetting, tutti i punti', 'wetting_noneq_tol_0.01':'wetting, tolleranza 0,01', 'wetting_noneq_tol_0.03':'wetting, tolleranza 0,03', drying_without_extrapolated:'drying senza θ estrapolato', wetting_without_extrapolated:'wetting senza θ estrapolato'};
+let hs = `<thead><tr><th>Prof.</th><th>Variante</th><th>θr</th><th>θs</th><th>α [1/kPa]</th><th>n</th><th>N ore</th><th>Parametri al vincolo</th></tr></thead><tbody>`;
+for (const d of depths){ const R=D.depths[d], w=R.fits.wetting;
+  hs += `<tr><td>${d} cm</td><td><b>wetting, tolleranza 0,02 (usato)</b></td><td class="num">${fmt(w.params.theta_r,3)}</td><td class="num">${fmt(w.params.theta_s,3)}</td><td class="num">${fmt(w.params.alpha,3)}</td><td class="num">${fmt(w.params.n,2)}</td><td class="num">${w.all_points.n}</td><td>${w.params_at_bound.join(', ')||'–'}</td></tr>`;
+  for (const [k,lab] of Object.entries(SL)){ const x=R.sensitivity[k]; if(!x) continue;
+    hs += x.error?`<tr><td></td><td>${lab}</td><td colspan="6" class="muted">${x.error}</td></tr>`:`<tr><td></td><td>${lab}</td><td class="num">${fmt(x.params.theta_r,3)}</td><td class="num">${fmt(x.params.theta_s,3)}</td><td class="num">${fmt(x.params.alpha,3)}</td><td class="num">${fmt(x.params.n,2)}</td><td class="num">${x.n}</td><td>${x.params_at_bound.join(', ')||'–'}</td></tr>`; } }
+document.getElementById('senstable').innerHTML = hs+'</tbody>';
 
 // ---- time scale (shared across panels)
 const tnum = s => Date.parse(s.replace(' ','T')+':00Z')/864e5;
@@ -331,15 +360,18 @@ function render(){
     const yr=[ymin-pad,ymax+pad], xr=[-1.1,Math.log10(4000)];
     for (const b of ['drying','wetting']){
       const idx=[], uidx=[];
-      P.branch.forEach((x,i)=>{ if(x===b) idx.push(i); else if(x==='undetermined') uidx.push(i); });
+      const nidx=[];
+      P.branch.forEach((x,i)=>{ if(x===b){ if(b==='wetting' && P.noneq[i]) nidx.push(i); else idx.push(i);} else if(x==='undetermined') uidx.push(i); });
       const tr=[];
       if(showU) tr.push({type:'scatter',mode:'markers',x:uidx.map(i=>P.s[i]),y:uidx.map(i=>P.theta[i]),
         marker:{size:3,color:und,opacity:.35},hoverinfo:'skip',name:'indeterminati'});
       tr.push({type:'scatter',mode:'markers',name:b,
         x:idx.map(i=>P.s[i]), y:idx.map(i=>P.theta[i]), text:idx.map(i=>P.t[i]),
-        marker:{size:4,color:idx.map(i=>P.tn[i]),colorscale:'Viridis',cmin:t0,cmax:t1,opacity:.8,
+        marker:{size:4,color:idx.map(i=>P.tn[i]),symbol:idx.map(i=>P.extrap[i]?'circle-open':'circle'),colorscale:'Viridis',cmin:t0,cmax:t1,opacity:.8,
           colorbar:{tickvals,ticktext,thickness:10,len:.9,outlinewidth:0,tickfont:{color:mu,size:10}}},
         hovertemplate:'%{text}<br>s = %{x:.1f} kPa<br>θ = %{y:.3f}<extra></extra>'});
+      if(nidx.length) tr.push({type:'scatter',mode:'markers',name:'fuori equilibrio',x:nidx.map(i=>P.s[i]),y:nidx.map(i=>P.theta[i]),text:nidx.map(i=>P.t[i]),
+        marker:{size:5,symbol:'x-thin',line:{width:1.2,color:und}},hovertemplate:'%{text}<br>fuori equilibrio, escluso dal fit<br>s = %{x:.1f} kPa<br>θ = %{y:.3f}<extra></extra>'});
       const F=R.fits[b];
       tr.push({type:'scatter',mode:'markers',x:F.bins.s,y:F.bins.theta,customdata:F.bins.count,
         marker:{symbol:'x-thin',size:7,line:{width:1.5,color:fg}},
@@ -352,13 +384,17 @@ function render(){
       Plotly.react(`p-${d}-${b}`,tr,L,cfgP);
     }
     // comparison
-    const cmp=[];
+    const cmp=[], H=R.hysteresis;
+    cmp.push({type:'scatter',mode:'lines',x:[H.s_common[0],H.s_common[1],H.s_common[1],H.s_common[0],H.s_common[0]],y:[yr[0],yr[0],yr[1],yr[1],yr[0]],fill:'toself',fillcolor:css('--band'),line:{width:0},name:'campo comune',hoverinfo:'skip'});
     for (const b of ['drying','wetting']){
-      const F=R.fits[b], col=b==='drying'?dry:wet;
+      const F=R.fits[b], col=b==='drying'?dry:wet, [a,z]=F.s_p05_p95;
       cmp.push({type:'scatter',mode:'markers',x:F.bins.s,y:F.bins.theta,name:b+' (mediane)',
         marker:{size:6,color:col,opacity:.55},hovertemplate:b+' mediana<br>s = %{x:.2f}<br>θ = %{y:.3f}<extra></extra>'});
-      cmp.push({type:'scatter',mode:'lines',x:R.curve_s,y:F.curve_theta,name:b,
+      const inS=R.curve_s.map((x,i)=>(x>=a&&x<=z)?F.curve_theta[i]:null), outS=R.curve_s.map((x,i)=>(x>=a&&x<=z)?null:F.curve_theta[i]);
+      cmp.push({type:'scatter',mode:'lines',x:R.curve_s,y:inS,name:b,
         line:{color:col,width:2.5,dash:b==='drying'?'solid':'dash'},hovertemplate:b+'<br>s = %{x:.2f}<br>θ = %{y:.3f}<extra></extra>'});
+      cmp.push({type:'scatter',mode:'lines',x:R.curve_s,y:outS,name:b+' fuori dal campo osservato',showlegend:false,
+        line:{color:col,width:1.2,dash:'dot'},hovertemplate:b+' (estrapolata)<br>s = %{x:.2f}<br>θ = %{y:.3f}<extra></extra>'});
     }
     const Lc=baseLayout('suzione s [kPa]','θ [m³/m³]',{showlegend:true,
       legend:{orientation:'h',x:0,y:1.0,yanchor:'bottom',font:{size:11,color:mu}}});
@@ -372,6 +408,15 @@ function render(){
         x:ix.map(i=>P.t[i]),y:ix.map(i=>P.theta[i]),marker:{size:3,color:col},
         hovertemplate:'%{x}<br>θ = %{y:.3f}<extra>'+b+'</extra>'});
     }
+    { const ex=[]; P.extrap.forEach((x,i)=>{if(x)ex.push(i)}); const u=D.config.qc.extrap_uncert_theta;
+      if(ex.length){ // one closed polygon per contiguous run of extrapolated hours, separated by nulls (fill 'toself' fills each segment)
+        const X=[], Y=[]; let i=0;
+        while(i<P.t.length){ if(!P.extrap[i]){i++;continue;} let j=i; while(j+1<P.t.length && P.extrap[j+1]) j++;
+          const r=[]; for(let k=i;k<=j;k++) r.push(k);
+          r.forEach(k=>{X.push(P.t[k]);Y.push(P.theta[k]+u);}); r.slice().reverse().forEach(k=>{X.push(P.t[k]);Y.push(P.theta[k]-u);});
+          X.push(P.t[i]); Y.push(P.theta[i]+u); X.push(null); Y.push(null); i=j+1; }
+        ts.unshift({type:'scatter',mode:'lines',x:X,y:Y,fill:'toself',fillcolor:'rgba(128,128,128,0.22)',line:{width:0},connectgaps:false,hoverinfo:'skip',
+          name:`θ fuori calibrazione ±${String(u).replace('.',',')}`}); } }
     const Lt=baseLayout('','θ [m³/m³]',{showlegend:true,legend:{orientation:'h',x:0,y:1,yanchor:'bottom',font:{size:11,color:mu}}});
     Lt.xaxis.type='date'; Lt.margin.t=26; Lt.margin.b=30;
     Plotly.react(`p-${d}-ts`,ts,Lt,cfgP);
