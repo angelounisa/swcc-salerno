@@ -80,7 +80,7 @@ footer{font-size:.8rem;color:var(--muted)}
 .plot.prof{height:520px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (max-width:900px){.grid2{grid-template-columns:1fr}}
-#colsvg svg{display:block;max-width:100%;height:auto}
+#colsvg svg,#m-colsvg svg{display:block;max-width:100%;height:auto}
 #kTable th,#kTable td{white-space:normal}
 </style>
 
@@ -92,6 +92,7 @@ footer{font-size:.8rem;color:var(--muted)}
       <button role="tab" id="tab-nv" data-site="nv">Senza vegetazione · 15/30/60 cm</button>
       <button role="tab" id="tab-v" data-site="v">Vegetata · 15/35/60 cm</button>
       <button role="tab" id="tab-sim" data-site="sim">Confronto vegetata – senza vegetazione</button>
+      <button role="tab" id="tab-mod" data-site="mod">Modello numerico</button>
     </nav>
   </header>
 
@@ -234,11 +235,72 @@ footer{font-size:.8rem;color:var(--muted)}
       <ul id="cmpNotes"></ul>
     </section>
   </div>
+  <div id="m-simview" class="stack" hidden>
+    <p class="muted" style="max-width:95ch">Risultati del solutore alle differenze finite (equazione di Richards 1D in forma mista, schema di pendio indefinito a 28°), tenuti separati dalle analisi sui soli dati delle altre schede. Le curve di ritenzione sono le curve principali di drying misurate (una per strato, comune alle due parcelle); la conducibilità parte da quella del drenaggio notturno; solo due fattori per parcella sono calibrati sui periodi di drying del 2025 e il 2026 è usato come verifica. Il modello serve a interpretare i dati (bilancio idrico, acqua sotto i sensori), non a sostituirli: dove modello e misure divergono valgono le misure.</p>
+
+    <div class="dhead"><h2>1 · Modello numerico</h2><span class="muted">pendio indefinito: dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Dominio e condizioni al contorno</h3><div id="m-colsvg" style="overflow-x:auto"></div></div>
+      <div class="stack" style="gap:14px;min-width:0">
+        <div><h3 style="margin-bottom:6px">Caratteristiche geotecniche di laboratorio</h3><div class="tablebox"><table id="m-geoTable"></table></div></div>
+        <div><h3 style="margin-bottom:6px">Zone del modello</h3><div class="tablebox"><table id="m-zoneTable"></table></div></div>
+      </div>
+    </div>
+    <div class="tablebox"><table id="m-bcTable"></table></div>
+
+    <div class="dhead"><h2>2 · Calibrazione sui periodi di drying</h2><span class="muted">due soli fattori liberi; J = media sui sensori di RMSE(S<sub>e</sub>)/0,1 + RMSE(log₁₀ suzione)/0,3 nel drying 2025; più scuro = errore minore</span></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · mappa dell'errore J</h3><div class="plot" id="m-jm-NV" style="height:360px"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · mappa dell'errore J</h3><div class="plot" id="m-jm-V" style="height:360px"></div></div>
+    </div>
+    <div class="tablebox"><table id="m-candTable"></table></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · S<sub>e</sub> e suzione nei due drying</h3><div class="plot prof" id="m-dw-NV"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · S<sub>e</sub> e suzione nei due drying</h3><div class="plot prof" id="m-dw-V"></div></div>
+    </div>
+    <div class="tablebox"><table id="m-perfTable"></table></div>
+    <div class="tablebox"><table id="m-slopeTable"></table></div>
+
+    <div class="dhead"><h2>3 · Quanta pioggia si infiltra</h2><span class="muted">stima dai sensori evento per evento (non usa la temperatura) e stima dal modello</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Acqua accumulata nel profilo per evento di pioggia</h3><div class="plot" id="m-infPlot" style="height:420px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0">
+        <div class="tablebox"><table id="m-infTable"></table></div>
+        <div class="tablebox"><table id="m-infModel"></table></div>
+      </div>
+    </div>
+    <div class="tablebox"><table id="m-wbTable"></table></div>
+
+    <div class="dhead"><h2>4 · Profili calcolati</h2><span class="muted">S<sub>e</sub>(z) e suzione(z) negli istanti delle due stagioni secche; i punti sono le misure nello stesso istante</span></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · S<sub>e</sub></h3><div class="plot prof" id="m-pf-NV-Se"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · S<sub>e</sub></h3><div class="plot prof" id="m-pf-V-Se"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · suzione</h3><div class="plot prof" id="m-pf-NV-s"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · suzione</h3><div class="plot prof" id="m-pf-V-s"></div></div>
+    </div>
+
+    <div class="dhead"><h2>5 · Serie temporali simulate e osservate</h2><span class="muted">periodo completo in S<sub>e</sub>; fasce = finestre di drying</span></div>
+    <div class="card"><div class="plot sim" id="m-tsPlot"></div></div>
+
+    <div class="dhead"><h2>6 · Verifica del solutore</h2><span class="muted">stesso problema risolto con un secondo codice indipendente (forma in carico, griglia di 0,25 cm, integrazione BDF a passo adattivo): linee = riferimento, cerchi = solutore del modello</span></div>
+    <div class="grid3">
+      <div class="card"><h3>Assorbimento radicale</h3><div class="plot" id="m-ver-T1"></div></div>
+      <div class="card"><h3>Infiltrazione e ridistribuzione</h3><div class="plot" id="m-ver-T2"></div></div>
+      <div class="card"><h3>Evaporazione dalla superficie</h3><div class="plot" id="m-ver-T3"></div></div>
+    </div>
+    <div class="tablebox"><table id="m-verTable"></table></div>
+
+    <section class="notes">
+      <h2>Note e ipotesi</h2>
+      <ul id="m-dryNotes"></ul>
+    </section>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script>const DATA = /*DATA*/null;</script>
 <script>window.CMP = /*CMP*/null;</script>
+<script>window.SIM2 = /*SIM2*/null;</script>
 <script>
 (function(){
 const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;
@@ -424,17 +486,18 @@ function render(){
 }
 document.getElementById('showU').addEventListener('change',render);
 document.getElementById('showFit').addEventListener('change',render);
-const rerenderAll=()=>{ render(); window.SimView && window.SimView.redraw(); };
+const rerenderAll=()=>{ render(); window.SimView && window.SimView.redraw(); window.ModView && !document.getElementById('m-simview').hidden && window.ModView.redraw(); };
 const mq=window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',rerenderAll);
 new MutationObserver(rerenderAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 const KEY={nv:'NV',v:'V'};
 function show(id){
-  const isSim = id==='sim';
-  document.getElementById('analysis').hidden = isSim;
+  const isSim = id==='sim', isMod = id==='mod';
+  document.getElementById('analysis').hidden = isSim || isMod;
   document.getElementById('simview').hidden = !isSim;
-  if (isSim) {
-    document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.site==='sim')));
-    window.SimView.activate(); return;
+  document.getElementById('m-simview').hidden = !isMod;
+  if (isSim || isMod) {
+    document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.site===id)));
+    (isSim ? window.SimView : window.ModView).activate(); return;
   }
   if(!KEY[id]) id='nv';
   SITE=id; D=ALL[KEY[id]]; depths=Object.keys(D.depths);

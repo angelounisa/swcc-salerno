@@ -4,7 +4,9 @@
 const S2 = window.SIM2, SW = S2.swcc, KF = S2.kfield, EV = S2.events, TC = S2.thetaCal, BV = S2.baselineVertical, EX = S2.excess;
 const BETA = S2.sites.NV.model.slope_deg, VF = S2.verify, LAYFIT = S2.sites.NV.fits;
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const $ = id => document.getElementById(id);
+// model tab: every element id carries the prefix m- (the comparison tab uses the same names); sections removed from this tab resolve to a detached div
+const $ = id => document.getElementById('m-'+id) || document.createElement('div');
+const PR = (id, ...a) => { const e = document.getElementById('m-'+id); if (e) return Plotly.react(e, ...a); };
 const SITES = ['NV','V'], LABEL = {NV:'Senza vegetazione', V:'Vegetata'}, COL = {NV:'--nv', V:'--veg'};
 const PAIRS = [['15','15'],['30','35'],['60','60']];
 const CMH = 360000, CM_PER_KPA = 10.1972;
@@ -136,7 +138,7 @@ function fill(){
     `<b>Infiltrazione.</b> Nel modello l'intercettazione non è calibrata: usa le capacità dei quattro strati di vegetazione riportate in sito. Ne risulta che al suolo sotto bosco arriva il ${Math.round(FT('V').net_fraction*100)}% della pioggia, in accordo con il 59–67% ricostruito in sito in due eventi. I sensori vedono molto meno (${Math.round(sm.frac_V*100)}% contro ${Math.round(sm.frac_NV*100)}%), ma è un limite inferiore: non conta l'acqua che supera i 75 cm o resta sopra il sensore a 15 cm.`,
     `<b>Calibrazione di θ.</b> Dal file calibrato della parcella senza vegetazione (fino al ${dIt(TC.calibrated_file_last_time)}) sono state ricavate due funzioni dell'uscita del sensore in mV: una per A1 (15 cm) e una per A2 (30 e 60 cm, identica), che riproducono il file con uno scarto di ${fx(Math.max(TC.functions.A1.rmse,TC.functions.A2.rmse),4)} m³/m³. In quel file θ è in ritardo di un'ora rispetto alla suzione (e al θ grezzo): il ritardo è stato tolto. Le funzioni sono applicate a tutta la serie e anche alla parcella vegetata, assumendo stessi terreni e stessi sensori; a 60 cm nella vegetata il ${Math.round(TC.applied.V_60.frac_extrapolated*100)}% delle misure è sotto il campo coperto dalla calibrazione.`,
     `<b>Temperature.</b> La temperatura dell'aria misurata in campo aperto (a 40 cm dal suolo, 17/03–03/09/2025) copre tutto il drying 2025; per il resto è stimata dalla temperatura del suolo, che in media è 3 °C più alta. Il sensore a 40 cm dal suolo tocca 49 °C nelle ore calde: la media giornaliera può essere sovrastimata.`,
-    `<b>Ipotesi rimaste.</b> k = 0,5 nella ripartizione con il LAI; lunghezza di decadimento dei macropori 5 cm (il valore più grande compatibile con i punti di K sotto 5 kPa, entro l'accuratezza di ±2 kPa del sensore di suzione); passaggio A1/A2 a 20 cm; pendio indefinito con β = 32° (dalle slide; il lavoro riporta 25–30°, localmente oltre 35°); profondità dei sensori intese come verticali; nessuna isteresi.`];
+    `<b>Ipotesi rimaste.</b> k = 0,5 nella ripartizione con il LAI; lunghezza di decadimento dei macropori 5 cm (il valore più grande compatibile con i punti di K sotto 5 kPa, entro l'accuratezza di ±2 kPa del sensore di suzione); passaggio A1/A2 a 20 cm; pendio indefinito con β = ${fx(BETA,0)}° (pendenza media adottata; le slide ALERT riportano 32°, il lavoro 25–30°, localmente oltre 35°: con 32° i due fattori calibrati restano uguali e il bilancio cambia di pochi millimetri); profondità dei sensori intese come verticali; nessuna isteresi.`];
   $('dryNotes').innerHTML = notes.map(x=>'<li>'+x+'</li>').join('');
   $('colsvg').innerHTML = columnSVG();
 }
@@ -189,7 +191,7 @@ function plots(){
     const xs=SW.sensors[Object.keys(sh.sensors)[0]].curve.s;
     tr.push({type:'scatter',mode:'lines',x:xs,y:xs.map(s=>seVG(s,sh.alpha,sh.n)),name:'curva comune '+lay,line:{color:fg,width:2.5},hovertemplate:'curva comune<br>s = %{x:.1f} kPa<br>S<sub>e</sub> = %{y:.2f}<extra></extra>'});
     const L=base('suzione s [kPa]','saturazione efficace S<sub>e</sub>'); L.xaxis.type='log'; L.xaxis.dtick=1; L.xaxis.range=[-0.05,Math.log10(5000)]; L.yaxis.range=[-0.03,1.08];
-    Plotly.react('se-'+lay,tr,L,cfgP); });
+    PR('se-'+lay,tr,L,cfgP); });
   // 2. K(s)
   { const tr=[], sy={NV:'circle',V:'diamond'}, cl={'NV 22.5 cm':'--nv','NV 45 cm':'--dry','V 25 cm':'--veg','V 47.5 cm':'--wet'};
     Object.entries(KF.planes).forEach(([k,p]) => { const s=k.split(' ')[0], nm=`${LABEL[s]} · piano a ${k.slice(s.length+1)}`;
@@ -199,14 +201,14 @@ function plots(){
     tr.push({type:'scatter',mode:'lines',x:xs,y:xs.map((s,i)=>z.Ks_cm_h*kr[i]+z.Kmac_cm_h*Math.exp(-s*CM_PER_KPA/z.hmac_cm)),name:'modello A2 (matrice + macropori)',line:{color:fg,width:2.5},hovertemplate:'modello<br>s = %{x:.1f} kPa<br>K = %{y:.2g} cm/h<extra></extra>'});
     tr.push({type:'scatter',mode:'lines',x:xs,y:xs.map((s,i)=>GEO[1].Ks*CMH*kr[i]),name:'K<sub>sat</sub> di laboratorio × Mualem',line:{color:mu,width:1.5,dash:'dot'},hovertemplate:'laboratorio × Mualem<br>s = %{x:.1f} kPa<br>K = %{y:.2g} cm/h<extra></extra>'});
     const L=base('suzione s [kPa]','conducibilità K [cm/h]'); L.xaxis.type='log'; L.yaxis.type='log'; L.xaxis.dtick=1; L.yaxis.dtick=1; L.yaxis.range=[-5.2,1]; L.xaxis.range=[-0.3,2.5];
-    Plotly.react('kPlot',tr,L,cfgP); }
+    PR('kPlot',tr,L,cfgP); }
   // verification profiles: reference (lines) vs solver (markers)
   ['T1','T2','T3'].forEach(cn => { const c=VF.ref.cases[cn], zr=VF.ref.z_cm, sim=VF.sim[cn][VF.dz_model], pal=['#c9a227','#8a5a9e','#2b7a8c','#b0651f'], tr=[];
     c.hours.forEach((hr,j) => { const lab = hr>=48 ? (hr/24)+' giorni' : hr+' h';
       tr.push({type:'scatter',mode:'lines',x:c.profiles[hr].map(v=>Math.max(-v/CM_PER_KPA,0.05)),y:zr,name:lab,legendgroup:lab,line:{color:pal[j],width:2},hovertemplate:lab+'<br>z = %{y} cm<br>s = %{x:.1f} kPa<extra>riferimento</extra>'});
       tr.push({type:'scatter',mode:'markers',x:sim[hr].filter((_,i)=>i%5===0).map(v=>Math.max(-v/CM_PER_KPA,0.05)),y:zr.filter((_,i)=>i%5===0),legendgroup:lab,showlegend:false,marker:{size:6,color:pal[j],symbol:'circle-open',line:{width:1.5}},hovertemplate:lab+'<br>z = %{y} cm<br>s = %{x:.1f} kPa<extra>solutore</extra>'}); });
     const L=base('suzione s [kPa]','profondità z [cm]'); L.yaxis.autorange='reversed'; L.xaxis.type='log'; L.legend.font.size=10;
-    Plotly.react('ver-'+cn,tr,L,cfgP); });
+    PR('ver-'+cn,tr,L,cfgP); });
   // 4. J maps
   SITES.forEach(s => { const c=CAL(s), ef=c.config.eFactor, lk=c.config.log10_kmult, zmin=Math.min(...c.grid_J.flat());
     const tr=[{type:'heatmap',x:ef,y:lk,z:c.grid_J,zmin,zmax:zmin*2.2,colorscale:[[0,'#143d6b'],[0.5,'#7fa9d1'],[1,'#eef3f8']],colorbar:{title:{text:'J',font:{color:mu}},thickness:10,outlinewidth:0,tickfont:{color:mu,size:10}},hovertemplate:'ETP × %{x}<br>K × 10^%{y}<br>J = %{z:.2f}<extra></extra>'},
@@ -214,7 +216,7 @@ function plots(){
       {type:'scatter',mode:'markers',x:[1],y:[0],name:'senza calibrazione',marker:{size:11,symbol:'x-thin',line:{width:2.5,color:'#f2c14e'}},hovertemplate:'senza calibrazione<extra></extra>'}];
     if (c.free_best.eFactor!==c.chosen.eFactor || c.free_best.log10_kmult!==c.chosen.log10_kmult) tr.push({type:'scatter',mode:'markers',x:[c.free_best.eFactor],y:[c.free_best.log10_kmult],name:'minimo libero',marker:{size:11,symbol:'diamond-open',line:{width:2.5,color:'#f2c14e'}},hovertemplate:'minimo libero<extra></extra>'});
     const L=base('fattore di ETP','moltiplicatore della K di matrice'); L.yaxis.tickvals=[-1,-0.5,0,0.5,1,1.5]; L.yaxis.ticktext=['0,1','0,3','1','3','10','30']; L.margin.r=4;
-    Plotly.react('jm-'+s,tr,L,cfgP); });
+    PR('jm-'+s,tr,L,cfgP); });
   // drying windows
   SITES.forEach(s => { const R=S2.sites[s], D=CAL(s), ks=Object.keys(R.Se), shade=['#c9a227','#8a5a9e','#2b7a8c'], tr=[];
     ks.forEach((k,j) => { const xs=[], ot=[], os=[], st=[], ss=[];
@@ -227,13 +229,13 @@ function plots(){
     L.xaxis={type:'date',gridcolor:gr,linecolor:ln,tickfont:{color:mu},anchor:'y2',rangebreaks:[{bounds:[T[D.series.calib.i1],T[D.series.valid.i0]]}]};
     L.yaxis={title:{text:'S<sub>e</sub>',font:{color:mu,size:11}},domain:[0.54,1],gridcolor:gr,linecolor:ln,zeroline:false,tickfont:{color:mu}};
     L.yaxis2={title:{text:'suzione [kPa]',font:{color:mu,size:11}},domain:[0,0.46],type:'log',dtick:1,gridcolor:gr,linecolor:ln,tickfont:{color:mu}};
-    Plotly.react('dw-'+s,tr,L,cfgP); });
+    PR('dw-'+s,tr,L,cfgP); });
   // 5. infiltration scatter
   { const tr=[]; SITES.forEach(s => { const e=EV.events.filter(v=>v['dS_'+s]!=null);
       tr.push({type:'scatter',mode:'markers',x:e.map(v=>v.P_mm),y:e.map(v=>v['dS_'+s]),text:e.map(v=>dIt(v.start)),name:LABEL[s],marker:{size:9,color:css(COL[s]),opacity:.8,symbol:s==='V'?'diamond':'circle',line:{width:1,color:pn}},hovertemplate:'%{text}<br>pioggia %{x:.0f} mm<br>accumulo %{y:.0f} mm<extra>'+LABEL[s]+'</extra>'}); });
     tr.push({type:'scatter',mode:'lines',x:[0,210],y:[0,210],name:'accumulo = pioggia',line:{color:mu,width:1,dash:'dot'},hoverinfo:'skip'});
     const L=base('pioggia cumulata dell\'evento [mm]','acqua accumulata in 0–75 cm [mm]'); L.yaxis.range=[-5,100]; L.xaxis.range=[0,215];
-    Plotly.react('infPlot',tr,L,cfgP); }
+    PR('infPlot',tr,L,cfgP); }
   // 6. profiles
   SITES.forEach(s => { const R=S2.sites[s], M=R.model, cols=instColors(M), z=R.z_cm;
     for (const v of ['Se','s']) { const tr=[];
@@ -244,7 +246,7 @@ function plots(){
         tr.push({type:'scatter',mode:'markers',x:ox,y:od.map(Number),legendgroup:lab,showlegend:false,marker:{size:9,color:cols[k],line:{width:1.5,color:fg},symbol:dash==='dash'?'diamond':'circle'},hovertemplate:`${lab}<br>z = %{y} cm<br>${v==='Se'?'S<sub>e</sub> = %{x:.2f}':'s = %{x:.1f} kPa'}<extra>misura</extra>`}); });
       const L=base(v==='Se'?'saturazione efficace S<sub>e</sub>':'suzione s [kPa]','profondità z [cm]'); L.yaxis.autorange='reversed'; L.legend.font.size=10;
       if(v==='s'){ L.xaxis.type='log'; L.xaxis.dtick=1; L.xaxis.range=[-1,5]; } else L.xaxis.range=[-0.05,1.1];
-      Plotly.react(`pf-${s}-${v}`,tr,L,cfgP); } });
+      PR(`pf-${s}-${v}`,tr,L,cfgP); } });
   // 7. full series in Se
   const days=Object.keys(S2.P_daily), tr=[{type:'bar',x:days,y:days.map(d=>S2.P_daily[d]),name:'pioggia in campo aperto',marker:{color:css('--wet')},yaxis:'y',hovertemplate:'%{x}<br>%{y:.1f} mm/g<extra></extra>'}];
   const doms=[[0.54,0.75],[0.27,0.48],[0,0.21]];
@@ -257,11 +259,11 @@ function plots(){
     xaxis:{type:'date',gridcolor:gr,linecolor:ln,tickfont:{color:mu},anchor:'y4'}, yaxis:{title:{text:'pioggia [mm/g]',font:{size:11,color:mu}},domain:[0.79,1],gridcolor:gr,tickfont:{color:mu}},
     annotations:[['calib','drying 2025 · calibrazione'],['valid','drying 2026 · validazione']].map(([k,t])=>({xref:'x',yref:'paper',x:T[Math.round((W[k].i0+W[k].i1)/2)],y:1.0,text:t,showarrow:false,font:{size:11,color:mu},yanchor:'bottom'}))};
   PAIRS.forEach((pr,j)=>{ L['yaxis'+(j+2)]={title:{text:`S<sub>e</sub> ${pr[0]}/${pr[1]} cm`,font:{size:11,color:mu}},domain:doms[j],gridcolor:gr,linecolor:ln,zeroline:false,tickfont:{color:mu}}; });
-  Plotly.react('tsPlot',tr,L,cfgP);
+  PR('tsPlot',tr,L,cfgP);
 }
 let inited=false;
 function activate(){ if(!inited){ inited=true; fill(); } plots(); }
 function redraw(){ if(inited && !$('simview').hidden) plots(); }
-window.SimView = { activate, redraw };
+window.ModView = { activate, redraw };
 })();
 </script>

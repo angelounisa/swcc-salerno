@@ -73,6 +73,11 @@ python qc.py NV_cal.xlsx V_cal.xlsx theta_calibration.json swcc_main.json result
 python manifest.py 1.1.0 MANIFEST.json
 ```
 
-## Modello numerico (non usato nella dashboard)
+## Modello numerico (quarta scheda della dashboard)
 
-Il solutore di Richards 1D in schema di pendio indefinito (`sim/solver.js`), la sua calibrazione (`sim/`, `run_pipeline.sh`) e la verifica con un codice indipendente (`verify/`) restano nel repository per un eventuale confronto di stabilità sotto i 60 cm, dove non ci sono sensori (la stabilità mostrata nella dashboard è calcolata dalle sole misure). La pagina con i risultati del modello (`site/drying_view.js`) non è più inclusa nella dashboard; l'ultima versione che la mostra è il commit `cf1965f`.
+Il solutore di Richards 1D in schema di pendio indefinito a 28° (`sim/solver.js`), la sua calibrazione sui periodi di drying (`sim/`, `run_pipeline.sh`) e la verifica con un codice indipendente (`verify/`) producono `sim/sim2_results.json`, mostrato nella scheda "Modello numerico" (`site/drying_view.js`). Le altre schede usano solo i dati misurati.
+
+```bash
+./run_pipeline.sh Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx   # colonna verticale di riferimento, poi pendio a 28°, poi verifiche
+python build.py
+```

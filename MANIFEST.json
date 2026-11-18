@@ -1,6 +1,6 @@
 {
- "version": "1.1.0",
- "created": "2026-11-17",
+ "version": "1.2.0",
+ "created": "2026-11-18",
  "environment": {
   "python": "3.13.18",
   "numpy": "2.5.3",
@@ -110,8 +110,8 @@
     "bytes": 3454
    },
    "build.py": {
-    "sha256": "1dc9d8c8d3f0b565ba7603b5ca8c3d18d390967a2fb0aa63fdfd03a671565cdb",
-    "bytes": 3439
+    "sha256": "a35aefa3a58408e016b0cfe3d119ed8ce948b5f3e1187659418c345b88501a8e",
+    "bytes": 4228
    },
    "manifest.py": {
     "sha256": "8b74d48c5fcdd4145bcad6f32e4a25cf092f3dbdd62333d6d31a4ef459fbc29f",

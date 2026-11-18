@@ -1,9 +1,9 @@
 #!/bin/bash
-# Model pipeline: vertical column (slope 0, saved as baseline) and then infinite slope (32 deg), then checks.
+# Model pipeline: vertical column (slope 0, saved as baseline) and then infinite slope (28 deg), then checks.
 # usage (from the repo root, with the calibrated meter files): ./run_pipeline.sh RAIN NV_CAL V_CAL
 set -euo pipefail
 RAIN=$1; NV=$2; V=$3
-for SLOPE in 0 32; do
+for SLOPE in 0 28; do
   python3 kfield.py "$RAIN" "$NV" "$V" swcc_main.json kfield.json $SLOPE | tail -1
   ( cd sim
     python3 build_models.py ../swcc_main.json ../kfield.json $SLOPE

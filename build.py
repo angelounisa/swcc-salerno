@@ -1,6 +1,6 @@
 """Assemble the dashboard: site/body.html + branch analysis (results_*.json) + data-only comparison of the two plots
--> site/artifact.html (Claude artifact) and repo/docs/index.html (GitHub Pages). The numerical model (sim/, verify/) is
-kept in the repository but is not part of the page."""
++ results of the numerical model (sim/sim2_results.json, own tab, view site/drying_view.js)
+-> site/artifact.html (Claude artifact) and repo/docs/index.html (GitHub Pages)."""
 import json, pathlib, shutil
 body = pathlib.Path('site/body.html').read_text()
 data = json.dumps({'NV': json.load(open('results_NV.json')), 'V': json.load(open('results_V.json'))}, separators=(',', ':'), allow_nan=False)
@@ -11,8 +11,15 @@ CMP = {'cmp': json.load(open('compare.json')), 'swcc': {'sensors': SWm['sensors'
        'thetaCal': json.load(open('cal/theta_calibration.json')), 'eventsSummary': json.load(open('sim/infiltration_events.json'))['summary'],
        'mech': json.load(open('mechanisms.json')), 'stab': json.load(open('stability.json')), 'qc': json.load(open('qc.json'))}
 CMP['stab']['series'] = {k: v for k, v in CMP['stab']['series'].items() if not k.startswith('sig_')}     # suction-stress series not plotted
-assert body.count('/*DATA*/null') == 1 and body.count('/*CMP*/null') == 1
-page = body.replace('/*DATA*/null', data).replace('/*CMP*/null', json.dumps(CMP, separators=(',', ':'), allow_nan=False)) + '\n' + view
+S2 = json.load(open('sim/sim2_results.json')); S2['events'] = json.load(open('sim/infiltration_events.json'))
+S2['swcc'] = {'sensors': SWm['sensors'], 'shared': SWm['shared'], 'config': SWm['config']}; S2['kfield'] = CMP['kfield']
+S2['thetaCal'] = CMP['thetaCal']; S2['baselineVertical'] = json.load(open('sim/baseline_vertical.json')); S2['excess'] = json.load(open('sim/excess.json'))
+S2['verify'] = json.load(open('verify/out_cmp.json'))
+for s_ in S2['sites'].values(): assert s_['model']['slope_deg'] == CMP['stab']['config']['beta_deg'], 'model and stability use different slopes'
+modview = pathlib.Path('site/drying_view.js').read_text()
+assert body.count('/*DATA*/null') == 1 and body.count('/*CMP*/null') == 1 and body.count('/*SIM2*/null') == 1
+page = (body.replace('/*DATA*/null', data).replace('/*CMP*/null', json.dumps(CMP, separators=(',', ':'), allow_nan=False))
+        .replace('/*SIM2*/null', json.dumps(S2, separators=(',', ':'), allow_nan=False)) + '\n' + view + '\n' + modview)
 pathlib.Path('site/artifact.html').write_text(page)
 repo = pathlib.Path('repo'); (repo / 'docs').mkdir(parents=True, exist_ok=True)
 head_end = page.index('</style>') + len('</style>')

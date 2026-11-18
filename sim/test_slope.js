@@ -6,7 +6,7 @@ const fs=require('fs'), S=require('./solver.js'), assert=require('assert');
 // (b)
 const r=0.01, nH=24*400;   // cm/h, 400 days
 const f={P_mm:new Array(nH).fill(r*10), PE_mm:new Array(nH).fill(0)}, fit={theta_r:0.08,theta_s:0.30,alpha:0.07,n:1.48};
-for (const beta of [0,32]) {
+for (const beta of [0,28]) {
   const M={L_cm:100,dz_cm:1,hCrit_cm:-100000,Ss_per_cm:1e-6,hs_cm:-2,dtMin_h:1e-7,dtMax_h:1,maxIter:25,tolTheta:1e-6,tolHsat_cm:0.1,itGrow:4,itShrink:8,outDepths_cm:[50],
     eFactor:1,throughfall:1,tFrac:0,roots:[[0,0],[100,0]],feddes_cm:[0,-1,-1000,-15000],profileHours:[nH-1],slope_deg:beta,
     zones:[{name:'X',zTop_cm:0,zBot_cm:100,ret:'a',Ks_cm_h:0.2,Kmac_cm_h:0,hmac_cm:5}]};
