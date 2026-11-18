@@ -18,7 +18,7 @@ S2['verify'] = json.load(open('verify/out_cmp.json'))
 for s_ in S2['sites'].values(): assert s_['model']['slope_deg'] == CMP['stab']['config']['beta_deg'], 'model and stability use different slopes'
 modview = pathlib.Path('site/drying_view.js').read_text() + '\n' + pathlib.Path('site/exp_view.js').read_text()
 P2 = json.load(open('paper_p2.json')); PA = json.load(open('paper_analysis.json'))
-EXP = {'att': json.load(open('exp/attribution.json')), 'ev': json.load(open('exp/events.json')), 'mem': json.load(open('exp/memory.json')), 'par': S2['params'],
+EXP = {'ev': json.load(open('exp/events.json')), 'mem': json.load(open('exp/memory.json')), 'par': S2['params'],
        'kdata': {'base': P2['base'], 's0_common_kPa': [r['P50_mm']['common_s_before_kPa'] for r in PA['P2']]}}
 assert EXP['ev']['slope_deg'] == CMP['stab']['config']['beta_deg']
 assert body.count('/*DATA*/null') == 1 and body.count('/*CMP*/null') == 1 and body.count('/*SIM2*/null') == 1 and body.count('/*EXP*/null') == 1

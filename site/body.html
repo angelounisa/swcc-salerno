@@ -236,7 +236,7 @@ footer{font-size:.8rem;color:var(--muted)}
     </section>
   </div>
   <div id="m-simview" class="stack" hidden>
-    <p class="muted" style="max-width:95ch">Il solutore alle differenze finite (Richards 1D, pendio indefinito a 28°) non è usato per simulare l'intero periodo, ma per esperimenti numerici che separano i meccanismi: nella colonna il terreno è identico e i fattori con cui il bosco differisce dall'area senza vegetazione (intercettazione, quota di traspirazione, radici, domanda evaporativa, stato iniziale) si accendono uno alla volta. Le curve di ritenzione sono le curve principali di drying misurate; i parametri vengono dalla calibrazione sui periodi di drying (sezione 2) e non sono ricalibrati negli esperimenti.</p>
+    <p class="muted" style="max-width:95ch">Il solutore alle differenze finite (Richards 1D, pendio indefinito a 28°) non è usato per simulare l'intero periodo, ma per esperimenti numerici che separano i meccanismi: nella colonna il terreno è identico e i fattori con cui il bosco differisce dall'area senza vegetazione (intercettazione, quota di traspirazione, radici, domanda evaporativa) si accendono uno alla volta. Le curve di ritenzione sono le curve principali di drying misurate; i parametri vengono dalla calibrazione sui periodi di drying (sezione 2) e non sono ricalibrati negli esperimenti.</p>
 
     <div class="dhead"><h2>1 · Modello numerico</h2><span class="muted">pendio indefinito: dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
     <div class="grid2">
@@ -261,22 +261,17 @@ footer{font-size:.8rem;color:var(--muted)}
     <div class="tablebox"><table id="m-perfTable"></table></div>
     <div class="tablebox"><table id="m-slopeTable"></table></div>
 
-    <div class="dhead"><h2>3 · Esperimento 1 · Inverno: quale fattore del bosco conta</h2><span class="muted">piano fattoriale completo (32 simulazioni) sulla stagione umida 1/10/2025–30/04/2026 con la pioggia oraria reale; partendo dalla colonna senza vegetazione si accendono i fattori del bosco; contributo di ogni fattore = valore di Shapley</span></div>
-    <div class="card"><h3>Contributo di ogni fattore alla differenza bosco − senza vegetazione nel tempo con suzione sotto 10 kPa</h3><div class="plot" id="x-shap" style="height:380px"></div></div>
-    <div class="tablebox"><table id="x-attTable"></table></div>
-    <div class="tablebox"><table id="x-wbTable"></table></div>
-
-    <div class="dhead"><h2>4 · Esperimento 2 · Eventi di progetto</h2><span class="muted">pioggia uniforme in 24 h su colonne con la stessa suzione iniziale uniforme, con e senza bosco, poi 48 h asciutte; pioggia critica = la più piccola che porta la suzione sotto 10 kPa</span></div>
+    <div class="dhead"><h2>3 · Eventi di progetto</h2><span class="muted">pioggia uniforme in 24 h su colonne con la stessa suzione iniziale uniforme, con e senza bosco, poi 48 h asciutte; pioggia critica = la più piccola che porta la suzione sotto 10 kPa</span></div>
     <div class="grid2">
       <div class="card"><h3>Fattore di pioggia equivalente del modello e misurato</h3><div class="plot" id="x-k" style="height:400px"></div></div>
       <div class="card"><h3>Fattore di sicurezza minimo alla base della copertura (120 cm)</h3><div class="plot" id="x-fs" style="height:400px"></div></div>
     </div>
     <div class="tablebox"><table id="x-pcTable"></table></div>
 
-    <div class="dhead"><h2>5 · Esperimento 3 · Memoria della stagione secca</h2><span class="muted">dal profilo di suzione misurato il 15/08/2025, pioggia reale dell'autunno 2025: giorno in cui ogni profondità torna stabilmente sotto 30 kPa (stessa regola dei dati) e pioggia caduta da allora</span></div>
+    <div class="dhead"><h2>4 · Memoria della stagione secca</h2><span class="muted">dal profilo di suzione misurato il 15/08/2025, pioggia reale dell'autunno 2025: giorno in cui ogni profondità torna stabilmente sotto 30 kPa (stessa regola dei dati) e pioggia caduta da allora</span></div>
     <div class="tablebox"><table id="x-memTable"></table></div>
 
-    <div class="dhead"><h2>6 · Verifica del solutore</h2><span class="muted">stesso problema risolto con un secondo codice indipendente (forma in carico, griglia di 0,25 cm, integrazione BDF a passo adattivo): linee = riferimento, cerchi = solutore del modello</span></div>
+    <div class="dhead"><h2>5 · Verifica del solutore</h2><span class="muted">stesso problema risolto con un secondo codice indipendente (forma in carico, griglia di 0,25 cm, integrazione BDF a passo adattivo): linee = riferimento, cerchi = solutore del modello</span></div>
     <div class="grid3">
       <div class="card"><h3>Assorbimento radicale</h3><div class="plot" id="m-ver-T1"></div></div>
       <div class="card"><h3>Infiltrazione e ridistribuzione</h3><div class="plot" id="m-ver-T2"></div></div>

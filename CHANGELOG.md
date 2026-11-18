@@ -2,6 +2,9 @@
 
 Ogni versione corrisponde a un tag git; `MANIFEST.json` contiene lo SHA-256 di dati, script e risultati della versione.
 
+## 1.3.1 — 18/11/2026
+- Tolto dalla scheda del modello l'esperimento invernale di attribuzione: senza ramo di wetting il modello non riproduce la stagione umida (6–7% di ore sotto 10 kPa contro 27% misurato). Restano eventi di progetto e memoria della stagione secca; lo script resta in `exp/`.
+
 ## 1.3.0 — 18/11/2026
 - Scheda "Modello numerico" riorganizzata: tolte le simulazioni dell'intero periodo; aggiunti tre esperimenti numerici (attribuzione invernale dei fattori del bosco, eventi di progetto, memoria della stagione secca).
 

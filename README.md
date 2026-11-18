@@ -75,14 +75,14 @@ python manifest.py 1.1.0 MANIFEST.json
 
 ## Modello numerico (quarta scheda della dashboard)
 
-Il solutore di Richards 1D in schema di pendio indefinito a 28° (`sim/solver.js`), calibrato sui periodi di drying (`sim/`, `run_pipeline.sh`) e verificato con un codice indipendente (`verify/`), non è usato per simulare l'intero periodo ma per tre esperimenti numerici su una colonna con terreno identico, in cui i fattori del bosco si accendono uno alla volta (`exp/`):
+Il solutore di Richards 1D in schema di pendio indefinito a 28° (`sim/solver.js`), calibrato sui periodi di drying (`sim/`, `run_pipeline.sh`) e verificato con un codice indipendente (`verify/`), non è usato per simulare l'intero periodo ma per esperimenti numerici su una colonna con terreno identico, in cui i fattori del bosco si accendono uno alla volta (`exp/`):
 
-- `attribution.js`: piano fattoriale completo (32 simulazioni) sulla stagione umida 2025–26, contributi con i valori di Shapley;
+- `attribution.js`: piano fattoriale sulla stagione umida 2025–26 (valori di Shapley). Non è mostrato nella dashboard: il modello, senza ramo di wetting, dà il 6–7% di ore sotto 10 kPa contro il 27% misurato;
 - `events.js`: eventi di progetto con suzione iniziale uguale, pioggia critica, fattore di pioggia equivalente del modello, fattore di sicurezza fino a 120 cm;
 - `memory.js`: riumidificazione autunnale 2025, piano 2 × 2 stato iniziale × colonna e fattori singoli.
 
 ```bash
 ./run_pipeline.sh Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx      # calibrazione e verifica
-cd exp && node attribution.js attribution.json && node events.js events.json && node memory.js memory.json
+cd exp && node events.js events.json && node memory.js memory.json
 cd .. && python build.py
 ```
