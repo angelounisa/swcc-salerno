@@ -7,9 +7,9 @@ FILES = {
     "raw_inputs": ["data.xlsx", "dataV.xlsx", "cal/cal.xlsx", "rain/unif.xlsx", "rain/cava.xlsx", "rain/tempNV.xlsx", "rain/tempV.xlsx", "rain/air_T_RH_2025_from_slides.csv"],
     "derived_inputs": ["cal/NV_cal.xlsx", "cal/V_cal.xlsx", "cal/theta_calibration.json", "sim/infiltration_events.json"],
     "scripts": ["calibrate_theta.py", "analysis.py", "swcc_main.py", "kfield.py", "compare_plots.py", "mechanisms.py", "stability.py", "qc.py",
-                "paper_analysis.py", "paper_p2_sens.py", "make_paper_figs.py", "sim/infil_events.py", "exp/common.js", "exp/attribution.js", "exp/events.js", "exp/memory.js", "build.py", "manifest.py"],
+                "paper_analysis.py", "paper_p2_sens.py", "make_paper_figs.py", "sim/infil_events.py", "exp/common.js", "exp/attribution.js", "exp/events.js", "exp/memory.js", "exp/autumn_check.js", "build.py", "manifest.py"],
     "results": ["results_NV.json", "results_V.json", "swcc_main.json", "kfield.json", "compare.json", "mechanisms.json", "stability.json", "qc.json",
-                "paper_analysis.json", "paper_p2.json", "preregistration.json", "exp/attribution.json", "exp/events.json", "exp/memory.json"],
+                "paper_analysis.json", "paper_p2.json", "preregistration.json", "exp/attribution.json", "exp/events.json", "exp/memory.json", "exp/autumn_check.json"],
 }
 sha = lambda f: hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()
 out = {"version": sys.argv[1], "created": datetime.date.today().isoformat(),

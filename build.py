@@ -17,10 +17,7 @@ S2['thetaCal'] = CMP['thetaCal']; S2['baselineVertical'] = json.load(open('sim/b
 S2['verify'] = json.load(open('verify/out_cmp.json'))
 for s_ in S2['sites'].values(): assert s_['model']['slope_deg'] == CMP['stab']['config']['beta_deg'], 'model and stability use different slopes'
 modview = pathlib.Path('site/drying_view.js').read_text() + '\n' + pathlib.Path('site/exp_view.js').read_text()
-P2 = json.load(open('paper_p2.json')); PA = json.load(open('paper_analysis.json'))
-EXP = {'ev': json.load(open('exp/events.json')), 'mem': json.load(open('exp/memory.json')), 'par': S2['params'],
-       'kdata': {'base': P2['base'], 's0_common_kPa': [r['P50_mm']['common_s_before_kPa'] for r in PA['P2']]}}
-assert EXP['ev']['slope_deg'] == CMP['stab']['config']['beta_deg']
+EXP = {'par': S2['params'], 'chk': json.load(open('exp/autumn_check.json'))}    # numerical experiments not shown: the model does not reproduce wetting
 assert body.count('/*DATA*/null') == 1 and body.count('/*CMP*/null') == 1 and body.count('/*SIM2*/null') == 1 and body.count('/*EXP*/null') == 1
 page = (body.replace('/*DATA*/null', data).replace('/*CMP*/null', json.dumps(CMP, separators=(',', ':'), allow_nan=False))
         .replace('/*SIM2*/null', json.dumps(S2, separators=(',', ':'), allow_nan=False)).replace('/*EXP*/null', json.dumps(EXP, separators=(',', ':'), allow_nan=False)) + '\n' + view + '\n' + modview)
@@ -32,7 +29,7 @@ full = ('<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
         + page[:head_end] + '\n</head>\n<body>\n' + page[head_end:] + '\n</body>\n</html>\n')
 (repo / 'docs' / 'index.html').write_text(full)
 for d in ('sim', 'site', 'verify', 'data', 'exp'): (repo / d).mkdir(exist_ok=True)
-for fn in ['common.js', 'attribution.js', 'events.js', 'memory.js', 'attribution.json', 'events.json', 'memory.json']: shutil.copy('exp/' + fn, repo / 'exp' / fn)
+for fn in ['common.js', 'attribution.js', 'events.js', 'memory.js', 'autumn_check.js', 'attribution.json', 'events.json', 'memory.json', 'autumn_check.json']: shutil.copy('exp/' + fn, repo / 'exp' / fn)
 for fn in ['analysis.py', 'calibrate_theta.py', 'swcc_main.py', 'kfield.py', 'compare_plots.py', 'stability.py', 'mechanisms.py', 'qc.py', 'build.py', 'run_pipeline.sh',
            'results_NV.json', 'results_V.json', 'swcc_main.json', 'kfield.json', 'compare.json', 'stability.json', 'mechanisms.json', 'qc.json']:
     shutil.copy(fn, repo / fn)

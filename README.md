@@ -75,14 +75,6 @@ python manifest.py 1.1.0 MANIFEST.json
 
 ## Modello numerico (quarta scheda della dashboard)
 
-Il solutore di Richards 1D in schema di pendio indefinito a 28° (`sim/solver.js`), calibrato sui periodi di drying (`sim/`, `run_pipeline.sh`) e verificato con un codice indipendente (`verify/`), non è usato per simulare l'intero periodo ma per esperimenti numerici su una colonna con terreno identico, in cui i fattori del bosco si accendono uno alla volta (`exp/`):
+Il solutore di Richards 1D in schema di pendio indefinito a 28° (`sim/solver.js`) con le curve principali di drying è calibrato e verificato sui periodi di essiccamento (`sim/`, `run_pipeline.sh`, `verify/`). La scheda mostra modello, calibrazione e verifica.
 
-- `attribution.js`: piano fattoriale sulla stagione umida 2025–26 (valori di Shapley). Non è mostrato nella dashboard: il modello, senza ramo di wetting, dà il 6–7% di ore sotto 10 kPa contro il 27% misurato;
-- `events.js`: eventi di progetto con suzione iniziale uguale, pioggia critica, fattore di pioggia equivalente del modello, fattore di sicurezza fino a 120 cm;
-- `memory.js`: riumidificazione autunnale 2025, piano 2 × 2 stato iniziale × colonna e fattori singoli.
-
-```bash
-./run_pipeline.sh Pioggia_unificata.xlsx NV_cal.xlsx V_cal.xlsx      # calibrazione e verifica
-cd exp && node events.js events.json && node memory.js memory.json
-cd .. && python build.py
-```
+Non è affidabile per l'imbibizione (nessuna isteresi): `exp/autumn_check.js` confronta le suzioni simulate e misurate nell'autunno 2025 e mostra scarti grandi (bosco 60 cm: 628 contro 1586 kPa a ottobre, 37 contro 472 kPa a novembre). Per questo gli esperimenti numerici in `exp/` (attribuzione invernale, eventi di progetto, memoria della stagione secca) restano nel repository ma non sono usati nella dashboard. Per usarli serve un ramo di wetting verificato sui profili d'autunno e d'inverno.

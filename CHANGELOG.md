@@ -2,6 +2,9 @@
 
 Ogni versione corrisponde a un tag git; `MANIFEST.json` contiene lo SHA-256 di dati, script e risultati della versione.
 
+## 1.3.2 — 18/11/2026
+- Tolti dalla scheda del modello anche eventi di progetto e memoria della stagione secca: il modello non segue le suzioni misurate nell'autunno 2025 (controllo in `exp/autumn_check.js`); la coincidenza delle date di riumidificazione a 60 cm era dovuta a due soli temporali; il k del modello alla suzione iniziale dei dati (27–30 kPa) è 0,73–0,80 contro 0,23–0,60 misurato. La scheda mostra modello, calibrazione sul drying, verifica e limiti.
+
 ## 1.3.1 — 18/11/2026
 - Tolto dalla scheda del modello l'esperimento invernale di attribuzione: senza ramo di wetting il modello non riproduce la stagione umida (6–7% di ore sotto 10 kPa contro 27% misurato). Restano eventi di progetto e memoria della stagione secca; lo script resta in `exp/`.
 
