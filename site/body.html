@@ -236,7 +236,7 @@ footer{font-size:.8rem;color:var(--muted)}
     </section>
   </div>
   <div id="m-simview" class="stack" hidden>
-    <p class="muted" style="max-width:95ch">Solutore alle differenze finite (Richards 1D, pendio indefinito a 28°) con le curve principali di drying misurate. È calibrato e verificato solo sui periodi di essiccamento; per l'imbibizione non è affidabile e non è usato per confrontare le parcelle. Le altre schede usano solo i dati misurati.</p>
+    <p class="muted" style="max-width:95ch">Solutore alle differenze finite (Richards 1D, pendio indefinito a 28°). Le sezioni 1–3 usano le curve principali di drying, calibrate e verificate sui periodi di essiccamento. La sezione 4 analizza gli eventi di pioggia con un terreno in imbibizione calibrato a parte. Le altre schede usano solo i dati misurati.</p>
 
     <div class="dhead"><h2>1 · Modello numerico</h2><span class="muted">pendio indefinito: dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
     <div class="grid2">
@@ -269,6 +269,24 @@ footer{font-size:.8rem;color:var(--muted)}
     </div>
     <div class="tablebox"><table id="m-verTable"></table></div>
 
+    <div class="dhead"><h2>4 · Analisi a eventi</h2><span class="muted">42 eventi da almeno 7,5 mm per il terreno, 39 con dati in entrambe le parcelle; finestra da 6 ore prima a 48 ore dopo l'evento; stato iniziale dai θ misurati</span></div>
+    <p class="muted" style="max-width:95ch" id="e-intro"></p>
+    <h3 style="margin-top:4px">4.1 · Terreno in imbibizione, calibrato sulla parcella senza vegetazione</h3>
+    <div class="grid2">
+      <div class="card"><h3>Errore medio J sugli eventi (α<sub>w</sub> = 2 α<sub>d</sub>)</h3><div class="plot" id="e-jmap" style="height:340px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="e-soilTable"></table></div><div class="tablebox"><table id="e-sensTable"></table></div></div>
+    </div>
+    <h3 style="margin-top:4px">4.2 · Input al suolo evento per evento, ricavato per inversione</h3>
+    <div class="grid2">
+      <div class="card"><h3>Acqua entrata nel suolo contro pioggia dell'evento</h3><div class="plot" id="e-netPlot" style="height:420px"></div></div>
+      <div class="card"><h3>Quota di pioggia entrata nel suolo, per classe di evento</h3><div class="plot" id="e-sizePlot" style="height:420px"></div></div>
+    </div>
+    <div class="card"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between"><h3>Evento di esempio: S<sub>e</sub> misurata e simulata</h3>
+      <label class="muted" style="font-size:.85rem">evento <select id="e-exSel"></select></label></div>
+      <div class="grid2"><div class="plot" id="e-ex-NV" style="height:440px"></div><div class="plot" id="e-ex-V" style="height:440px"></div></div></div>
+    <div class="tablebox"><table id="e-evTable"></table></div>
+    <section class="notes"><h3>Interpretazione dei parametri</h3><ol id="e-interp" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ol></section>
+
     <section class="notes">
       <h2>Limiti del modello</h2>
       <ul id="m-dryNotes"></ul>
@@ -281,6 +299,7 @@ footer{font-size:.8rem;color:var(--muted)}
 <script>window.CMP = /*CMP*/null;</script>
 <script>window.SIM2 = /*SIM2*/null;</script>
 <script>window.EXP = /*EXP*/null;</script>
+<script>window.EVT = /*EVT*/null;</script>
 <script>
 (function(){
 const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;

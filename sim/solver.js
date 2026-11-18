@@ -14,6 +14,10 @@
  * i.e. the vertical equation with K / c2 and gravity term c2 (beta = 0 is the vertical column). Free drainage at the
  * base (dh/dn = 0) is q = K per unit horizontal area. The slope-parallel flux K sin(beta) does not change the storage
  * of an infinite slope; its depth-integrated value (transmissivity flux, cm2/h per cm of slope width) is reported.
+ * Optional bimodal retention (Durner, 1994, WRR 30(2)): theta(h) = theta_VG(h) + dts * S2(h), S2 = (1+(a2|h|)^n2)^-m2,
+ * a second (structural/macropore) pore domain of capacity dts that fills only near saturation (a2 >> a). Its
+ * conductivity is the Kmac term below; the Mualem K of the matrix is unchanged. Layers without dts_macro (or 0)
+ * are exactly the unimodal model.
  * Dual conductivity: K(h) = Ks_matrix * Kr(h) + Kmac * exp(min(h,0)/hmac). The first term is the soil matrix
  * (Ks_matrix from field drainage data); the second is a macropore term that vanishes within a few hmac of
  * saturation, so that K(0) = Ks_matrix + Kmac equals the saturated conductivity measured in the laboratory.
@@ -95,12 +99,15 @@
       if (!L) throw new Error('no layer covers z = ' + z);
       if (!(L.n > 1 && L.ts > L.tr && L.Ks_cm_h > 0 && L.alpha_per_kPa > 0)) throw new Error('bad layer params');
       if (!(L.Kmac_cm_h >= 0 && L.hmac_cm > 0)) throw new Error('bad macropore params');
-      const q = { tr: L.tr, ts: L.ts, a: L.alpha_per_kPa / CM_PER_KPA, n: L.n, m: 1 - 1 / L.n, Ks: L.Ks_cm_h, Kmac: L.Kmac_cm_h, hmac: L.hmac_cm };
+      const q = { tr: L.tr, ts: L.ts, a: L.alpha_per_kPa / CM_PER_KPA, n: L.n, m: 1 - 1 / L.n, Ks: L.Ks_cm_h, Kmac: L.Kmac_cm_h, hmac: L.hmac_cm, dts: 0, a2: 1, n2: 2, m2: 0.5 };
+      if (L.dts_macro !== undefined && L.dts_macro !== 0) {
+        if (!(L.dts_macro > 0 && L.alpha2_per_kPa > L.alpha_per_kPa && L.n2 > 1)) throw new Error('bad macropore retention params');
+        q.dts = L.dts_macro; q.a2 = L.alpha2_per_kPa / CM_PER_KPA; q.n2 = L.n2; q.m2 = 1 - 1 / L.n2; }
       if (!(cfg.hs_cm < 0)) throw new Error('hs_cm must be negative');
       const ans = Math.pow(q.a * -cfg.hs_cm, q.n);
       q.Ss_ = Math.pow(1 + ans, -q.m);                 // S at h_s
       q.Fs = 1 - Math.pow(ans / (1 + ans), q.m);         // F(S_s)
-      q.ths = q.tr + (q.ts - q.tr) * q.Ss_;              // theta at h_s (max water content used by the model)
+      q.ths = q.tr + (q.ts - q.tr) * q.Ss_ + q.dts * Math.pow(1 + Math.pow(q.a2 * -cfg.hs_cm, q.n2), -q.m2);   // theta at h_s (max water content used by the model)
       P[i] = q;
     }
     // root density b(z) [1/cm], normalised so that sum(b_i w_i) = 1 (w_i = cell length)
@@ -132,7 +139,8 @@
     const Kh = new Float64Array(nn); // interface conductivity i+1/2 (arithmetic mean)
     const Ss = cfg.Ss_per_cm;
     const hs = cfg.hs_cm;
-    const wc = (hh, p) => hh >= hs ? p.ths + Ss * (hh - hs) : vgTheta(hh, p);
+    const macTh = (hh, p) => p.dts > 0 ? p.dts * Math.pow(1 + Math.pow(p.a2 * -hh, p.n2), -p.m2) : 0;   // macropore domain, h < 0
+    const wc = (hh, p) => hh >= hs ? p.ths + Ss * (hh - hs) : vgTheta(hh, p) + macTh(hh, p);
     const kOf = (hh, p) => {
       const mac = p.Kmac > 0 ? p.Kmac * Math.exp(Math.min(hh, 0) / p.hmac) : 0;
       if (hh >= hs) return p.Ks + mac;
@@ -164,6 +172,8 @@
           const t = p.tr + (p.ts - p.tr) * se;
           thk[i] = t;
           C[i] = (p.ts - p.tr) * p.m * p.n * p.a * (an / ah) * se / (1 + an);
+          if (p.dts > 0) { const ah2 = p.a2 * -hh, an2 = Math.pow(ah2, p.n2), s2 = Math.pow(1 + an2, -p.m2);
+            thk[i] += p.dts * s2; C[i] += p.dts * p.m2 * p.n2 * p.a2 * (an2 / ah2) * s2 / (1 + an2); }
           const f = 1 - Math.pow(an / (1 + an), p.m);
           K[i] = p.Ks * Math.sqrt(se / p.Ss_) * (f / p.Fs) * (f / p.Fs) + mac;
         }
@@ -196,7 +206,7 @@
           if (!isFinite(hNew[i])) return { ok: false, it };
           if (!conv) continue;
           if (hNew[i] >= hs || hk[i] >= hs) { if (Math.abs(hNew[i] - hk[i]) > cfg.tolHsat_cm) conv = false; } // saturated: theta is flat, test head
-          else if (Math.abs(vgTheta(hNew[i], P[i]) - thk[i]) > cfg.tolTheta) conv = false;
+          else if (Math.abs(vgTheta(hNew[i], P[i]) + macTh(hNew[i], P[i]) - thk[i]) > cfg.tolTheta) conv = false;
         }
         hk.set(hNew);
         if (conv) return { ok: true, it };
@@ -292,7 +302,9 @@
     if (!(Z.length > 0 && Z[0].zTop_cm === 0 && Z[Z.length - 1].zBot_cm === model.L_cm)) throw new Error('zones must cover [0, L]');
     for (let j = 1; j < Z.length; j++) if (Z[j].zTop_cm !== Z[j - 1].zBot_cm) throw new Error('zones must be contiguous');
     const layers = Z.map(zn => { const f = fits[zn.ret]; if (!f) throw new Error('no retention curve ' + zn.ret);
-      return { zTop_cm: zn.zTop_cm, zBot_cm: zn.zBot_cm, tr: f.theta_r, ts: f.theta_s, alpha_per_kPa: f.alpha, n: f.n, Ks_cm_h: zn.Ks_cm_h, Kmac_cm_h: zn.Kmac_cm_h, hmac_cm: zn.hmac_cm }; });
+      const lay = { zTop_cm: zn.zTop_cm, zBot_cm: zn.zBot_cm, tr: f.theta_r, ts: f.theta_s, alpha_per_kPa: f.alpha, n: f.n, Ks_cm_h: zn.Ks_cm_h, Kmac_cm_h: zn.Kmac_cm_h, hmac_cm: zn.hmac_cm };
+      if (f.dts_macro !== undefined) Object.assign(lay, { dts_macro: f.dts_macro, alpha2_per_kPa: f.alpha2, n2: f.n2 });
+      return lay; });
     const keys = Object.keys(s0_kPa).sort((x, y) => +x - +y), zs = keys.map(Number);
     const hs = keys.map(k => { const s = s0_kPa[k]; if (!(s > 0)) throw new Error('missing initial suction at ' + k); return -s * CM_PER_KPA; });
     const N = Math.round(model.L_cm / model.dz_cm), h0 = new Array(N + 1);

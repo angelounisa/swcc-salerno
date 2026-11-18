@@ -16,13 +16,13 @@ const FL = {I:'Intercettazione',T:'Quota di traspirazione',R:'Radici',E:'Domanda
 let filled=false;
 function fill(){
   const notes=[
-    `<b>Validità.</b> Il modello riproduce i periodi di essiccamento su cui è calibrato (sezione 2). Non riproduce l'imbibizione: usa la curva principale di drying anche quando il terreno si bagna, senza isteresi.`,
-    `<b>Controllo sull'autunno 2025.</b> Partendo dai profili misurati del 15/08/2025 con la pioggia reale, le suzioni mensili simulate si scostano molto da quelle misurate: nel bosco a 60 cm ${X.chk.V60_oct} contro ${X.chk.V60_oct_obs} kPa a ottobre e ${X.chk.V60_nov} contro ${X.chk.V60_nov_obs} kPa a novembre; senza vegetazione a 15 cm ${X.chk.NV15_jan} contro ${X.chk.NV15_jan_obs} kPa a gennaio. Per questo gli esperimenti numerici su eventi di pioggia e riumidificazione autunnale non sono mostrati (gli script restano nel repository, cartella <code>exp/</code>).`,
+    `<b>Validità.</b> Con le curve di drying (sezioni 1–3) il modello riproduce i periodi di essiccamento su cui è calibrato, non l'imbibizione. Per gli eventi (sezione 4) usa un terreno in imbibizione calibrato a parte sul disboscato.`,
+    `<b>Controllo sull'autunno 2025.</b> Partendo dai profili misurati del 15/08/2025 con la pioggia reale, le suzioni mensili simulate si scostano molto da quelle misurate: nel bosco a 60 cm ${X.chk.V60_oct} contro ${X.chk.V60_oct_obs} kPa a ottobre e ${X.chk.V60_nov} contro ${X.chk.V60_nov_obs} kPa a novembre; senza vegetazione a 15 cm ${X.chk.NV15_jan} contro ${X.chk.NV15_jan_obs} kPa a gennaio. Per questo non sono mostrate simulazioni continue sul periodo né della riumidificazione autunnale. Gli eventi sono simulati uno per uno, ripartendo ogni volta dai θ misurati (sezione 4). Gli script sono nel repository, cartella <code>exp/</code>.`,
     `<b>Domanda evaporativa.</b> Il fattore di ETP (× ${fx(X.par.NV.eFactor,2)} senza vegetazione, × ${fx(X.par.V.eFactor,2)} nel bosco) viene dalla calibrazione: rappresenta il microclima sotto chioma ma assorbe anche ciò che il modello non descrive.`,
-    `<b>Per usarlo nel confronto fra le parcelle</b> serve un ramo di wetting (isteresi) verificato sui profili d'autunno e d'inverno.`];
+    `<b>Analisi a eventi.</b> Il terreno in imbibizione è lo stesso nelle due parcelle. Una differenza reale del suolo superficiale (strato organico del bosco) finisce quindi nel volume trattenuto C<sub>eff</sub>, che è un limite superiore dell'intercettazione. L'ingresso nel tempo (τ) non è risolto con sensori a 15 cm e dati orari.`];
   $('m-dryNotes').innerHTML = notes.map(x=>'<li>'+x+'</li>').join('');
 }
-function draw(){ if(!filled){ filled=true; fill(); } }
+function draw(){ if(!filled){ filled=true; fill(); } window.EventView && window.EventView.draw(); }
 window.ExpView={draw};
 })();
 </script>
