@@ -2,6 +2,9 @@
 
 Ogni versione corrisponde a un tag git; `MANIFEST.json` contiene lo SHA-256 di dati, script e risultati della versione.
 
+## 1.3.0 — 18/11/2026
+- Scheda "Modello numerico" riorganizzata: tolte le simulazioni dell'intero periodo; aggiunti tre esperimenti numerici (attribuzione invernale dei fattori del bosco, eventi di progetto, memoria della stagione secca).
+
 ## 1.2.0 — 18/11/2026
 - Nuova scheda "Modello numerico" con i risultati del solutore: dominio e condizioni al contorno, calibrazione sul drying, infiltrazione e bilancio, profili, serie simulate, verifica con il codice indipendente.
 - Catena del modello rifatta con pendenza 28° (prima 32°): fattori calibrati invariati (ETP × 1,70 e × 0,50, K di matrice × 3,16), drenaggio +8 mm senza vegetazione e +5 mm vegetata.

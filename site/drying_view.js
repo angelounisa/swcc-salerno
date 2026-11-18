@@ -262,8 +262,8 @@ function plots(){
   PR('tsPlot',tr,L,cfgP);
 }
 let inited=false;
-function activate(){ if(!inited){ inited=true; fill(); } plots(); }
-function redraw(){ if(inited && !$('simview').hidden) plots(); }
+function activate(){ if(!inited){ inited=true; fill(); } plots(); window.ExpView && window.ExpView.draw(); }
+function redraw(){ if(inited && !$('simview').hidden){ plots(); window.ExpView && window.ExpView.draw(); } }
 window.ModView = { activate, redraw };
 })();
 </script>

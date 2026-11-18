@@ -1,5 +1,5 @@
 {
- "version": "1.2.0",
+ "version": "1.3.0",
  "created": "2026-11-18",
  "environment": {
   "python": "3.13.18",
@@ -109,13 +109,29 @@
     "sha256": "c8c27d3b35b38e90007bdafecae7000e14b344883e3309a81531669072dbb9bc",
     "bytes": 3454
    },
+   "exp/common.js": {
+    "sha256": "7aae531c69224a6895a10762b9b6c18cbdc8e636a210941d5923d047c075e80b",
+    "bytes": 2475
+   },
+   "exp/attribution.js": {
+    "sha256": "9f98028710e71d81506202f56f7d30b3c3952648e1492a8870e3e1778ed41364",
+    "bytes": 3766
+   },
+   "exp/events.js": {
+    "sha256": "b0146937563f93335f0457c6ded7084bc1553cdf1ea3bcd6dc9eaf74ba9dda9f",
+    "bytes": 5146
+   },
+   "exp/memory.js": {
+    "sha256": "c3d2e9d1b3dcee7a868235060e54e534e5c0b6f43372791b431cabc4b9397da3",
+    "bytes": 3882
+   },
    "build.py": {
-    "sha256": "a35aefa3a58408e016b0cfe3d119ed8ce948b5f3e1187659418c345b88501a8e",
-    "bytes": 4228
+    "sha256": "b5b7af53a0aa3fccdf1e5bb4ed0bf9b1eb31ab60bb7124e1263d3a0dfcc0f288",
+    "bytes": 5004
    },
    "manifest.py": {
-    "sha256": "8b74d48c5fcdd4145bcad6f32e4a25cf092f3dbdd62333d6d31a4ef459fbc29f",
-    "bytes": 1717
+    "sha256": "dc0c96a5cc140da8f7a3a07e2b888691e702476aceefccbbbe2fcf3567ea12d3",
+    "bytes": 1852
    }
   },
   "results": {
@@ -162,6 +178,18 @@
    "preregistration.json": {
     "sha256": "4475b8d3022191d1bc9e812b59ffff292716eeb6f520a40e94ffb87fbda27385",
     "bytes": 1747
+   },
+   "exp/attribution.json": {
+    "sha256": "5e97e9232a3302ca14f5436853807b42abfd413d133956ce1caa032ac91e1bf2",
+    "bytes": 37201
+   },
+   "exp/events.json": {
+    "sha256": "9cabb78dc52132cef6d47fec62f341ad6c967a4695470a524b8e94f2c405a36d",
+    "bytes": 17634
+   },
+   "exp/memory.json": {
+    "sha256": "c2b83a8ea478d5bb271267b5ecbaba48dff2400d1f97c75b042f43eabb831e8a",
+    "bytes": 5535
    }
   }
  }

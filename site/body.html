@@ -236,7 +236,7 @@ footer{font-size:.8rem;color:var(--muted)}
     </section>
   </div>
   <div id="m-simview" class="stack" hidden>
-    <p class="muted" style="max-width:95ch">Risultati del solutore alle differenze finite (equazione di Richards 1D in forma mista, schema di pendio indefinito a 28°), tenuti separati dalle analisi sui soli dati delle altre schede. Le curve di ritenzione sono le curve principali di drying misurate (una per strato, comune alle due parcelle); la conducibilità parte da quella del drenaggio notturno; solo due fattori per parcella sono calibrati sui periodi di drying del 2025 e il 2026 è usato come verifica. Il modello serve a interpretare i dati (bilancio idrico, acqua sotto i sensori), non a sostituirli: dove modello e misure divergono valgono le misure.</p>
+    <p class="muted" style="max-width:95ch">Il solutore alle differenze finite (Richards 1D, pendio indefinito a 28°) non è usato per simulare l'intero periodo, ma per esperimenti numerici che separano i meccanismi: nella colonna il terreno è identico e i fattori con cui il bosco differisce dall'area senza vegetazione (intercettazione, quota di traspirazione, radici, domanda evaporativa, stato iniziale) si accendono uno alla volta. Le curve di ritenzione sono le curve principali di drying misurate; i parametri vengono dalla calibrazione sui periodi di drying (sezione 2) e non sono ricalibrati negli esperimenti.</p>
 
     <div class="dhead"><h2>1 · Modello numerico</h2><span class="muted">pendio indefinito: dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
     <div class="grid2">
@@ -261,26 +261,20 @@ footer{font-size:.8rem;color:var(--muted)}
     <div class="tablebox"><table id="m-perfTable"></table></div>
     <div class="tablebox"><table id="m-slopeTable"></table></div>
 
-    <div class="dhead"><h2>3 · Quanta pioggia si infiltra</h2><span class="muted">stima dai sensori evento per evento (non usa la temperatura) e stima dal modello</span></div>
-    <div class="grid2">
-      <div class="card"><h3>Acqua accumulata nel profilo per evento di pioggia</h3><div class="plot" id="m-infPlot" style="height:420px"></div></div>
-      <div class="stack" style="gap:14px;min-width:0">
-        <div class="tablebox"><table id="m-infTable"></table></div>
-        <div class="tablebox"><table id="m-infModel"></table></div>
-      </div>
-    </div>
-    <div class="tablebox"><table id="m-wbTable"></table></div>
+    <div class="dhead"><h2>3 · Esperimento 1 · Inverno: quale fattore del bosco conta</h2><span class="muted">piano fattoriale completo (32 simulazioni) sulla stagione umida 1/10/2025–30/04/2026 con la pioggia oraria reale; partendo dalla colonna senza vegetazione si accendono i fattori del bosco; contributo di ogni fattore = valore di Shapley</span></div>
+    <div class="card"><h3>Contributo di ogni fattore alla differenza bosco − senza vegetazione nel tempo con suzione sotto 10 kPa</h3><div class="plot" id="x-shap" style="height:380px"></div></div>
+    <div class="tablebox"><table id="x-attTable"></table></div>
+    <div class="tablebox"><table id="x-wbTable"></table></div>
 
-    <div class="dhead"><h2>4 · Profili calcolati</h2><span class="muted">S<sub>e</sub>(z) e suzione(z) negli istanti delle due stagioni secche; i punti sono le misure nello stesso istante</span></div>
+    <div class="dhead"><h2>4 · Esperimento 2 · Eventi di progetto</h2><span class="muted">pioggia uniforme in 24 h su colonne con la stessa suzione iniziale uniforme, con e senza bosco, poi 48 h asciutte; pioggia critica = la più piccola che porta la suzione sotto 10 kPa</span></div>
     <div class="grid2">
-      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · S<sub>e</sub></h3><div class="plot prof" id="m-pf-NV-Se"></div></div>
-      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · S<sub>e</sub></h3><div class="plot prof" id="m-pf-V-Se"></div></div>
-      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · suzione</h3><div class="plot prof" id="m-pf-NV-s"></div></div>
-      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · suzione</h3><div class="plot prof" id="m-pf-V-s"></div></div>
+      <div class="card"><h3>Fattore di pioggia equivalente del modello e misurato</h3><div class="plot" id="x-k" style="height:400px"></div></div>
+      <div class="card"><h3>Fattore di sicurezza minimo alla base della copertura (120 cm)</h3><div class="plot" id="x-fs" style="height:400px"></div></div>
     </div>
+    <div class="tablebox"><table id="x-pcTable"></table></div>
 
-    <div class="dhead"><h2>5 · Serie temporali simulate e osservate</h2><span class="muted">periodo completo in S<sub>e</sub>; fasce = finestre di drying</span></div>
-    <div class="card"><div class="plot sim" id="m-tsPlot"></div></div>
+    <div class="dhead"><h2>5 · Esperimento 3 · Memoria della stagione secca</h2><span class="muted">dal profilo di suzione misurato il 15/08/2025, pioggia reale dell'autunno 2025: giorno in cui ogni profondità torna stabilmente sotto 30 kPa (stessa regola dei dati) e pioggia caduta da allora</span></div>
+    <div class="tablebox"><table id="x-memTable"></table></div>
 
     <div class="dhead"><h2>6 · Verifica del solutore</h2><span class="muted">stesso problema risolto con un secondo codice indipendente (forma in carico, griglia di 0,25 cm, integrazione BDF a passo adattivo): linee = riferimento, cerchi = solutore del modello</span></div>
     <div class="grid3">
@@ -291,7 +285,7 @@ footer{font-size:.8rem;color:var(--muted)}
     <div class="tablebox"><table id="m-verTable"></table></div>
 
     <section class="notes">
-      <h2>Note e ipotesi</h2>
+      <h2>Cosa dicono gli esperimenti</h2>
       <ul id="m-dryNotes"></ul>
     </section>
   </div>
@@ -301,6 +295,7 @@ footer{font-size:.8rem;color:var(--muted)}
 <script>const DATA = /*DATA*/null;</script>
 <script>window.CMP = /*CMP*/null;</script>
 <script>window.SIM2 = /*SIM2*/null;</script>
+<script>window.EXP = /*EXP*/null;</script>
 <script>
 (function(){
 const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;
