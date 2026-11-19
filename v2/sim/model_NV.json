@@ -1,0 +1,110 @@
+{
+ "dz_cm": 0.5,
+ "hCrit_cm": -100000,
+ "Ss_per_cm": 1e-06,
+ "hs_cm": -2,
+ "dtMin_h": 1e-07,
+ "dtMax_h": 1.0,
+ "maxIter": 25,
+ "tolTheta": 1e-05,
+ "tolHsat_cm": 0.1,
+ "itGrow": 4,
+ "itShrink": 8,
+ "slope_deg": 28.0,
+ "L_cm": 150,
+ "profileInstants": [
+  "2025-04-26 12:00",
+  "2025-06-01 12:00",
+  "2025-07-01 12:00",
+  "2025-08-01 12:00",
+  "2025-08-28 12:00",
+  "2026-04-01 12:00",
+  "2026-05-01 12:00",
+  "2026-06-01 12:00",
+  "2026-07-01 12:00",
+  "2026-07-30 12:00"
+ ],
+ "profileHours": [
+  2037,
+  2901,
+  3621,
+  4365,
+  5013,
+  10197,
+  10917,
+  11661,
+  12381,
+  13077
+ ],
+ "eFactor": 1.0,
+ "throughfall": 1.0,
+ "feddes_cm": [
+  0,
+  -1,
+  -1019.72,
+  -15295.800000000001
+ ],
+ "sources": {
+  "Ksat_lab": "Urciuoli et al. Table 1",
+  "roots": "ALERT 2025 slide 12: total root biomass [g per 360.8 cm3 core] at 20, 40, 60 cm; root depth 1 m (slide 24)",
+  "LAI": "ALERT 2025 slide 24",
+  "k_extinction": "assumed 0.5 (Ritchie 1972: SCF = 1 - exp(-k LAI))",
+  "feddes": "ALERT 2025 slide 28",
+  "hmac_cm": "5 cm, upper limit compatible with wet-end night-drainage K points within sensor accuracy"
+ },
+ "site": "NV",
+ "outDepths_cm": [
+  15,
+  30,
+  60
+ ],
+ "zones": [
+  {
+   "name": "A1",
+   "zTop_cm": 0,
+   "zBot_cm": 20,
+   "ret": "A1",
+   "Ks_cm_h": 0.048534792037218735,
+   "Kmac_cm_h": 0.3222652079627813,
+   "hmac_cm": 5.0
+  },
+  {
+   "name": "A2",
+   "zTop_cm": 20,
+   "zBot_cm": 150,
+   "ret": "A2",
+   "Ks_cm_h": 0.3237446205449052,
+   "Kmac_cm_h": 3.0134553794550945,
+   "hmac_cm": 5.0
+  }
+ ],
+ "LAI": 1.0,
+ "k_ext": 0.5,
+ "tFrac": 0.3934693402873666,
+ "roots": [
+  [
+   0,
+   1.506
+  ],
+  [
+   20,
+   1.506
+  ],
+  [
+   40,
+   0.962
+  ],
+  [
+   60,
+   0.363
+  ],
+  [
+   100,
+   0.0
+  ],
+  [
+   150,
+   0.0
+  ]
+ ]
+}

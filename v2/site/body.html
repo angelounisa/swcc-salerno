@@ -1,0 +1,513 @@
+<title>SWCC Salerno v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: stacked depth bands, each = drying | wetting | comparison, then a classification strip. Parameter table up top. */
+:root{
+  --bg:#f5f6f4; --panel:#ffffff; --fg:#1d2420; --muted:#5d6862; --line:#d9ddd8; --grid:#e8ebe7;
+  --dry:#a8581c; --wet:#2563a8; --sim:#6b3fa0; --obs:#4b5650; --band:rgba(37,99,168,.06); --nv:#b0651f; --veg:#2f7d4f; --soilA1:#d9c9a8; --soilA2:#e8dcc0; --soilC1:#e9d58f; --rock:#b9b9b2; --undet:#9aa39d; --flag:#9a6a00; --flagbg:#fbf1d6;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121614; --panel:#1a1f1c; --fg:#e4e8e5; --muted:#9aa59f; --line:#2d3430; --grid:#252b27;
+  --dry:#e0904f; --wet:#6fa6e6; --sim:#c39bf0; --obs:#b5beb8; --band:rgba(111,166,230,.08); --nv:#e3964f; --veg:#6cc28f; --soilA1:#5a4c33; --soilA2:#4a4030; --soilC1:#5c5124; --rock:#4a4a46; --undet:#6b746f; --flag:#e7b94a; --flagbg:#332a12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#1a1f1c; --fg:#e4e8e5; --muted:#9aa59f; --line:#2d3430; --grid:#252b27;
+  --dry:#e0904f; --wet:#6fa6e6; --sim:#c39bf0; --obs:#b5beb8; --band:rgba(111,166,230,.08); --nv:#e3964f; --veg:#6cc28f; --soilA1:#5a4c33; --soilA2:#4a4030; --soilC1:#5c5124; --rock:#4a4a46; --undet:#6b746f; --flag:#e7b94a; --flagbg:#332a12; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:1.9rem;letter-spacing:-.01em}
+h2{font-size:1.35rem}
+h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500}
+p{margin:0;max-width:75ch}
+.muted{color:var(--muted)}
+header{display:flex;flex-direction:column;gap:6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.method div{min-width:0;display:flex;flex-direction:column;gap:4px}
+code,.mono{font-family:var(--f-mono);font-size:.85em}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.85rem}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.8rem}
+td:first-child,th:first-child,td:nth-child(2),th:nth-child(2){text-align:left}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-family:var(--f-mono)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:500}
+.pill::before{content:"";width:10px;height:10px;border-radius:2px;background:currentColor}
+.pill.drying{color:var(--dry)} .pill.wetting{color:var(--wet)}
+.flag{display:inline-block;font-family:var(--f-mono);font-size:.72rem;color:var(--flag);background:var(--flagbg);border-radius:3px;padding:1px 5px}
+.bound{color:var(--flag)}
+.controls{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:.85rem}
+.controls label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+section.depth{display:flex;flex-direction:column;gap:12px;border-top:2px solid var(--fg);padding-top:14px}
+.dhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.dhead .mono{color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:1050px){.grid3{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 10px 4px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.plot{width:100%;height:380px}
+.plot.ts{height:230px}
+.notes{display:flex;flex-direction:column;gap:8px}
+.notes li{max-width:90ch}
+.notes h3{margin-bottom:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);margin-top:6px}
+.tabs button{font:inherit;font-family:var(--f-display);font-size:1rem;font-weight:500;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:8px 16px 6px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--fg)}
+.tabs button:focus-visible{outline:2px solid var(--wet);outline-offset:2px}
+footer{font-size:.8rem;color:var(--muted)}
+[hidden]{display:none!important}
+.stack{display:flex;flex-direction:column;gap:28px}
+.simctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 22px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.simctl .ctl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.simctl label{font-size:.8rem;color:var(--muted)}
+.simctl output{font-family:var(--f-mono);font-size:.85rem}
+.simctl input[type=range]{width:100%;accent-color:var(--sim)}
+.simbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.btn{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:5px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--fg)}
+.btn:focus-visible{outline:2px solid var(--sim);outline-offset:2px}
+.status{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.status.busy{color:var(--sim)}
+.status.err{color:var(--flag)}
+.mb{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+.mb b{color:var(--fg);font-weight:500}
+.plot.sim{height:900px}
+.plot.prof{height:520px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+#colsvg svg,#m-colsvg svg{display:block;max-width:100%;height:auto}
+#kTable th,#kTable td{white-space:normal}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Curve di ritenzione idrica · Salerno <span class="muted" style="font-size:.6em;font-weight:500">v2 · θ con la calibrazione fornita il 19/11/2026</span></h1>
+    <p class="muted">Contenuto d'acqua volumetrico θ contro suzione di matrice s, sensori METER su due parcelle (senza vegetazione e vegetata). Rami di essiccamento e imbibizione separati e interpolati con van Genuchten. Serie dal 31/01/2025 al 30/07/2026, fine della pioggia disponibile.</p>
+    <nav class="tabs" role="tablist" aria-label="Parcella">
+      <button role="tab" id="tab-nv" data-site="nv">Senza vegetazione · 15/30/60 cm</button>
+      <button role="tab" id="tab-v" data-site="v">Vegetata · 15/35/60 cm</button>
+      <button role="tab" id="tab-sim" data-site="sim">Confronto vegetata – senza vegetazione</button>
+      <button role="tab" id="tab-mod" data-site="mod">Modello numerico</button>
+    </nav>
+  </header>
+
+  <div id="analysis" class="stack">
+  <div class="meta" id="meta"></div>
+
+  <div class="method">
+    <div><h3>Classificazione dei rami</h3>
+      <p>Medie orarie dei dati a 5 min. Su una differenza centrata di <span id="cfg-win"></span> h: <b>drying</b> se θ cala di almeno <span id="cfg-dth"></span> m³/m³ e log₁₀s cresce di almeno <span id="cfg-dls"></span>; <b>wetting</b> se avviene il contrario. Gli altri istanti (stasi, o θ e s concordi, tipico degli artefatti termici diurni) sono <i>indeterminati</i> ed esclusi dal fit.</p></div>
+    <div><h3>Modello</h3>
+      <p>van Genuchten–Mualem: θ(s) = θ<sub>r</sub> + (θ<sub>s</sub>−θ<sub>r</sub>) / [1+(αs)<sup>n</sup>]<sup>1−1/n</sup>, s in kPa, α in 1/kPa. Minimi quadrati sulle mediane per classi di 0,1 decadi di log₁₀s (≥3 punti per classe), per non far pesare i lunghi plateau secchi.</p></div>
+    <div><h3>Lettura dei grafici</h3>
+      <p>Il colore dei punti è la data (scala viridis condivisa da tutti i pannelli); le croci grigie ore fuori equilibrio escluse dal wetting. Le croci nere sono le mediane usate per il fit, la linea è la curva interpolata. Nel pannello di confronto la fascia è il campo di suzione comune ai due rami; le curve sono punteggiate fuori dal campo osservato del proprio ramo.</p></div>
+  </div>
+
+  <div class="dhead"><h2>Parametri interpolati</h2><span class="muted">tra parentesi l'intervallo al 95% da bootstrap a blocchi mensili (i dati orari consecutivi sono autocorrelati: gli errori dalla matrice di covarianza li sottostimano e non sono più usati)</span></div>
+  <div class="tablebox"><table id="ptable"></table></div>
+
+  <div class="dhead"><h2>Isteresi: θ<sub>drying</sub> − θ<sub>wetting</sub> dalle curve interpolate</h2><span class="muted">m³/m³ con intervallo al 95% (bootstrap mensile, i due rami rifatti sugli stessi mesi), solo nel campo di suzione comune ai due rami (fra il 5° percentile più alto e il 95° più basso). Sono curve medie dei rami, non curve di stato.</span></div>
+  <div class="tablebox"><table id="htable"></table></div>
+
+  <div class="dhead"><h2>Controllo di qualità e sensibilità</h2><span class="muted">flag calcolati ora per ora e propagati nei fit</span></div>
+  <div class="tablebox"><table id="qctable"></table></div>
+  <div class="tablebox"><table id="senstable"></table></div>
+
+  <div class="controls">
+    <label><input type="checkbox" id="showU"> mostra i punti indeterminati (grigio) nei pannelli</label>
+    <label><input type="checkbox" id="showFit" checked> mostra curve interpolate</label>
+  </div>
+
+  <div id="depths" style="display:flex;flex-direction:column;gap:36px"></div>
+
+  <section class="notes">
+    <h2>Note sull'analisi</h2>
+    <ul id="notes"></ul>
+  </section>
+
+  <footer id="foot"></footer>
+  </div>
+
+  <div id="simview" class="stack" hidden>
+    <p class="muted" style="max-width:95ch">Confronto fra la parcella vegetata (bosco di leccio) e quella senza vegetazione fatto solo sui dati misurati, senza simulazioni: suzione, contenuto d'acqua (sia come θ calibrato sia come saturazione efficace S<sub>e</sub>), risposta alle piogge, perdite nei periodi asciutti, temperatura, meccanismi che emergono dai dati e stabilità calcolata con i valori misurati. I sensori sono confrontati a coppie: 15/15, 30/35 e 60/60 cm.</p>
+    <div class="controls" role="radiogroup" aria-label="Contenuto d'acqua nei grafici">
+      <span class="muted">Contenuto d'acqua nei grafici delle sezioni 2 e 4:</span>
+      <label><input type="radio" name="wvar" value="th" checked> θ calibrato [m³/m³]</label>
+      <label><input type="radio" name="wvar" value="Se"> saturazione efficace S<sub>e</sub></label>
+    </div>
+
+    <div class="dhead"><h2>1 · Le differenze in sintesi</h2></div>
+    <div class="tablebox"><table id="sumTable"></table></div>
+
+    <div class="dhead"><h2>2 · Serie appaiate</h2><span class="muted">pioggia giornaliera, contenuto d'acqua e suzione alle tre profondità</span></div>
+    <div class="card"><div class="plot" id="pairPlot" style="height:1150px"></div></div>
+
+    <div class="dhead"><h2>3 · Quanto tempo a quale suzione</h2><span class="muted">curve di durata sulle ore in cui entrambi i sensori della coppia hanno dati</span></div>
+    <div class="grid3">
+      <div class="card"><h3>15 / 15 cm</h3><div class="plot" id="dur-0"></div></div>
+      <div class="card"><h3>30 / 35 cm</h3><div class="plot" id="dur-1"></div></div>
+      <div class="card"><h3>60 / 60 cm</h3><div class="plot" id="dur-2"></div></div>
+    </div>
+    <div class="tablebox"><table id="durTable"></table></div>
+
+    <div class="dhead"><h2>4 · Risposta agli eventi di pioggia</h2><span class="muted">42 eventi da almeno 7,5 mm; aumento del contenuto d'acqua entro 24 ore dalla fine dell'evento</span></div>
+    <div class="grid3">
+      <div class="card"><h3>15 / 15 cm</h3><div class="plot" id="ev-0"></div></div>
+      <div class="card"><h3>30 / 35 cm</h3><div class="plot" id="ev-1"></div></div>
+      <div class="card"><h3>60 / 60 cm</h3><div class="plot" id="ev-2"></div></div>
+    </div>
+    <div class="tablebox"><table id="evTable"></table></div>
+    <div class="grid2">
+      <div class="card"><h3>Suzione minima raggiunta in ogni evento</h3><div class="plot" id="sminPlot" style="height:420px"></div></div>
+      <div class="card"><h3>Acqua accumulata nel profilo per evento</h3><div class="plot" id="infPlot" style="height:420px"></div></div>
+    </div>
+    <div class="tablebox"><table id="infTable"></table></div>
+
+    <div class="dhead"><h2>5 · Invaso e perdite nei periodi senza pioggia</h2><span class="muted">colonna strumentata 0–75 cm; la perdita è evapotraspirazione più drenaggio sotto i 75 cm</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Invaso nel tempo</h3><div class="plot" id="stoPlot" style="height:420px"></div></div>
+      <div class="card"><h3>Perdita d'invaso media nei periodi asciutti, per mese</h3><div class="plot" id="lossPlot" style="height:420px"></div></div>
+    </div>
+
+    <div class="dhead"><h2>6 · Direzione del flusso verticale</h2><span class="muted">dal segno del gradiente di carico totale fra due sensori</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Ore con flusso verso il basso, per mese</h3><div class="plot" id="grPlot" style="height:380px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="grTable"></table></div></div>
+    </div>
+
+    <div class="dhead"><h2>7 · Temperatura</h2><span class="muted">suolo a 15 cm nelle due parcelle; aria in campo aperto e sotto chioma</span></div>
+    <div class="card"><div class="plot" id="tempPlot" style="height:480px"></div></div>
+    <div class="tablebox"><table id="airTable"></table></div>
+
+    <div class="dhead"><h2>8 · Meccanismi che emergono dai dati</h2><span class="muted">relazioni cercate nelle misure; per ognuna sono indicati l'evidenza e i limiti</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Differenza vegetata − senza vegetazione, mediana mensile</h3><div class="plot" id="ratioPlot" style="height:460px"></div></div>
+      <div class="card"><h3>Quando ogni profondità supera 100 e 1000 kPa</h3><div class="plot" id="dryPlot" style="height:400px"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Acqua accumulata in 0–75 cm contro pioggia dell'evento</h3><div class="plot" id="thrPlot" style="height:400px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="rewetTable"></table></div><div class="tablebox"><table id="frontTable"></table></div></div>
+    </div>
+    <div class="tablebox"><table id="thrTable"></table></div>
+    <div class="tablebox"><table id="dayTable"></table></div>
+    <div class="tablebox"><table id="dsTable"></table></div>
+    <section class="notes"><h3>Cosa emerge</h3><ol id="mechList" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ol></section>
+
+    <div class="dhead"><h2>9 · Stabilità con i valori misurati</h2><span class="muted">pendio indefinito, superficie di scorrimento alla profondità di ogni sensore, suzione e θ misurati</span></div>
+    <p class="muted" style="max-width:95ch" id="fsIntro"></p>
+    <div class="card"><h3>Fattore di sicurezza nel tempo</h3><div class="plot" id="fsPlot" style="height:760px"></div></div>
+    <div class="grid3">
+      <div class="card"><h3>15 / 15 cm · durata</h3><div class="plot" id="fsd-0"></div></div>
+      <div class="card"><h3>30 / 35 cm · durata</h3><div class="plot" id="fsd-1"></div></div>
+      <div class="card"><h3>60 / 60 cm · durata</h3><div class="plot" id="fsd-2"></div></div>
+    </div>
+    <div class="tablebox"><table id="fsTable"></table></div>
+    <div class="grid2">
+      <div class="card"><h3>Fattore di sicurezza minimo in ogni evento di pioggia</h3><div class="plot" id="fsEvPlot" style="height:420px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="fsEvTable"></table></div><div class="tablebox"><table id="fsSensTable"></table></div></div>
+    </div>
+    <section class="notes"><h3>Come leggere il calcolo</h3><ul id="fsNotes" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ul></section>
+
+    <div class="dhead"><h2>10 · Curve principali di drying in saturazione efficace</h2><span class="muted">punti = inviluppo superiore dei dati di essiccamento di ogni sensore; linea = curva van Genuchten comune allo strato</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Strato A1 · sensori a 15 cm</h3><div class="plot" id="se-A1"></div></div>
+      <div class="card"><h3>Strato A2 · sensori a 30, 35 e 60 cm</h3><div class="plot" id="se-A2"></div></div>
+    </div>
+    <div class="tablebox"><table id="dcTable"></table></div>
+
+    <div class="dhead"><h2>11 · Conducibilità non satura dal drenaggio notturno</h2><span class="muted">perdita d'invaso nelle notti senza pioggia divisa per il gradiente misurato</span></div>
+    <div class="grid2">
+      <div class="card"><h3>K in funzione della suzione</h3><div class="plot" id="kPlot" style="height:420px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="kTable" style="white-space:normal"></table></div></div>
+    </div>
+
+    <div class="dhead"><h2>12 · Controllo di qualità dei dati usati in questa scheda</h2><span class="muted">dove θ è fuori dal campo della calibrazione e quali risultati ne dipendono</span></div>
+    <div class="tablebox"><table id="qcCmpTable"></table></div>
+    <section class="notes"><ul id="qcCmpNotes" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ul></section>
+
+    <section class="notes">
+      <h2>Note</h2>
+      <ul id="cmpNotes"></ul>
+    </section>
+  </div>
+  <div id="m-simview" class="stack" hidden>
+    <p class="muted" style="max-width:95ch">Solutore alle differenze finite (Richards 1D, pendio indefinito a 28°). Le sezioni 1–3 usano le curve principali di drying, calibrate e verificate sui periodi di essiccamento. La sezione 4 analizza gli eventi di pioggia con un terreno in imbibizione calibrato a parte. Le altre schede usano solo i dati misurati.</p>
+
+    <div class="dhead"><h2>1 · Modello numerico</h2><span class="muted">pendio indefinito: dominio geometrico, proprietà dei terreni, condizioni al contorno</span></div>
+    <div class="grid2">
+      <div class="card"><h3>Dominio e condizioni al contorno</h3><div id="m-colsvg" style="overflow-x:auto"></div></div>
+      <div class="stack" style="gap:14px;min-width:0">
+        <div><h3 style="margin-bottom:6px">Caratteristiche geotecniche di laboratorio</h3><div class="tablebox"><table id="m-geoTable"></table></div></div>
+        <div><h3 style="margin-bottom:6px">Zone del modello</h3><div class="tablebox"><table id="m-zoneTable"></table></div></div>
+      </div>
+    </div>
+    <div class="tablebox"><table id="m-bcTable"></table></div>
+
+    <div class="dhead"><h2>2 · Calibrazione sui periodi di drying</h2><span class="muted">due soli fattori liberi; J = media sui sensori di RMSE(S<sub>e</sub>)/0,1 + RMSE(log₁₀ suzione)/0,3 nel drying 2025; più scuro = errore minore</span></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · mappa dell'errore J</h3><div class="plot" id="m-jm-NV" style="height:360px"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · mappa dell'errore J</h3><div class="plot" id="m-jm-V" style="height:360px"></div></div>
+    </div>
+    <div class="tablebox"><table id="m-candTable"></table></div>
+    <div class="grid2">
+      <div class="card"><h3><span class="pill" style="color:var(--nv)">Senza vegetazione</span> · S<sub>e</sub> e suzione nei due drying</h3><div class="plot prof" id="m-dw-NV"></div></div>
+      <div class="card"><h3><span class="pill" style="color:var(--veg)">Vegetata</span> · S<sub>e</sub> e suzione nei due drying</h3><div class="plot prof" id="m-dw-V"></div></div>
+    </div>
+    <div class="tablebox"><table id="m-perfTable"></table></div>
+    <div class="tablebox"><table id="m-slopeTable"></table></div>
+
+    <div class="dhead"><h2>3 · Verifica del solutore</h2><span class="muted">stesso problema risolto con un secondo codice indipendente (forma in carico, griglia di 0,25 cm, integrazione BDF a passo adattivo): linee = riferimento, cerchi = solutore del modello</span></div>
+    <div class="grid3">
+      <div class="card"><h3>Assorbimento radicale</h3><div class="plot" id="m-ver-T1"></div></div>
+      <div class="card"><h3>Infiltrazione e ridistribuzione</h3><div class="plot" id="m-ver-T2"></div></div>
+      <div class="card"><h3>Evaporazione dalla superficie</h3><div class="plot" id="m-ver-T3"></div></div>
+    </div>
+    <div class="tablebox"><table id="m-verTable"></table></div>
+
+    <div class="dhead"><h2>4 · Analisi a eventi</h2><span class="muted">42 eventi da almeno 7,5 mm per il terreno, 39 con dati in entrambe le parcelle; finestra da 6 ore prima a 48 ore dopo l'evento; stato iniziale dai θ misurati</span></div>
+    <p class="muted" style="max-width:95ch" id="e-intro"></p>
+    <h3 style="margin-top:4px">4.1 · Terreno in imbibizione, calibrato sulla parcella senza vegetazione</h3>
+    <div class="grid2">
+      <div class="card"><h3>Errore medio J sugli eventi (α<sub>w</sub> = 2 α<sub>d</sub>)</h3><div class="plot" id="e-jmap" style="height:340px"></div></div>
+      <div class="stack" style="gap:14px;min-width:0"><div class="tablebox"><table id="e-soilTable"></table></div><div class="tablebox"><table id="e-sensTable"></table></div></div>
+    </div>
+    <h3 style="margin-top:4px">4.2 · Input al suolo evento per evento, ricavato per inversione</h3>
+    <div class="grid2">
+      <div class="card"><h3>Acqua entrata nel suolo contro pioggia dell'evento</h3><div class="plot" id="e-netPlot" style="height:420px"></div></div>
+      <div class="card"><h3>Quota di pioggia entrata nel suolo, per classe di evento (eventi con il bosco riprodotto)</h3><div class="plot" id="e-sizePlot" style="height:420px"></div></div>
+    </div>
+    <div class="card"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between"><h3>Evento di esempio: S<sub>e</sub> misurata e simulata</h3>
+      <label class="muted" style="font-size:.85rem">evento <select id="e-exSel"></select></label></div>
+      <div class="grid2"><div class="plot" id="e-ex-NV" style="height:440px"></div><div class="plot" id="e-ex-V" style="height:440px"></div></div></div>
+    <div class="tablebox"><table id="e-evTable"></table></div>
+    <section class="notes"><h3>Interpretazione dei parametri</h3><ol id="e-interp" style="margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px"></ol></section>
+
+    <section class="notes">
+      <h2>Limiti del modello</h2>
+      <ul id="m-dryNotes"></ul>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<script>const DATA = /*DATA*/null;</script>
+<script>window.CMP = /*CMP*/null;</script>
+<script>window.SIM2 = /*SIM2*/null;</script>
+<script>window.EXP = /*EXP*/null;</script>
+<script>window.EVT = /*EVT*/null;</script>
+<script>
+(function(){
+const ALL = DATA; let D, depths, C, t0, t1, tickvals, ticktext, SITE;
+const COMMON_NOTES = [
+ '<b>θ calibrato.</b> Il contenuto d\'acqua è quello calibrato fornito il 19/11/2026 (file DATI_CAL, colonne sotto CALIBRAZIONE), per tutti i sensori di entrambe le parcelle. La suzione è quella già calibrata, invariata. Gli orari del file calibrato sono spostati rispetto a quelli dei file con la suzione: un\'ora fino al 30/03/2025 e un salto il 18/12/2025 (10 h 40 min senza vegetazione, 25 h 05 min vegetata). È usata la base dei tempi dei file con la suzione, che è allineata alla pioggia, abbinando le righe tramite il θ grezzo, identico nei due file. Serie tagliata al 30/07/2026, ultima ora di pioggia.',
+ '<b>θ<sub>r</sub> poco vincolato.</b> In molti fit θ<sub>r</sub> finisce su un limite: i dati non raggiungono la zona residua, quindi θ<sub>r</sub> e n si compensano. Le celle in giallo indicano parametri sul vincolo; l\'intervallo bootstrap dice quanto il dato li vincola.',
+ '<b>Nuvole di punti, non curve.</b> Ogni ciclo parte da uno stato diverso: il fit di ogni ramo è una curva media, non una curva di stato. La curva principale di drying è una ricostruzione a parte (terza scheda) ed è quella da usare come proprietà del terreno. L\'isteresi della tabella è la differenza fra curve medie.',
+ '<b>Fit non identificabili.</b> Un fit è segnato come non identificabile quando l\'intervallo al 95% di α o di n copre più di un fattore 10: la curva descrive la forma dei dati nel campo osservato, ma i suoi parametri non vanno usati.',
+ '<b>Punti fuori equilibrio.</b> Un\'ora è fuori equilibrio quando θ supera di più di 0,02 m³/m³ la curva principale di drying del sensore alla suzione misurata: all\'equilibrio nessuno stato sta sopra quella curva, quindi la suzione è in ritardo rispetto a θ (fronte rapido, sensore lento). Queste ore sono escluse dal fit di wetting (croci grigie nei pannelli); la tabella di sensibilità riporta il fit con tutti i punti e con tolleranze 0,01 e 0,03.',
+ '<b>θ fuori dal campo della calibrazione.</b> Con la calibrazione fornita il campo di validità non è indicato: il controllo sulle ore estrapolate non è applicato e nessuna ora è segnata.'];
+const SITE_NOTES = {
+ nv: [
+ '<b>Rami di wetting meno affidabili.</b> Gli eventi di imbibizione durano poche ore e hanno molti meno punti dei rami di essiccamento. In più sensori α va al limite superiore o ha errore molto grande: la curva descrive la forma dei dati ma i parametri non sono identificabili.',
+ '<b>Ritardo del sensore di suzione.</b> Nel primo evento dopo l\'estate (set. 2025) θ sale subito mentre s resta per ore a 10²–10³ kPa; altri punti fuori equilibrio cadono negli eventi invernali (dicembre 2025 – febbraio 2026). Sono esclusi dal fit di wetting. Con tutti i punti α del wetting a 15 e 60 cm va al vincolo (10 1/kPa); senza, scende a 0,48 e 0,15.',
+ '<b>60 cm e curva comune di A2.</b> Con questa calibrazione il sensore a 60 cm (θ = θ grezzo + 0,05 m³/m³) ha una forma diversa dagli altri sensori di A2. La curva principale comune gli passa sotto fra 100 e 1000 kPa: lo scarto in S<sub>e</sub> è 0,064 contro 0,007 con il fit proprio. Per questo 1590 ore di drying (maggio–luglio e settembre 2025) risultano sopra la curva principale, cioè fuori equilibrio. È un effetto della forma comune, non un ritardo del sensore; il fit di drying non le esclude.',
+ '<b>Isteresi inversa a 30 cm.</b> Fra 30 e 100 kPa la curva media di wetting sta sopra quella di drying, con intervallo che esclude lo zero. Per curve di equilibrio è impossibile: è un artefatto (ritardo residuo o scanning), da non interpretare come proprietà del terreno.',
+ '<b>Plateau secco a 15 cm.</b> D\'estate s si stabilizza fra 2000 e 3300 kPa mentre θ oscilla col ciclo giornaliero (effetto termico sulla misura di θ).'],
+ v: [
+ '<b>Lacuna a 15 cm.</b> θ a 15 cm manca dal 31/01/2026 al 04/03/2026; quelle ore sono escluse e la serie temporale mostra il vuoto.',
+ '<b>Wetting a 35 e 60 cm limitato alle basse suzioni.</b> Il campo di suzione comune ai due rami è circa 7–28 kPa a 35 cm e 7–22 kPa a 60 cm: l\'isteresi è calcolata solo lì, e nei pannelli di confronto le curve fuori dal campo del proprio ramo sono punteggiate.',
+ '<b>Spostamento fra le due stagioni secche.</b> A 35 cm (e meno a 60 cm) l\'essiccamento del 2026 segue un percorso più secco di quello del 2025. La curva di drying interpolata media le due stagioni; vale la pena verificare se dipende dalle radici, dalla struttura del suolo o dal sensore.',
+ '<b>θ<sub>s</sub> basso a 15 cm.</b> Il θ<sub>s</sub> interpolato a 15 cm è molto inferiore a quello degli strati profondi: lo strato superficiale vegetato non si avvicina mai alla saturazione nei dati.',
+ '<b>Isteresi inversa a 60 cm.</b> A 10 kPa, unico punto del campo comune, la curva media di wetting sta sopra quella di drying (−0,006 m³/m³, intervallo −0,015/−0,002). Come a 30 cm senza vegetazione è un artefatto, da non interpretare come proprietà del terreno.',
+ '<b>Fit di wetting a 15 cm non identificabile.</b> I parametri del ramo di wetting a 15 cm hanno intervalli che coprono quasi tutto il campo ammesso: la curva va letta solo come descrizione dei dati.']
+};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (x,k)=> (x==null||!isFinite(x))?'–':Number(x).toFixed(k);
+const vg = (s,p)=> p.theta_r + (p.theta_s-p.theta_r)/Math.pow(1+Math.pow(p.alpha*s,p.n),1-1/p.n);
+
+function setup(){
+C = D.config;
+document.getElementById('cfg-win').textContent = C.diff_window_h;
+document.getElementById('cfg-dth').textContent = C.dtheta_min;
+document.getElementById('cfg-dls').textContent = C.dlogs_min;
+document.getElementById('meta').innerHTML =
+  `<span>periodo ${D.period[0].slice(0,10)} → ${D.period[1].slice(0,10)}</span><span>profondità ${depths.join(', ')} cm</span><span>passo originale 5 min · analisi su medie orarie</span><span>θ calibrato per terreno</span>`;
+document.getElementById('foot').textContent =
+  `Elaborazione: Python numpy ${D.versions.numpy}, pandas ${D.versions.pandas}, scipy ${D.versions.scipy} (curve_fit, trust-region con vincoli). Vincoli: θs ∈ [${C.theta_s_min}, ${C.theta_s_max}], θr ∈ [0, θmin del ramo], α ∈ [${C.alpha_bounds}] 1/kPa, n ∈ [${C.n_bounds}]. Punti nei grafici: un campione ogni ${C.plot_every_h} h.`;
+
+// ---- parameter table
+const pt = document.getElementById('ptable');
+const unid = f => ['alpha','n'].filter(k=>f.ci95[k][0]>0 && f.ci95[k][1]/f.ci95[k][0]>10);
+let h = `<thead><tr><th>Prof.</th><th>Ramo</th><th>θr</th><th>θs</th><th>α [1/kPa]</th><th>1/α [kPa]</th><th>n</th><th>R² classi</th><th>RMSE punti</th><th>N ore</th><th>Ore fuori equilibrio escluse</th><th>Ore con θ estrapolato</th><th>Stato</th></tr></thead><tbody>`;
+for (const d of depths) for (const b of ['drying','wetting']) {
+  const f = D.depths[d].fits[b], p=f.params, ci=f.ci95, ab=new Set(f.params_at_bound), un=unid(f);
+  const cell=(k,dig)=>`<td class="num${ab.has(k)?' bound':''}">${fmt(p[k],dig)}<span class="muted"> (${fmt(ci[k][0],dig)}, ${fmt(ci[k][1],dig)})</span>${ab.has(k)?' <span class="flag">vincolo</span>':''}</td>`;
+  h += `<tr${un.length?' style="opacity:.6"':''}><td>${d} cm</td><td><span class="pill ${b}">${b}</span></td>${cell('theta_r',3)}${cell('theta_s',3)}${cell('alpha',3)}<td class="num">${fmt(f.air_entry_kPa_1_over_alpha,1)}<span class="muted"> (${fmt(ci.air_entry_kPa[0],1)}, ${fmt(ci.air_entry_kPa[1],1)})</span></td>${cell('n',2)}<td class="num">${fmt(f.fit_bins.r2,3)}</td><td class="num">${fmt(f.all_points.rmse,4)}</td><td class="num">${f.all_points.n}</td><td class="num">${f.n_noneq_excluded||'–'}</td><td class="num">${(f.frac_extrapolated*100).toFixed(1)}%</td><td>${un.length?'<span class="flag">non identificabile ('+un.join(', ')+')</span>':'ok'}</td></tr>`;
+}
+pt.innerHTML = h+'</tbody>';
+
+// ---- hysteresis table
+const refS=D.config.hysteresis_ref_s_kPa;
+let hh = `<thead><tr><th>Prof.</th><th>Campo comune [kPa]</th>${refS.map(s=>`<th>s = ${s} kPa</th>`).join('')}</tr></thead><tbody>`;
+for (const d of depths){
+  const H=D.depths[d].hysteresis;
+  hh += `<tr><td>${d} cm</td><td class="num">${fmt(H.s_common[0],1)}–${fmt(H.s_common[1],0)}</td>${refS.map(s=>{ const i=H.ref_s.indexOf(s); if(i<0) return '<td class="num muted">fuori campo</td>';
+    const v=H.dtheta[i], c=H.ci95[i], sig=c[0]>0||c[1]<0;
+    return `<td class="num"${sig?' style="font-weight:600"':''}>${fmt(v,3)} <span class="muted">(${fmt(c[0],3)}, ${fmt(c[1],3)})</span>${sig&&v<0?' <span class="flag">inversa</span>':''}</td>`; }).join('')}</tr>`;
+}
+document.getElementById('htable').innerHTML = hh+'</tbody>';
+
+// ---- QC and sensitivity
+let hq = `<thead><tr><th>Prof.</th><th>Ore valide</th><th>Campo della calibrazione dello strato [m³/m³]</th><th>Ore con θ estrapolato</th><th>Ore fuori equilibrio (drying · wetting · indeterminate)</th><th>Fuori equilibrio con tolleranza 0,01 · 0,02 · 0,03</th><th>Mesi con più ore fuori equilibrio</th></tr></thead><tbody>`;
+for (const d of depths){ const q=D.depths[d].qc, nb=q.noneq_by_branch, t=q.noneq_counts_by_tol, mm=Object.entries(q.noneq_months).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  hq += `<tr><td>${d} cm</td><td class="num">${q.hours_valid}</td><td class="num">${q.theta_cal_range?fmt(q.theta_cal_range[0],3)+'–'+fmt(q.theta_cal_range[1],3):'<span class="muted">non indicato</span>'}</td><td class="num">${q.hours_extrapolated} (${(q.hours_extrapolated/q.hours_valid*100).toFixed(1)}%)</td><td class="num">${nb.drying} · ${nb.wetting} · ${nb.undetermined}</td><td class="num">${t['0.01']} · ${t['0.02']} · ${t['0.03']}</td><td>${mm.map(([m,n])=>m.slice(5,7)+'/'+m.slice(2,4)+': '+n).join(', ')}</td></tr>`; }
+document.getElementById('qctable').innerHTML = hq+'</tbody>';
+const SL={wetting_all_points:'wetting, tutti i punti', 'wetting_noneq_tol_0.01':'wetting, tolleranza 0,01', 'wetting_noneq_tol_0.03':'wetting, tolleranza 0,03', drying_without_extrapolated:'drying senza θ estrapolato', wetting_without_extrapolated:'wetting senza θ estrapolato'};
+let hs = `<thead><tr><th>Prof.</th><th>Variante</th><th>θr</th><th>θs</th><th>α [1/kPa]</th><th>n</th><th>N ore</th><th>Parametri al vincolo</th></tr></thead><tbody>`;
+for (const d of depths){ const R=D.depths[d], w=R.fits.wetting;
+  hs += `<tr><td>${d} cm</td><td><b>wetting, tolleranza 0,02 (usato)</b></td><td class="num">${fmt(w.params.theta_r,3)}</td><td class="num">${fmt(w.params.theta_s,3)}</td><td class="num">${fmt(w.params.alpha,3)}</td><td class="num">${fmt(w.params.n,2)}</td><td class="num">${w.all_points.n}</td><td>${w.params_at_bound.join(', ')||'–'}</td></tr>`;
+  for (const [k,lab] of Object.entries(SL)){ const x=R.sensitivity[k]; if(!x) continue; if(/extrapolated/.test(k) && !R.qc.hours_extrapolated) continue;   // identical to the main fit when no hour is extrapolated
+    hs += x.error?`<tr><td></td><td>${lab}</td><td colspan="6" class="muted">${x.error}</td></tr>`:`<tr><td></td><td>${lab}</td><td class="num">${fmt(x.params.theta_r,3)}</td><td class="num">${fmt(x.params.theta_s,3)}</td><td class="num">${fmt(x.params.alpha,3)}</td><td class="num">${fmt(x.params.n,2)}</td><td class="num">${x.n}</td><td>${x.params_at_bound.join(', ')||'–'}</td></tr>`; } }
+document.getElementById('senstable').innerHTML = hs+'</tbody>';
+
+// ---- time scale (shared across panels)
+const tnum = s => Date.parse(s.replace(' ','T')+':00Z')/864e5;
+t0 = tnum(D.period[0].slice(0,16)); t1 = tnum(D.period[1].slice(0,16));
+tickvals=[]; ticktext=[];
+{ let y=+D.period[0].slice(0,4), m=+D.period[0].slice(5,7);
+  for(;;){ m+=1; if(m>12){m=1;y++;} const v=Date.UTC(y,m-1,1)/864e5; if(v>t1)break; if((m-1)%3===0){tickvals.push(v); ticktext.push(`${['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'][m-1]} ${String(y).slice(2)}`);} } }
+for (const d of depths){ const P=D.depths[d].points; if(!P.tn) P.tn = P.t.map(tnum); }
+
+// ---- build DOM
+const host=document.getElementById('depths'); host.innerHTML='';
+for (const d of depths){
+  const c=D.depths[d].counts;
+  const sec=document.createElement('section'); sec.className='depth';
+  sec.innerHTML = `<div class="dhead"><h2>${d} cm</h2><span class="mono">ore drying ${c.drying||0} · wetting ${c.wetting||0} · indeterminate ${c.undetermined||0}</span></div>
+   <div class="grid3">
+     <div class="card"><h3><span class="pill drying">Ramo di essiccamento</span></h3><div class="plot" id="p-${d}-drying"></div></div>
+     <div class="card"><h3><span class="pill wetting">Ramo di imbibizione</span></h3><div class="plot" id="p-${d}-wetting"></div></div>
+     <div class="card"><h3>Confronto curve interpolate</h3><div class="plot" id="p-${d}-cmp"></div></div>
+   </div>
+   <div class="card"><h3>Serie temporale di θ con classificazione dei rami</h3><div class="plot ts" id="p-${d}-ts"></div></div>`;
+  host.appendChild(sec);
+}
+
+document.getElementById('notes').innerHTML = SITE_NOTES[SITE].concat(COMMON_NOTES).map(x=>'<li>'+x+'</li>').join('');
+}
+function baseLayout(xtitle,ytitle,extra){
+  const fg=css('--fg'), mu=css('--muted'), gr=css('--grid'), ln=css('--line');
+  return Object.assign({
+    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+    font:{family:css('--f-body'),size:12,color:fg},
+    margin:{l:56,r:12,t:8,b:44}, showlegend:false, hovermode:'closest',
+    xaxis:{title:{text:xtitle,font:{color:mu}},gridcolor:gr,linecolor:ln,zeroline:false,tickfont:{color:mu}},
+    yaxis:{title:{text:ytitle,font:{color:mu}},gridcolor:gr,linecolor:ln,zeroline:false,tickfont:{color:mu}},
+    hoverlabel:{font:{family:css('--f-mono')}}
+  },extra||{});
+}
+const cfgP={displaylogo:false,responsive:true,modeBarButtonsToRemove:['lasso2d','select2d']};
+
+function render(){
+  const showU=document.getElementById('showU').checked, showFit=document.getElementById('showFit').checked;
+  const fg=css('--fg'), dry=css('--dry'), wet=css('--wet'), und=css('--undet'), mu=css('--muted');
+  for (const d of depths){
+    const R=D.depths[d], P=R.points;
+    // global axis ranges per depth so drying and wetting panels are comparable
+    const ymin=Math.min(...P.theta), ymax=Math.max(...P.theta), pad=(ymax-ymin)*0.05;
+    const yr=[ymin-pad,ymax+pad], xr=[-1.1,Math.log10(4000)];
+    for (const b of ['drying','wetting']){
+      const idx=[], uidx=[];
+      const nidx=[];
+      P.branch.forEach((x,i)=>{ if(x===b){ if(b==='wetting' && P.noneq[i]) nidx.push(i); else idx.push(i);} else if(x==='undetermined') uidx.push(i); });
+      const tr=[];
+      if(showU) tr.push({type:'scatter',mode:'markers',x:uidx.map(i=>P.s[i]),y:uidx.map(i=>P.theta[i]),
+        marker:{size:3,color:und,opacity:.35},hoverinfo:'skip',name:'indeterminati'});
+      tr.push({type:'scatter',mode:'markers',name:b,
+        x:idx.map(i=>P.s[i]), y:idx.map(i=>P.theta[i]), text:idx.map(i=>P.t[i]),
+        marker:{size:4,color:idx.map(i=>P.tn[i]),symbol:idx.map(i=>P.extrap[i]?'circle-open':'circle'),colorscale:'Viridis',cmin:t0,cmax:t1,opacity:.8,
+          colorbar:{tickvals,ticktext,thickness:10,len:.9,outlinewidth:0,tickfont:{color:mu,size:10}}},
+        hovertemplate:'%{text}<br>s = %{x:.1f} kPa<br>θ = %{y:.3f}<extra></extra>'});
+      if(nidx.length) tr.push({type:'scatter',mode:'markers',name:'fuori equilibrio',x:nidx.map(i=>P.s[i]),y:nidx.map(i=>P.theta[i]),text:nidx.map(i=>P.t[i]),
+        marker:{size:5,symbol:'x-thin',line:{width:1.2,color:und}},hovertemplate:'%{text}<br>fuori equilibrio, escluso dal fit<br>s = %{x:.1f} kPa<br>θ = %{y:.3f}<extra></extra>'});
+      const F=R.fits[b];
+      tr.push({type:'scatter',mode:'markers',x:F.bins.s,y:F.bins.theta,customdata:F.bins.count,
+        marker:{symbol:'x-thin',size:7,line:{width:1.5,color:fg}},
+        hovertemplate:'mediana classe<br>s = %{x:.2f} kPa<br>θ = %{y:.3f}<br>n = %{customdata}<extra></extra>'});
+      if(showFit) tr.push({type:'scatter',mode:'lines',x:R.curve_s,y:F.curve_theta,
+        line:{color:b==='drying'?dry:wet,width:2.5,dash:b==='drying'?'solid':'dash'},
+        hovertemplate:'VG '+b+'<br>s = %{x:.2f} kPa<br>θ = %{y:.3f}<extra></extra>'});
+      const L=baseLayout('suzione s [kPa]','θ [m³/m³]');
+      L.xaxis.type='log'; L.xaxis.range=xr; L.xaxis.dtick=1; L.xaxis.tickangle=0; L.yaxis.range=yr; L.margin.r=8;
+      Plotly.react(`p-${d}-${b}`,tr,L,cfgP);
+    }
+    // comparison
+    const cmp=[], H=R.hysteresis;
+    cmp.push({type:'scatter',mode:'lines',x:[H.s_common[0],H.s_common[1],H.s_common[1],H.s_common[0],H.s_common[0]],y:[yr[0],yr[0],yr[1],yr[1],yr[0]],fill:'toself',fillcolor:css('--band'),line:{width:0},name:'campo comune',hoverinfo:'skip'});
+    for (const b of ['drying','wetting']){
+      const F=R.fits[b], col=b==='drying'?dry:wet, [a,z]=F.s_p05_p95;
+      cmp.push({type:'scatter',mode:'markers',x:F.bins.s,y:F.bins.theta,name:b+' (mediane)',
+        marker:{size:6,color:col,opacity:.55},hovertemplate:b+' mediana<br>s = %{x:.2f}<br>θ = %{y:.3f}<extra></extra>'});
+      const inS=R.curve_s.map((x,i)=>(x>=a&&x<=z)?F.curve_theta[i]:null), outS=R.curve_s.map((x,i)=>(x>=a&&x<=z)?null:F.curve_theta[i]);
+      cmp.push({type:'scatter',mode:'lines',x:R.curve_s,y:inS,name:b,
+        line:{color:col,width:2.5,dash:b==='drying'?'solid':'dash'},hovertemplate:b+'<br>s = %{x:.2f}<br>θ = %{y:.3f}<extra></extra>'});
+      cmp.push({type:'scatter',mode:'lines',x:R.curve_s,y:outS,name:b+' fuori dal campo osservato',showlegend:false,
+        line:{color:col,width:1.2,dash:'dot'},hovertemplate:b+' (estrapolata)<br>s = %{x:.2f}<br>θ = %{y:.3f}<extra></extra>'});
+    }
+    const Lc=baseLayout('suzione s [kPa]','θ [m³/m³]',{showlegend:true,
+      legend:{orientation:'h',x:0,y:1.0,yanchor:'bottom',font:{size:11,color:mu}}});
+    Lc.xaxis.type='log'; Lc.xaxis.range=xr; Lc.xaxis.dtick=1; Lc.xaxis.tickangle=0; Lc.yaxis.range=yr; Lc.margin.t=30;
+    Plotly.react(`p-${d}-cmp`,cmp,Lc,cfgP);
+    // time series coloured by class
+    const ts=[];
+    for (const [b,col] of [['undetermined',und],['drying',dry],['wetting',wet]]){
+      const ix=[]; P.branch.forEach((x,i)=>{if(x===b)ix.push(i)});
+      ts.push({type:'scatter',mode:'markers',name:b==='undetermined'?'indeterminato':b,
+        x:ix.map(i=>P.t[i]),y:ix.map(i=>P.theta[i]),marker:{size:3,color:col},
+        hovertemplate:'%{x}<br>θ = %{y:.3f}<extra>'+b+'</extra>'});
+    }
+    { const ex=[]; P.extrap.forEach((x,i)=>{if(x)ex.push(i)}); const u=D.config.qc.extrap_uncert_theta;
+      if(ex.length){ // one closed polygon per contiguous run of extrapolated hours, separated by nulls (fill 'toself' fills each segment)
+        const X=[], Y=[]; let i=0;
+        while(i<P.t.length){ if(!P.extrap[i]){i++;continue;} let j=i; while(j+1<P.t.length && P.extrap[j+1]) j++;
+          const r=[]; for(let k=i;k<=j;k++) r.push(k);
+          r.forEach(k=>{X.push(P.t[k]);Y.push(P.theta[k]+u);}); r.slice().reverse().forEach(k=>{X.push(P.t[k]);Y.push(P.theta[k]-u);});
+          X.push(P.t[i]); Y.push(P.theta[i]+u); X.push(null); Y.push(null); i=j+1; }
+        ts.unshift({type:'scatter',mode:'lines',x:X,y:Y,fill:'toself',fillcolor:'rgba(128,128,128,0.22)',line:{width:0},connectgaps:false,hoverinfo:'skip',
+          name:`θ fuori calibrazione ±${String(u).replace('.',',')}`}); } }
+    const Lt=baseLayout('','θ [m³/m³]',{showlegend:true,legend:{orientation:'h',x:0,y:1,yanchor:'bottom',font:{size:11,color:mu}}});
+    Lt.xaxis.type='date'; Lt.margin.t=26; Lt.margin.b=30;
+    Plotly.react(`p-${d}-ts`,ts,Lt,cfgP);
+  }
+}
+document.getElementById('showU').addEventListener('change',render);
+document.getElementById('showFit').addEventListener('change',render);
+const rerenderAll=()=>{ render(); window.SimView && window.SimView.redraw(); window.ModView && !document.getElementById('m-simview').hidden && window.ModView.redraw(); };
+const mq=window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',rerenderAll);
+new MutationObserver(rerenderAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+const KEY={nv:'NV',v:'V'};
+function show(id){
+  const isSim = id==='sim', isMod = id==='mod';
+  document.getElementById('analysis').hidden = isSim || isMod;
+  document.getElementById('simview').hidden = !isSim;
+  document.getElementById('m-simview').hidden = !isMod;
+  if (isSim || isMod) {
+    document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.site===id)));
+    (isSim ? window.SimView : window.ModView).activate(); return;
+  }
+  if(!KEY[id]) id='nv';
+  SITE=id; D=ALL[KEY[id]]; depths=Object.keys(D.depths);
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.site===id)));
+  setup(); render();
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{ if(location.hash!=='#'+b.dataset.site) location.hash=b.dataset.site; else show(b.dataset.site); }));
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+// the simulator script is defined after this one: start once the whole page is parsed
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',()=>show(location.hash.slice(1)));
+else show(location.hash.slice(1));
+})();
+</script>

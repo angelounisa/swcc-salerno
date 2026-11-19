@@ -1,0 +1,349 @@
+{
+ "config": {
+  "extrap_uncert_theta": 0.03,
+  "wet_months": [
+   10,
+   11,
+   12,
+   1,
+   2,
+   3,
+   4
+  ],
+  "layers_cm": {
+   "NV": {
+    "15": [
+     0,
+     22.5
+    ],
+    "30": [
+     22.5,
+     45
+    ],
+    "60": [
+     45,
+     75
+    ]
+   },
+   "V": {
+    "15": [
+     0,
+     25
+    ],
+    "35": [
+     25,
+     47.5
+    ],
+    "60": [
+     47.5,
+     75
+    ]
+   }
+  },
+  "unidentifiable_ci_ratio": 10.0
+ },
+ "sensors": [
+  {
+   "site": "NV",
+   "depth": 15,
+   "hours_valid": 13091,
+   "hours_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "frac_extrapolated_wet_season": 0.0,
+   "frac_extrapolated_dry_season": 0.0,
+   "side": null,
+   "theta_range_extrapolated": null,
+   "Se_uncert_when_extrapolated": 0.465,
+   "noneq": 574,
+   "noneq_wetting": 304,
+   "noneq_months": {
+    "2025-02": 42,
+    "2025-03": 16,
+    "2025-10": 9,
+    "2025-11": 109,
+    "2025-12": 54,
+    "2026-01": 172,
+    "2026-02": 149,
+    "2026-03": 8,
+    "2026-04": 3,
+    "2026-05": 8,
+    "2026-06": 4
+   }
+  },
+  {
+   "site": "NV",
+   "depth": 30,
+   "hours_valid": 13091,
+   "hours_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "frac_extrapolated_wet_season": 0.0,
+   "frac_extrapolated_dry_season": 0.0,
+   "side": null,
+   "theta_range_extrapolated": null,
+   "Se_uncert_when_extrapolated": 0.127,
+   "noneq": 562,
+   "noneq_wetting": 197,
+   "noneq_months": {
+    "2025-02": 18,
+    "2025-09": 70,
+    "2025-10": 9,
+    "2025-11": 68,
+    "2025-12": 36,
+    "2026-01": 109,
+    "2026-02": 137,
+    "2026-03": 9,
+    "2026-05": 106
+   }
+  },
+  {
+   "site": "NV",
+   "depth": 60,
+   "hours_valid": 13091,
+   "hours_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "frac_extrapolated_wet_season": 0.0,
+   "frac_extrapolated_dry_season": 0.0,
+   "side": null,
+   "theta_range_extrapolated": null,
+   "Se_uncert_when_extrapolated": 0.148,
+   "noneq": 1764,
+   "noneq_wetting": 79,
+   "noneq_months": {
+    "2025-05": 420,
+    "2025-06": 720,
+    "2025-07": 155,
+    "2025-09": 417,
+    "2025-10": 36,
+    "2025-11": 8,
+    "2025-12": 3,
+    "2026-01": 5
+   }
+  },
+  {
+   "site": "V",
+   "depth": 15,
+   "hours_valid": 12328,
+   "hours_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "frac_extrapolated_wet_season": 0.0,
+   "frac_extrapolated_dry_season": 0.0,
+   "side": null,
+   "theta_range_extrapolated": null,
+   "Se_uncert_when_extrapolated": 0.547,
+   "noneq": 22,
+   "noneq_wetting": 14,
+   "noneq_months": {
+    "2025-02": 7,
+    "2026-01": 15
+   }
+  },
+  {
+   "site": "V",
+   "depth": 35,
+   "hours_valid": 13090,
+   "hours_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "frac_extrapolated_wet_season": 0.0,
+   "frac_extrapolated_dry_season": 0.0,
+   "side": null,
+   "theta_range_extrapolated": null,
+   "Se_uncert_when_extrapolated": 0.136,
+   "noneq": 477,
+   "noneq_wetting": 27,
+   "noneq_months": {
+    "2025-02": 53,
+    "2025-03": 19,
+    "2025-09": 405
+   }
+  },
+  {
+   "site": "V",
+   "depth": 60,
+   "hours_valid": 13090,
+   "hours_extrapolated": 0,
+   "frac_extrapolated": 0.0,
+   "frac_extrapolated_wet_season": 0.0,
+   "frac_extrapolated_dry_season": 0.0,
+   "side": null,
+   "theta_range_extrapolated": null,
+   "Se_uncert_when_extrapolated": 0.16,
+   "noneq": 601,
+   "noneq_wetting": 70,
+   "noneq_months": {
+    "2025-02": 11,
+    "2025-10": 123,
+    "2025-11": 461,
+    "2026-01": 4,
+    "2026-02": 2
+   }
+  }
+ ],
+ "storage": {
+  "NV": {
+   "frac_hours_with_band": 0.0,
+   "max_band_mm": 0.0,
+   "median_band_when_present_mm": 0.0,
+   "wet_season_frac_hours_with_band": 0.0
+  },
+  "V": {
+   "frac_hours_with_band": 0.0,
+   "max_band_mm": 0.0,
+   "median_band_when_present_mm": 0.0,
+   "wet_season_frac_hours_with_band": 0.0
+  }
+ },
+ "fits": [
+  {
+   "site": "NV",
+   "depth": 15,
+   "branch": "drying",
+   "params_at_bound": [
+    "alpha"
+   ],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [
+    "alpha"
+   ],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 0,
+   "usable_for_tables": false
+  },
+  {
+   "site": "NV",
+   "depth": 15,
+   "branch": "wetting",
+   "params_at_bound": [],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [
+    "alpha"
+   ],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 304,
+   "usable_for_tables": false
+  },
+  {
+   "site": "NV",
+   "depth": 30,
+   "branch": "drying",
+   "params_at_bound": [],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 0,
+   "usable_for_tables": true
+  },
+  {
+   "site": "NV",
+   "depth": 30,
+   "branch": "wetting",
+   "params_at_bound": [],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 197,
+   "usable_for_tables": true
+  },
+  {
+   "site": "NV",
+   "depth": 60,
+   "branch": "drying",
+   "params_at_bound": [
+    "theta_r"
+   ],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 0,
+   "usable_for_tables": true
+  },
+  {
+   "site": "NV",
+   "depth": 60,
+   "branch": "wetting",
+   "params_at_bound": [
+    "theta_r"
+   ],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [
+    "alpha"
+   ],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 79,
+   "usable_for_tables": false
+  },
+  {
+   "site": "V",
+   "depth": 15,
+   "branch": "drying",
+   "params_at_bound": [],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 0,
+   "usable_for_tables": true
+  },
+  {
+   "site": "V",
+   "depth": 15,
+   "branch": "wetting",
+   "params_at_bound": [
+    "theta_r"
+   ],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [
+    "alpha"
+   ],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 14,
+   "usable_for_tables": false
+  },
+  {
+   "site": "V",
+   "depth": 35,
+   "branch": "drying",
+   "params_at_bound": [
+    "theta_r"
+   ],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 0,
+   "usable_for_tables": true
+  },
+  {
+   "site": "V",
+   "depth": 35,
+   "branch": "wetting",
+   "params_at_bound": [],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 27,
+   "usable_for_tables": true
+  },
+  {
+   "site": "V",
+   "depth": 60,
+   "branch": "drying",
+   "params_at_bound": [
+    "theta_r"
+   ],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 0,
+   "usable_for_tables": true
+  },
+  {
+   "site": "V",
+   "depth": 60,
+   "branch": "wetting",
+   "params_at_bound": [],
+   "ci_entirely_at_bound": [],
+   "not_identifiable": [],
+   "frac_extrapolated": 0.0,
+   "n_noneq_excluded": 70,
+   "usable_for_tables": true
+  }
+ ]
+}

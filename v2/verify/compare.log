@@ -1,0 +1,24 @@
+T1 dz 1 end: net surface flux mm  sim 0.00 ref 0.00 | drainage mm  sim 11.56 ref 11.59
+T1 dz 1 t 240 h: max |dlog10(-h)| = 0.1456 at z 16 cm (sim -6720.8 ref -9397.6 )  mass err mm 0.0000
+T1 dz 1 t 480 h: max |dlog10(-h)| = 0.0062 at z 33 cm (sim -7599.9 ref -7491.5 )  mass err mm 0.0000
+T1 dz 1 t 960 h: max |dlog10(-h)| = 0.0016 at z 55 cm (sim -5348.6 ref -5329.2 )  mass err mm 0.0000
+T1 dz 0.5 end: net surface flux mm  sim 0.00 ref 0.00 | drainage mm  sim 11.56 ref 11.59
+T1 dz 0.5 t 240 h: max |dlog10(-h)| = 0.0496 at z 16 cm (sim -8383.9 ref -9397.6 )  mass err mm 0.0000
+T1 dz 0.5 t 480 h: max |dlog10(-h)| = 0.0009 at z 34 cm (sim -6539.1 ref -6525.8 )  mass err mm 0.0000
+T1 dz 0.5 t 960 h: max |dlog10(-h)| = 0.0008 at z 49 cm (sim -11469.7 ref -11490.4 )  mass err mm 0.0000
+T2 dz 1 end: net surface flux mm  sim 48.00 ref 48.00 | drainage mm  sim 0.00 ref 0.00
+T2 dz 1 t 12 h: max |dlog10(-h)| = 0.1974 at z 38 cm (sim -2903.8 ref -4574.8 )  mass err mm 0.0000
+T2 dz 1 t 24 h: max |dlog10(-h)| = 0.1042 at z 19 cm (sim -114.7 ref -90.3 )  mass err mm 0.0000
+T2 dz 1 t 48 h: max |dlog10(-h)| = 0.0355 at z 80 cm (sim -4336.2 ref -4705.8 )  mass err mm 0.0000
+T2 dz 1 t 96 h: max |dlog10(-h)| = 0.0134 at z 97 cm (sim -4243.9 ref -4376.6 )  mass err mm 0.0000
+T2 dz 0.5 end: net surface flux mm  sim 48.00 ref 48.00 | drainage mm  sim 0.00 ref 0.00
+T2 dz 0.5 t 12 h: max |dlog10(-h)| = 0.0731 at z 38 cm (sim -3866.4 ref -4574.8 )  mass err mm 0.0000
+T2 dz 0.5 t 24 h: max |dlog10(-h)| = 0.0469 at z 57 cm (sim -2427.1 ref -2704.1 )  mass err mm 0.0000
+T2 dz 0.5 t 48 h: max |dlog10(-h)| = 0.0158 at z 80 cm (sim -4538.2 ref -4705.8 )  mass err mm 0.0000
+T2 dz 0.5 t 96 h: max |dlog10(-h)| = 0.0091 at z 97 cm (sim -4285.8 ref -4376.6 )  mass err mm 0.0000
+T3 dz 1 end: net surface flux mm  sim -9.46 ref -8.51 | drainage mm  sim 15.88 ref 16.03
+T3 dz 1 t 120 h: max |dlog10(-h)| = 0.4605 at z 1 cm (sim -6058.6 ref -2098.4 )  mass err mm -0.0017
+T3 dz 1 t 480 h: max |dlog10(-h)| = 0.4339 at z 1 cm (sim -7033.5 ref -2589.8 )  mass err mm -0.0017
+T3 dz 0.5 end: net surface flux mm  sim -8.83 ref -8.51 | drainage mm  sim 15.97 ref 16.03
+T3 dz 0.5 t 120 h: max |dlog10(-h)| = 0.1511 at z 1 cm (sim -2971.5 ref -2098.4 )  mass err mm -0.0016
+T3 dz 0.5 t 480 h: max |dlog10(-h)| = 0.1428 at z 1 cm (sim -3597.6 ref -2589.8 )  mass err mm -0.0016

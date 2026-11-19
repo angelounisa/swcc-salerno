@@ -1,0 +1,73 @@
+{
+ "source": "user calibration, DATI_CAL__COMEGNA.xlsx (columns under CALIBRAZIONE), received 19/11/2026",
+ "suction": "unchanged from the previous files (already calibrated)",
+ "time_base": "previous files (rain-consistent); the workbook timestamps are shifted (DST and a jump on 18/12/2025: 10 h 40 min NV, 25 h 05 min V), rows matched through the raw VWC",
+ "cut_at_rain_end": "2026-07-30 23:00:00",
+ "calibrated_file_last_time": "2026-07-30 23:00:00",
+ "config": {
+  "layer_of": {
+   "15": "A1",
+   "30": "A2",
+   "35": "A2",
+   "60": "A2"
+  }
+ },
+ "functions": {
+  "A1": {
+   "theta_cal_range": null
+  },
+  "A2": {
+   "theta_cal_range": null
+  }
+ },
+ "sites": {
+  "NV": {
+   "rows": 156926,
+   "first": "2025-01-31 13:40:00",
+   "last": "2026-07-30 23:00:00",
+   "theta_range": {
+    "VWC 15": [
+     0.1034384512205292,
+     0.4154475616620208
+    ],
+    "VWC 30": [
+     0.1204102365579451,
+     0.4301762798320957
+    ],
+    "VWC 60": [
+     0.1573999999999999,
+     0.3974
+    ]
+   },
+   "missing_theta": {
+    "VWC 15": 0,
+    "VWC 30": 0,
+    "VWC 60": 0
+   }
+  },
+  "V": {
+   "rows": 156990,
+   "first": "2025-01-31 13:40:00",
+   "last": "2026-07-30 23:00:00",
+   "theta_range": {
+    "VWC 15": [
+     0.1013736037349768,
+     0.3358309695999999
+    ],
+    "VWC 35": [
+     0.1209902874722973,
+     0.3549238554910719
+    ],
+    "VWC 60": [
+     0.1060561340845667,
+     0.2805260015734719
+    ]
+   },
+   "missing_theta": {
+    "VWC 15": 9152,
+    "VWC 35": 0,
+    "VWC 60": 0
+   }
+  }
+ }
+}
